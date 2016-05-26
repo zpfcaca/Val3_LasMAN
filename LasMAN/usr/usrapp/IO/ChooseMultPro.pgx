@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="ChooseMultPro" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nWorkPlace" type="num" use="reference" xsi:type="element" dimensions="1" />
+      <Parameter name="x_nProductIndex" type="num" use="reference" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //2013.10.30
+  //通过数字量来选择产品
+  //主要用来检测按钮触发
+  //同工位多产品函数
+  //专为法利莱编写
+  //需要外部PLC支持
+  //DataBase中的变量需改变
+
+
+  x_nProductIndex=0
+  x_nProductIndex=0
+  l_nNum=0
+
+
+  wait(dDio["UsIn_bNull1"]==true or dDio["UsIn_bNull2"]==true or dDio["UsIn_bNull3"]==true or dDio["UsIn_bNull4"]==true or dDio["UsIn_bNull5"]==true or dDio["UsIn_bNull6"]==true or dDio["UsIn_bNull7"]==true or dDio["UsIn_bNull8"]==true)
+  delay(0.2)
+  //1，2，3，4对应工位1可能有的15种组合
+  if dDio["UsIn_bNull1"]==true or dDio["UsIn_bNull2"]==true or dDio["UsIn_bNull3"]==true or dDio["UsIn_bNull4"]==true
+    x_nWorkPlace=1
+    l_nNum=sel(dDio["UsIn_bNull1"]==true,1,0)*1+l_nNum
+    l_nNum=sel(dDio["UsIn_bNull2"]==true,1,0)*2+l_nNum
+    l_nNum=sel(dDio["UsIn_bNull3"]==true,1,0)*4+l_nNum
+    l_nNum=sel(dDio["UsIn_bNull4"]==true,1,0)*8+l_nNum
+  endIf
+  //5，6，7，8对应工位2可能有的15种组合
+  if dDio["UsIn_bNull5"]==true or dDio["UsIn_bNull6"]==true or dDio["UsIn_bNull7"]==true or dDio["UsIn_bNull8"]==true
+    x_nWorkPlace=2
+    l_nNum=sel(dDio["UsIn_bNull5"]==true,1,0)*1+l_nNum
+    l_nNum=sel(dDio["UsIn_bNull6"]==true,1,0)*2+l_nNum
+    l_nNum=sel(dDio["UsIn_bNull7"]==true,1,0)*4+l_nNum
+    l_nNum=sel(dDio["UsIn_bNull8"]==true,1,0)*8+l_nNum
+  endIf
+
+  if l_nNum>15
+    x_nWorkPlace=-1
+    return
+  endIf
+
+  x_nProductIndex=l_nNum
+  logMsg("工位"+toString("",x_nWorkPlace)+":"+"选择产品号"+toString("",x_nProductIndex))
+
+  dDio["UsO_bNull1"]=true
+  wait(dDio["UsIn_bNull1"]==false and dDio["UsIn_bNull2"]==false and dDio["UsIn_bNull3"]==false and dDio["UsIn_bNull4"]==false and dDio["UsIn_bNull5"]==false and dDio["UsIn_bNull6"]==false and dDio["UsIn_bNull7"]==false and dDio["UsIn_bNull8"]==false)
+  dDio["UsO_bNull1"]=false
+
+  logMsg("工位选择产品完成")
+
+end]]></Code>
+  </Program>
+</Programs>

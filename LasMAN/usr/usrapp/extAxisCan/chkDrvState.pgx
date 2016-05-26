@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="chkDrvState">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nAxisNum" type="num" xsi:type="element" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nStatus" type="num" xsi:type="array" size="1" />
+      <Local name="l_nStatus1" type="num" xsi:type="array" size="1" />
+      <Local name="l_bIsOneBitSet" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //检查状态
+  l_nStatus=0
+  //确定电机是否在remote状态
+  // read status_remote register
+  //  call chkStatusRemote(x_nAxisNum,l_bIsOneBitSet)
+  //  if l_bIsOneBitSet
+  //    nDrvState[x_nAxisNum]=15
+  //  else
+  
+  //读取状态字
+  call chkStatusWord(x_nAxisNum,l_nStatus)
+  //cst:nDRV_ACTIV:掩码，111dec=1101111bin.驱动器处于某种状态
+  l_nStatus1=bAnd(l_nStatus,cst:nDRV_ACTIV)
+  switch l_nStatus1
+    //
+    case cst:nRdy2SwitchON
+      nDrvState[x_nAxisNum]=3
+    break
+    //
+    case cst:nSwitchedON
+      nDrvState[x_nAxisNum]=4
+    break
+    //使能
+    case cst:nOperatEnabled
+      nDrvState[x_nAxisNum]=5
+    break
+    //quickstop
+    case cst:nQuickStopActiv
+      nDrvState[x_nAxisNum]=12
+    break
+    //
+    default
+      //cst:nDRV_FAULT=100 1111
+      l_nStatus1=bAnd(l_nStatus,cst:nDRV_FAULT)
+      
+      switch l_nStatus1
+        case cst:nNotRdySwiON
+          nDrvState[x_nAxisNum]=1
+        break
+        //
+        case cst:nSwitchONDis
+          nDrvState[x_nAxisNum]=2
+        break
+        //
+        case cst:nFaultReacActiv
+          nDrvState[x_nAxisNum]=13
+        break
+        //
+        case cst:nFaultState
+          nDrvState[x_nAxisNum]=14
+        break
+        //
+        default
+          nDrvState[x_nAxisNum]=-1
+        break
+      endSwitch
+    break
+    //
+  endSwitch
+end]]></Code>
+  </Program>
+</Programs>

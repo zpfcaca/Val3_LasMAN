@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="Main" access="private" >
+    <Locals>
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+  //-----------------------------------------------------------------------
+  //Header begin
+  //Description of program
+  //  根据不同类型的报警和当前机器人所处的运行状态处理报警事件
+  //Input parameters
+  //
+  //Output paramaters
+  //Example
+  //  call Main()
+  //History
+  //  Creation : 2013-06-23
+  //Header end
+  //-----------------------------------------------------------------------
+  //主程序
+
+
+  //等按钮松开
+  wait(getKey()==-1)
+  do
+    //每个操作模式之前的动作
+    cls()
+    userPage()
+    resetMotion()
+    call UI:Control_PanelMd("请等待，正在载入库......")
+
+
+    //
+    switch DataBase:nInterfaceType
+      case 1
+        //手动回零
+        call OnEvent1()
+      break
+      case 2
+        //手动对齐
+        call OnEvent2()
+      break
+      case 3
+        //编辑工艺
+        call OnEvent3()
+      break
+      case 4
+        //编辑动作
+        call OnEvent4()
+      break
+      case 5
+        //编辑产品
+        call OnEvent5()
+      break
+      case 6
+        //远程
+        call OnEvent6()
+      break
+      //选项
+      case 7
+        call OnEvent7()
+      break
+      case 8
+        //退出
+        call OnEvent8()
+      break
+      case 9
+        //主界面
+        call OnEvent9()
+      break
+      case 10
+        //示教产品的用户坐标系
+        call OnEvent10()
+      break
+
+      case 11
+        //示教产品偏差
+        call OnEvent11()
+      break
+
+      //异步第七轴
+      case 12
+        call OnEvent12()
+      break
+
+      //生产
+      case 13
+        call OnEvent13()
+      break
+
+
+      //示教工具
+      case 14
+        call OnEvent14()
+      break
+
+
+      //示教Home
+      case 15
+        call OnEvent15()
+      break
+
+
+      //异步第八轴
+      case 16
+        call OnEvent16()
+      break
+
+
+      //替换空白调试文件
+      case 17
+        call OnEvent17()
+      break
+
+
+      //示教同步七轴
+      case 18
+        call OnEvent18()
+      break
+
+      //示教同步八轴
+      case 19
+        call OnEvent19()
+      break
+
+
+      //其他非法标志符，则退出
+      default
+        bExit=true
+      break
+
+    endSwitch
+
+    delay(0)
+  until bExit
+  //Exit
+  call stop()
+
+end]]></Code>
+  </Program>
+</Programs>

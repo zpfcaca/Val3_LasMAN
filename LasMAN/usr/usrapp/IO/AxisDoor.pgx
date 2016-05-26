@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="AxisDoor" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_bOpen" type="bool" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_b8Axis" type="bool" use="value" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Code><![CDATA[begin
+  //门开关信号
+  //为外部轴七轴和八轴进行打开安全门使用
+  //法利莱
+  //安全门信号设置
+
+
+  //如果门打不开，则打不开
+  if !bAxisDoorEnable
+    return
+  endIf
+
+
+  //x_bOpen   true 打开门   false 门关闭
+  //x_b8Axis  true  八轴    false 七轴
+
+
+  //七八轴打开
+  if !x_b8Axis
+    //七轴打开
+    if x_bOpen
+      dDio["UsO_bNull5"]=true
+      wait(dDio["UsIn_bNull5"]==true and dDio["UsIn_bNull6"]==false)
+    else
+      dDio["UsO_bNull5"]=false
+      wait(dDio["UsIn_bNull6"]==true and dDio["UsIn_bNull5"]==false)
+
+    endIf
+
+
+  else
+    //八轴打开
+    if x_bOpen
+      dDio["UsO_bNull6"]=true
+      wait(dDio["UsIn_bNull7"]==true and dDio["UsIn_bNull8"]==false)
+    else
+      dDio["UsO_bNull6"]=false
+      wait(dDio["UsIn_bNull8"]==true and dDio["UsIn_bNull7"]==false)
+
+    endIf
+  endIf
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

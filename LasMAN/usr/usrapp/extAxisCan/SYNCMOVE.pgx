@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="syncMove" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nAxisNum" type="num" xsi:type="array" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_jCurr" type="jointRx" xsi:type="array" size="1" />
+      <Local name="l_nEncRes" type="num" xsi:type="array" size="1" />
+      <Local name="l_nDrvPos" type="num" xsi:type="array" size="2" />
+      <Local name="l_bFirstRun" type="bool" xsi:type="array" size="1" />
+      <Local name="l_i" type="num" xsi:type="array" size="1" />
+      <Local name="l_bError" type="bool" xsi:type="array" size="1" />
+      <Local name="l_sMsg" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  l_nEncRes=8192/360
+  
+  call setCmdPos(0)
+  call setCmdPos(1)
+  bStop=false
+  l_bFirstRun=true
+  
+  // Ne pas supprimer ces lignes 
+  disablePower()
+  wait(isPowered()==false)
+  //wait(isPowered()==true)
+  /// FIN /////////////
+  
+  while !bStop
+    if (isPowered()==true) and (l_bFirstRun==false)
+      for l_i=0 to size(x_nAxisNum)-1
+        if (diSwitchedOn[x_nAxisNum[l_i]]==false)
+          doSwitchOn[x_nAxisNum[l_i]]=true
+          delay(0.05)
+          doEnableOp[x_nAxisNum[l_i]]=true
+        endIf
+      endFor
+      // Get system position
+      $XgetDrvCmdPos(l_nDrvPos)
+      //$XgetJntCmdPos(l_nJntPos)
+      // Send it to the external axis
+      aioSet(aoPosCmd[x_nAxisNum[0]],l_nDrvPos[0]*l_nEncRes)
+      aioSet(aoPosCmd[x_nAxisNum[1]],l_nDrvPos[1]*l_nEncRes)
+      //l_sMsg="0: "+toString(".3",l_nJntPos[0])+"   1: "+toString(".3",l_nJntPos[1])
+      l_sMsg="0: "+toString(".3",l_nDrvPos[0])+"   1: "+toString(".3",l_nDrvPos[1])
+      //? l_sMsg
+    else
+      for l_i=0 to size(x_nAxisNum)-1
+        doSwitchOn[x_nAxisNum[l_i]]=false
+        doEnableOp[x_nAxisNum[l_i]]=false
+      endFor
+      // Get external axis position
+      l_nDrvPos[0]=aioGet(aiPosFbk[x_nAxisNum[0]])/l_nEncRes
+      l_nDrvPos[1]=aioGet(aiPosFbk[x_nAxisNum[1]])/l_nEncRes
+      // Update it in the system
+      $XsetDrvFbkPos(l_nDrvPos)
+    endIf
+    delay(0)
+    l_bFirstRun=false
+  endWhile
+end]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="CopyFileContext" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_bRes" type="bool" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_sFileSource" type="string" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_sFileDest" type="string" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_nStart" type="num" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_nEnd" type="num" use="value" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_sBuff" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+  x_bRes=false
+  if x_nEnd==-1
+    x_nEnd=50000000
+  endIf
+  if x_sFileDest=="" or x_nStart<0 or x_nEnd<1 or x_nEnd<x_nStart or x_sFileDest==""
+    return
+  endIf
+  if !$fileExists(x_sFileSource) or !$fileExists(x_sFileDest)
+    return
+  endIf
+
+
+  nFileID=$fileOpen(x_sFileSource,"r")
+  if nFileID<0 or nFileID>9
+    return
+  endIf
+
+  nFile2ID=$fileOpen(x_sFileDest,"a")
+  if nFile2ID<0 or nFile2ID>9
+    return
+  endIf
+
+
+  l_nNum=1
+  while true
+    if $fileGet(nFileID,l_sBuff,l_nNum)!=1
+      call CloseAllFile()
+      return
+    endIf
+    if l_nIndex>=x_nStart and l_nIndex<=x_nEnd
+
+      if $fileSet(nFile2ID,l_sBuff,l_nNum)!=1
+        call CloseAllFile()
+        return
+      endIf
+    endIf
+    l_nIndex=l_nIndex+1
+  endWhile
+
+  call CloseAllFile()
+
+
+end]]></Code>
+  </Program>
+</Programs>

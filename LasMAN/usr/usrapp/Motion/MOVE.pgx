@@ -1,0 +1,1063 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="Move" access="public">
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="5" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nStartCutTime" type="num" xsi:type="array" size="1" />
+      <Local name="l_nBuffCutCount" type="num" xsi:type="array" size="1" />
+      <Local name="l_jBuff" type="jointRx" xsi:type="array" size="1" />
+      <Local name="l_trTrsf" type="trsf" xsi:type="array" size="3" />
+      <Local name="l_nBuffCircle" type="num" xsi:type="array" size="1" />
+      <Local name="l_sString" type="string" xsi:type="array" size="1" />
+      <Local name="l_nToolMode" type="num" xsi:type="array" size="1" />
+      <Local name="l_p" type="point" xsi:type="array" size="1" />
+      <Local name="l_nTargetID" type="num" xsi:type="array" size="1" />
+      <Local name="l_nWeldID" type="num" xsi:type="array" size="1" />
+      <Local name="l_trTrsfBuff" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_nActionIDbuff" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //lasman核心函数
+  //说明通过读取文件来实现多个路径的运动
+  
+  
+  //1.程序初始化
+  resetMotion()
+  //安全点置位
+  
+  
+  DataBase:nPointType=0
+  DataBase:bMoveTask=true
+  DataBase:bIOStart=false
+  call IO:SafteyIO()
+  //对运动参数进行判断
+  //2015.03.13
+  //为7轴报错
+  if TxtFile:nSingleType<1 or (TxtFile:b8Axis and DataBase:bSingleAxisMode)
+    popUpMsg("路径参数异常!")
+    disablePower()
+    DataBase:nPointType=5
+    return
+  endIf
+  
+  
+  //2014.07.30
+  //同步七八轴
+  if TxtFile:bSync7Axis or TxtFile:bSync8Axis
+    if !ExtAxis:libExist("Disk://extAxisCan/extAxisCan.pjx")
+      if ExtAxis:libLoad("Disk://extAxisCan/extAxisCan.pjx")!=0
+        popUpMsg("加载外部轴出错")
+        disablePower()
+        DataBase:nPointType=5
+        return
+      endIf
+    endIf
+  endIf
+  
+  
+  
+  //检查动作中是否具有焊接收弧
+  if TxtFile:bWeldEnable
+    TxtFile:bActionWeldEnd[51]=false
+    for l_nNum[0]=1 to 50
+      TxtFile:bActionWeldEnd[l_nNum[0]]=false
+      for l_nNum[1]=0 to 11
+        if TxtFile:nAction[l_nNum[0],l_nNum[1],0]==167
+          TxtFile:bActionWeldEnd[l_nNum[0]]=true
+          TxtFile:bActionWeldEnd[51]=true
+        endIf
+      endFor
+    endFor
+  endIf
+  
+  
+  //互斥异步轴
+  if DataBase:bMutexAxis
+    if TxtFile:b7Axis or TxtFile:b8Axis
+      if DataBase:nWorkPlaceIndex<1 or DataBase:nWorkPlaceIndex>2
+        popUpMsg("异步轴只能选择工位1或者工位2!")
+        disablePower()
+        DataBase:nPointType=5
+        return
+      endIf
+    endIf
+  endIf
+  
+  
+  //2.异步七轴和八轴是否在零位
+  //生产或者远程生产
+  if DataBase:nInterfaceType==6 or DataBase:nInterfaceType==13
+    if TxtFile:b7Axis
+      //等待7轴在安全点位置
+      if (DataBase:nWorkPlaceIndex==1 and DataBase:bMutexAxis) or !DataBase:bMutexAxis
+        call IO:AxisDoor(true,false)
+        call IO:Axis7OnReady(TxtFile:trAxisData.x,TxtFile:trAxisData.y,TxtFile:trAxisData.z,l_bRes)
+        if !l_bRes
+          popUpMsg("异步七轴运动安全点异常!")
+          
+          disablePower()
+          DataBase:nPointType=5
+          DataBase:bMoveTask=false
+          return
+        endIf
+        call IO:AxisDoor(false,false)
+      endIf
+    endIf
+    
+    
+    if TxtFile:b8Axis
+      //等待异步8轴在安全点位置
+      
+      if (DataBase:nWorkPlaceIndex==2 and DataBase:bMutexAxis) or !DataBase:bMutexAxis
+        call IO:AxisDoor(true,true)
+        call IO:Axis8OnReady(TxtFile:trAxis8Data.x,TxtFile:trAxis8Data.y,TxtFile:trAxis8Data.z,l_bRes)
+        if !l_bRes
+          popUpMsg("异步八轴运动安全点异常!")
+          disablePower()
+          
+          DataBase:nPointType=5
+          DataBase:bMoveTask=false
+          return
+        endIf
+        call IO:AxisDoor(false,true)
+      endIf
+      
+    endIf
+  endIf
+  
+  
+  //2.循环,从开始运动路径到结束路径
+  for l_nNum[3]=nStartTraj to nEndTraj
+    
+    //判断路径是否过滤
+    //需要外部PLC给信号，属于定制版接口
+    if TxtFile:bTrajFilter
+      call Kit:TrajByPass(l_nNum[3],nEndTraj)
+    endIf
+    
+    //IO置位，再次确认IO安全
+    call IO:SafteyIO()
+    
+    //2.1等待读取文件  
+    //TxtFile bReadProduct是表示已经开始读文件
+    if TxtFile:bReadProduct or taskStatus("ReadFile")!=-1
+      TxtFile:bStartRead=true
+      wait(TxtFile:bStartRead==false)
+    endIf
+    
+    //在远程生产或者生产模式下，必须nReadTrajIndex大于0
+    if DataBase:nInterfaceType==13 or DataBase:nInterfaceType==6
+      wait(TxtFile:nReadTrajIndex>0)
+    endIf
+    
+    
+    //2.2数据初始化
+    TxtFile:fArray.trsf={0,0,0,0,0,0}
+    // DataBase:nTrajIndex=TxtFile:nTrajIndex
+    DataBase:nTrajIndex=TxtFile:nReadTrajIndex
+    
+    //2015.02.03
+    //为空路径设置
+    //穿孔工艺
+    if TxtFile:trWorkplace.rz!=-1
+      TxtFile:trWorkplace.rz=max(TxtFile:trWorkplace.rz,1)
+      TxtFile:trWorkplace.rz=min(TxtFile:trWorkplace.rz,50)
+      TxtFile:trWorkplace.rz=round(TxtFile:trWorkplace.rz)
+    endIf
+    
+    if TxtFile:bWeldEnable
+      TxtFile:trIODelay.y=0
+    endIf
+    
+    
+    //2014.07.28
+    //同步轴选项
+    if TxtFile:nSingleType==20 or TxtFile:nSingleType==9
+      if TxtFile:bSync7Axis==false and TxtFile:bSync8Axis==false
+        popUpMsg("请先配置同步轴!")
+        disablePower()
+        DataBase:nPointType=5
+        DataBase:bMoveTask=false
+        return
+      endIf
+    endIf
+    
+    
+    
+    //2.3客户自定义函数
+    call Custom:BeforeTraj(TxtFile:nReadTrajIndex)
+    
+    
+    
+    
+    
+    //2016.1.8
+    //2.4等待异步7轴到达位置
+    //1.只有七轴 把b7Axis设置为true b8Axis设置为false  DataBase:bMutexAxis设置为false
+    //2.只有八轴 把b8Axis设置为true  b7Axis设置为false DataBase:bMutexAxis设置为false
+    //3. 七，八轴同动，先动七轴,再动八轴，把b7Axis和b8Axis设置为true,DataBase:bMutexAxis设置为false
+    //4. 要么动七轴，要么动八轴 把b7Axis和b8Axis设置为true,DataBase:bMutexAxis设置为true
+    //七轴只能工位1动，八轴只能工位2动
+    //bMutexAxis 需要在DataBase中进行设置并保存，b8Axis和b7Axis可以设置异步七八轴启用
+    
+    
+    
+    
+    if TxtFile:b7Axis
+      if (DataBase:nWorkPlaceIndex==1 and DataBase:bMutexAxis ) or !DataBase:bMutexAxis 
+        call IO:Axis7OnReady(TxtFile:trWorkplace.x,TxtFile:trWorkplace.y,TxtFile:trAxisData.z,l_bRes)
+        if !l_bRes
+          popUpMsg("异常七轴异常!")
+          disablePower()
+          DataBase:bMoveTask=false
+          DataBase:nPointType=5
+          
+          return
+        endIf
+      endIf
+    endIf
+    
+    //2.4等待异步8轴到达位置
+    if TxtFile:b8Axis
+      if (DataBase:nWorkPlaceIndex==2 and DataBase:bMutexAxis ) or !DataBase:bMutexAxis 
+        call IO:Axis8OnReady(TxtFile:trWorkplace.z,TxtFile:trWorkplace.rx,TxtFile:trAxis8Data.z,l_bRes)
+        if !l_bRes
+          popUpMsg("异常八轴异常!")
+          disablePower()
+          DataBase:nPointType=5
+          DataBase:bMoveTask=false
+          
+          return
+        endIf
+      endIf
+    endIf
+    
+    
+    
+    
+    //***************************************
+    //****************************************
+    //2014.11.25
+    //发送外部轴指令给程序
+    //2014.12.01
+    //对程序格式进行重构
+    if DataBase:bExtraContrAxis 
+      
+      call IO:ExtraContrAxis(TxtFile:trWorkplace.x,l_bRes)
+      if !l_bRes
+        popUpMsg("PLC控制外部轴数据错误,检查第七轴数据!")
+        disablePower()
+        DataBase:nPointType=5
+        DataBase:bMoveTask=false
+      endIf
+    endIf
+    
+    //****************************************
+    //**************************************
+    
+    
+    
+    //2.5客户自定义函数
+    call Custom:BeforeAppro()
+    
+    //2.6趋近点
+    DataBase:nPointType=1
+    setMoveId(0)
+    DataBase:bIOStart=false
+    if TxtFile:trPointCount.x>0
+      for l_nNum=0  to size(TxtFile:pAppro)-1
+        call SpeedFilter(TxtFile:trAppro[l_nNum],mRun)
+        mRun.reach=mRun.leave=2
+        mRun.blend=Cartesian
+        if TxtFile:bAppro[l_nNum]
+          TxtFile:pAppro[l_nNum].config=TxtFile:cCfg
+          if TxtFile:nSingleType!=20 and  TxtFile:nSingleType!=9
+            movel(TxtFile:pAppro[l_nNum],TxtFile:tCfg,mRun)
+          else
+            call ExtAxis:SingleMove(2,l_jBuff,l_p,TxtFile:pAppro[l_nNum],TxtFile:tCfg,mRun,TxtFile:trApproAxis[l_nNum])
+          endIf
+        else
+          mRun.blend=joint
+          //如果没有偏移与阵列，则不进行角度转换
+          if TxtFile:fPofffset.trsf=={0,0,0,0,0,0} and  TxtFile:fToffset.trsf=={0,0,0,0,0,0} and TxtFile:fArray.trsf=={0,0,0,0,0,0}
+            l_jBuff=TxtFile:jAppro[l_nNum]
+          else
+            call Joint2Joint(TxtFile:jAppro[l_nNum],l_jBuff,l_bRes)
+            if !l_bRes
+              popUpMsg("关节点转换出现异常")
+              DataBase:bMoveTask=false
+              disablePower()
+              return
+            endIf
+          endIf
+          if TxtFile:nSingleType!=20 and  TxtFile:nSingleType!=9
+            movej(l_jBuff,TxtFile:tCfg,mRun)
+          else
+            
+            call ExtAxis:SingleMove(1,l_jBuff,l_p,TxtFile:pAppro[l_nNum],TxtFile:tCfg,mRun,TxtFile:trApproAxis[l_nNum])
+          endIf
+        endIf
+        
+      endFor
+    endIf
+    
+    //2.7规则图形的转换
+    if TxtFile:nSingleType!=10 and TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+      
+      //保留规则图形的数据
+      for l_nNum=0 to size(TxtFile:pCut)-1
+        l_trTrsf[l_nNum]=TxtFile:pCut[l_nNum].trsf
+      endFor
+      
+      //如果是焊接，则没有切入切出点
+      if TxtFile:bWeldEnable
+        TxtFile:trDownLead.x=TxtFile:trDownLead.z=0  
+      endIf
+      
+      
+      //光斑计算
+      l_nBuffCircle=TxtFile:trDownLead.ry
+      call Algorith:Facula(l_trTrsf,TxtFile:trPresetData.ry,TxtFile:nSingleType,TxtFile:trDownLead,l_bRes)
+      if !l_bRes
+        popUpMsg("光斑计算错误")
+        DataBase:bMoveTask=false
+        disablePower()
+        return
+      endIf
+      
+      //求规则图形算法
+      call Algorith:RegulPoint(l_trTrsf,TxtFile:nSingleType,TxtFile:trDownLead,TxtFile:pCut,TxtFile:pMoveC,TxtFile:bMoveC,TxtFile:trCut,l_bRes,TxtFile:bWeldEnable)
+      TxtFile:trDownLead.ry=l_nBuffCircle
+      if !l_bRes
+        popUpMsg("规则图形计算错误")
+        DataBase:bMoveTask=false
+        disablePower()
+        return
+      else
+        //获得新的运动指令个数
+        TxtFile:trPointCount.y=size(TxtFile:pCut)
+      endIf      
+    endIf
+    
+    //闭合图形不封闭
+    //属于定制接口
+    if TxtFile:nSingleType!=10 and TxtFile:bOpenSharp and TxtFile:nOpenShapeLeng>0 and TxtFile:trDownLead.z==0 and TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+      call Algorith:NoCloseShape(TxtFile:pCut,TxtFile:pMoveC,TxtFile:bMoveC,TxtFile:nOpenShapeLeng,l_bRes)
+      if l_bRes
+        logMsg(toString("",TxtFile:nSingleType)+"图形不封闭")
+      endIf
+    endIf
+    
+    //测试功能,轴偏移
+    //属于定制接口
+    if DataBase:bDebugMode and TxtFile:nSingleType==10 and TxtFile:trPointCount.y<500
+      
+      call Algorith:Axis1Offset(TxtFile:pCut,DataBase:n1AxisOffset,TxtFile:tCfg)
+    endIf
+    
+    //计算实际切割的路径长
+    call Algorith:GetCutLength(TxtFile:pCut,TxtFile:pMoveC,TxtFile:bMoveC,DataBase:nCutLength,l_bRes)
+    
+    //焊接不支持400多个点
+    //2016.01.08
+    //为融覆使用，离线会比较多
+    //    if TxtFile:bWeldEnable and TxtFile:trPointCount.y>=400
+    //      popUpMsg("焊接不支持多于400个点")
+    //      DataBase:bMoveTask=false
+    //      disablePower()
+    //      return
+    //    endIf
+    
+    //2.8计算收弧点的距离
+    if TxtFile:bWeldEnable and !DataBase:bIOControl
+      TxtFile:trIODelay.y=0
+      TxtFile:nWeldActionId=0
+      call Algorith:GetWeldId(TxtFile:pCut,TxtFile:pMoveC,TxtFile:bMoveC,TxtFile:trWorkplace.ry,TxtFile:nWeldActionId,l_bRes,DataBase:nWeldEndOffset)
+      if !l_bRes or TxtFile:nWeldActionId<1
+        popUpMsg("收弧点计算错误")
+        DataBase:bMoveTask=false
+        disablePower()
+        return
+      else
+        logMsg("计算收弧ID:"+toString(".3",TxtFile:nWeldActionId)+"长度:"+toString(".1",TxtFile:trWorkplace.ry))
+      endIf
+    endIf
+    
+    
+    
+    
+    //计算具有收弧的点
+    if TxtFile:bWeldEnable and TxtFile:trWorkplace.z==1 and TxtFile:bActionWeldEnd[51]
+      
+      //计算具有收弧点 
+      
+      
+    endIf
+    
+    //超过500个点的不规则轨迹不能阵列
+    if TxtFile:trPointCount.y>=400
+      TxtFile:trArray={0,0,0,0,0,0}
+    endIf
+    
+    
+    
+    //如果不是远程模式，则等待按下
+    //安全机制
+    DataBase:nToolMode=workingMode()
+    l_nToolMode=-1
+    if DataBase:nToolMode!=4
+      while l_nToolMode!=0
+        DataBase:nToolMode=workingMode(l_nToolMode)
+        delay(0)
+      endWhile
+    endIf
+    
+    
+    //******************************
+    //阵列数据合法性确认
+    //2015.02.12
+    //为同步空走路径
+    if TxtFile:nSingleType==9
+      TxtFile:trWorkplace.rz=-1
+      TxtFile:trArray={0,0,0,0,0,0}
+    endIf
+    
+    //如果切割点大于499个点
+    //则不能进行阵列
+    if TxtFile:trPointCount.y>=499 
+      TxtFile:trArray={0,0,0,0,0,0}
+    endIf
+    
+    
+    //2016.01.13
+    //如果是切割，强制Z轴方向上没有阵列
+    if !TxtFile:bWeldEnable
+      TxtFile:trArray.ry=TxtFile:trArray.rz=0
+    endIf
+    
+    //*************************************
+    //2.9切割点
+    TxtFile:fArray.trsf={0,0,0,0,0,0}
+    
+    
+    
+    
+    //
+    //2016.03.06
+    //在阵列之前添加动作
+    
+    if TxtFile:bWeldEnable and DataBase:nArrayCutAction[0]>0 and DataBase:nArrayCutAction[0]<50
+      if roundDown(DataBase:nArrayCutAction[0])==roundUp(DataBase:nArrayCutAction[0])
+        waitEndMove()
+        logMsg("DataBase库中nArrayCutAction[0]响应")
+        call GetActionData(TxtFile:nAction,nAction,DataBase:nArrayCutAction[0])
+        call IO:Action(nAction,true,0)
+        call IO:Action(nAction,false,0)
+        
+      endIf
+    endIf
+    
+    call Custom:BeforeArrayCut(TxtFile:nTrajIndex)
+    
+    
+    
+    
+    for l_nNum[1]=0 to max(roundDown(TxtFile:trArray.x)-1,0)
+      for l_nNum[2]=0 to max(roundDown(TxtFile:trArray.z)-1,0)
+        
+        //2016.01.13
+        //为焊接添加Z轴的阵列
+        for l_nNum[3]=0 to max(roundDown(TxtFile:trArray.ry)-1,0)
+          
+          //阵列点
+          DataBase:nArrayX=l_nNum[1]+1
+          DataBase:nArrayY=l_nNum[2]+1
+          DataBase:nArrayZ=l_nNum[3]+1
+          
+          //阵列数据处理
+          TxtFile:fArray.trsf.x=l_nNum[1]*TxtFile:trArray.y
+          TxtFile:fArray.trsf.y=l_nNum[2]*TxtFile:trArray.rx
+          //2016.01.13
+          //为焊接添加
+          TxtFile:fArray.trsf.z=l_nNum[3]*TxtFile:trArray.rz
+          
+          //IO初始化
+          bWeldAction=false
+          DataBase:bIOStart=false
+          
+          //2015.03.05
+          //阵列第一点的速度
+          if l_nNum[2]!=0 or l_nNum[1]!=0
+            call SpeedFilter(TxtFile:trAppro[0],mRun)
+          else
+            call SpeedFilter(TxtFile:trCut[0],mRun)
+          endIf
+          
+          //TxtFile:trWorkplace.rz   穿孔工艺序号
+          //2015.02.03  为同步轴设置
+          if TxtFile:trWorkplace.rz!=-1
+            TxtFile:trWorkplace.rz=roundDown(TxtFile:trWorkplace.rz)
+            TxtFile:trWorkplace.rz=max(min(50,TxtFile:trWorkplace.rz),1)
+          endIf
+          TxtFile:pCut[0].config=TxtFile:pMoveC[0].config=TxtFile:cCfg
+          mRun.leave=mRun.reach=0
+          //×××××××××××××××××××××××××××××××××××××××
+          
+          //在穿孔点之前
+          call Custom:BeforeCut()
+          
+          
+          //激光如果是厚板,两级穿孔
+          if DataBase:bThickPlatPunch and  !TxtFile:bWeldEnable 
+            call ThickPlateCut()
+          endIf
+          
+          //***************
+          
+          setMoveId(0)
+          
+          //走到第一个切割点（穿孔点）
+          if TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+            movel(TxtFile:pCut[0],TxtFile:tCfg,mRun)
+          else
+            call ExtAxis:SingleMove(2,l_jBuff,l_p,TxtFile:pCut[0],TxtFile:tCfg,mRun,TxtFile:trCutAxis[0])
+          endIf
+          
+          
+          //等待第一个切割点（穿孔点）到位
+          waitEndMove()
+          setMoveId(1)
+          
+          //2016.01.26
+          //为熔覆程序
+          l_trTrsfBuff=TxtFile:pCut[0].trsf
+          l_nNum[4]=0
+          
+          
+          //激光焊接.激光程序号选择，
+          //TxtFile:trWorkplace.z!=1 表示不适用动作来控制焊接IO，程序直接控制
+          //2014.2.21
+          
+          //2016.01..13
+          //添加DataBase:bIOControl
+          //全部由动作来控制
+          if TxtFile:bWeldEnable  and !DataBase:bIOControl
+            call IO:WeldProgChoose(TxtFile:trWorkplace.rz)
+          endIf
+          
+          //切割点或者焊接点标志符
+          DataBase:nPointType=2
+          
+          
+          //客户自定义函数
+          call Custom:BeforeOpenLaser()
+          
+          
+          
+          
+          //气体，随动，激光处理
+          
+          //2016.01..13
+          //添加DataBase:bIOControl
+          //全部由动作来控制
+          if !TxtFile:bWeldEnable or !DataBase:bIOControl
+            //2015.02.02
+            //等于-1时，不开光开气开随动
+            if  TxtFile:trWorkplace.rz!=-1
+              //穿孔工艺
+              call IO:Preset(TxtFile:nPreset,TxtFile:trWorkplace.rz,TxtFile:trPresetData.z,TxtFile:trPresetData.x,TxtFile:trPresetData.y)
+              
+              //开光开气开随动
+              if DataBase:nInterfaceType==6 or DataBase:nInterfaceType==13
+                //********************************************
+                //2015.5.28
+                //气体选择
+                if DataBase:bGasChoose
+                  call IO:GasChoose(TxtFile:trWorkplace.ry)
+                endIf
+                //
+                call IO:PerforatiAction(TxtFile:trIODelay.x,TxtFile:trIODelay.y)
+              else
+                //气体选择
+                if DataBase:bGasChoose
+                  call IO:GasChoose(sel(DataBase:bKeyIO[2],TxtFile:trWorkplace.ry,0))
+                endIf
+                
+                //************************************************
+                call IO:KeyDigtalIO(DataBase:bKeyIO[2],DataBase:bKeyIO[1],DataBase:bKeyIO[0],TxtFile:trIODelay.x,TxtFile:trIODelay.y)
+                DataBase:bIOStart=true
+              endIf
+            else
+              logMsg("穿孔工艺设置为-1，不开光开气开随动")
+            endIf
+            
+            
+          endIf
+          
+          
+          //激光切割开光之后的处理
+          call Custom:AfterOpenLaser()
+          
+          //激光切割穿孔延时
+          if !TxtFile:bWeldEnable
+            delay(max(TxtFile:nTrajDelay[0],0))
+          endIf
+          
+          
+          //2014.07.21
+          //添加第一点工艺
+          call IO:Preset(TxtFile:nPreset,TxtFile:trCut[0].x,TxtFile:trPresetData.z,TxtFile:trPresetData.x,TxtFile:trPresetData.y)
+          
+          
+          
+          //切割时，第一点的动作，主要用来调节随动高度和占空比适应高功率激光器
+          call GetActionData(TxtFile:nAction,nAction,TxtFile:trCut[0].y)
+          call IO:Action(nAction,true,0)
+          call IO:Action(nAction,false,0)
+          
+          
+          l_nStartCutTime=clock()
+          //l_nNum表示已经压入堆栈的点个个数，以500为一个堆栈大小
+          l_nNum=1
+          
+          //l_nBuffCutCount用来表示总共压入堆栈切割点的总个数
+          l_nBuffCutCount=1
+          
+          //从切割第二点开始生产到多个点
+          while TxtFile:trPointCount.y>1 and l_nBuffCutCount<TxtFile:trPointCount.y
+            //超过500个点则进行等待
+            if l_nNum>=500
+              logMsg(TxtFile:sProductName+":"+toString("",l_nBuffCutCount)+"点压入运动堆栈")
+              //2015.12.30
+              //等待TxtFile:bStartRead等于false
+              //资源耗费特别大的时候，会占用
+              //尤其是当读一条运动一条的时候
+              wait(TxtFile:bStartRead==false)
+              TxtFile:bStartRead=true
+              //delay(0.5)
+              wait(TxtFile:bStartRead==false)
+              l_nNum=0
+            endIf
+            
+            
+            //读取数一定要超过运行数
+            
+            //2015.11.05
+            //为法力来修改
+            if (TxtFile:nSingleType==10 or TxtFile:nSingleType==20)
+              if l_nBuffCutCount>=TxtFile:nReadCutCount
+                logMsg("注意:等待ReadFile读取文件:读"+toString("",TxtFile:nReadCutCount)+":走"+toString("",l_nBuffCutCount))
+                
+              endIf
+              //TxtFile:bReadProduct=true
+              
+              
+              wait(TxtFile:nReadCutCount>l_nBuffCutCount)
+            endIf
+            
+            //生产参数
+            call SpeedFilter(TxtFile:trCut[l_nNum],mRun)
+            
+            //不规则图形拐角速度自适应
+            if TxtFile:bAdjustSpEnable and !TxtFile:bMoveC[l_nNum] and TxtFile:nSingleType==10 and l_nNum>1
+              call CoreSpeed(l_nNum,mRun)
+            endIf
+            
+            //焊接参数,焊接出光
+            //DataBase:bWeldAction 表示是利用动作来进行焊接
+            //TxtFile:trWorkplace.z==1 表示利用动作来进行焊接
+            
+            
+            //2016.01.13
+            //全部由动作控制
+            if TxtFile:bWeldEnable  and l_nNum==1 and !DataBase:bIOControl
+              if DataBase:nInterfaceType==6 or DataBase:nInterfaceType==13  
+                call IO:PerforatiAction(TxtFile:trIODelay.x,0)
+              else
+                call IO:KeyDigtalIO(DataBase:bKeyIO[2],DataBase:bKeyIO[1],DataBase:bKeyIO[0],TxtFile:trIODelay.x,0)
+                DataBase:bIOStart=true
+              endIf
+            endIf
+            
+            
+            
+            //2016.02.01
+            //安全机制
+            //为离线软件专门配置
+            //离线的两点之间的距离不能超过200mm
+            if TxtFile:trPointCount.y>=400 and distance(TxtFile:pCut[l_nNum].trsf,l_trTrsfBuff)>200
+              disablePower()
+              popUpMsg("离线点"+toString("",l_nBuffCutCount)+"两点之间的距离大于200mm")
+              logMsg("切割点："+toString("",l_nBuffCutCount)+"报错")
+            endIf
+            
+            
+            
+            
+            //运动函数
+            TxtFile:pCut[l_nNum].config=TxtFile:pMoveC[l_nNum].config=TxtFile:cCfg
+            if TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+              if TxtFile:bMoveC[l_nNum]
+                l_nWeldID=movec(TxtFile:pMoveC[l_nNum],TxtFile:pCut[l_nNum],TxtFile:tCfg,mRun)
+              else
+                l_nWeldID=movel(TxtFile:pCut[l_nNum],TxtFile:tCfg,mRun)
+              endIf
+            else
+              if TxtFile:bMoveC[l_nNum]
+                call ExtAxis:SingleMove(3,l_jBuff,TxtFile:pMoveC[l_nNum],TxtFile:pCut[l_nNum],TxtFile:tCfg,mRun,TxtFile:trCutAxis[l_nNum])
+              else
+                call ExtAxis:SingleMove(2,l_jBuff,l_p,TxtFile:pCut[l_nNum],TxtFile:tCfg,mRun,TxtFile:trCutAxis[l_nNum])
+                
+              endIf
+              
+              
+            endIf
+            
+            //2016.01.26
+            //为离线熔覆程序定制
+            //
+            //2016.03.15
+            if distance(TxtFile:pCut[l_nNum].trsf,l_trTrsfBuff)<=0
+              popUpMsg("相邻两个点相同")
+              logMsg("相邻两个点相同"+toString("",l_nNum))
+              DataBase:bMoveTask=false
+              disablePower()
+              return
+            endIf
+            
+            
+            //2016.04.28
+            //通过这个实现moveid的较为精确的控制
+            //1.贝塞尔曲线的  2.圆弧
+            //通过计算出一条路径的最小的movdid.
+            //影响最小moveid的是blend的leave, 
+            // DataBase:nActionID=l_nActionIDbuff=max(0.01,1-(TxtFile:trCut[l_nNum].ry)/distance(TxtFile:pCut[l_nNum].trsf,l_trTrsfBuff))
+            DataBase:nActionID=l_nActionIDbuff=max(0.01,1-(TxtFile:trCut[l_nNum].ry+l_nNum[4])/distance(TxtFile:pCut[l_nNum].trsf,l_trTrsfBuff))
+            
+            //把最小的MOVEID值放在这个里面
+            //trCut.rz放置MOVEID
+            TxtFile:trCut[l_nNum].rz=DataBase:nActionID
+            
+            //2016.01.26
+            //为熔覆修改
+            l_trTrsfBuff=TxtFile:pCut[l_nNum].trsf
+            if isEmpty()
+              l_nNum[4]=0
+            else
+              l_nNum[4]=TxtFile:trCut[l_nNum].ry
+            endIf
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            //收弧动作
+            //2015.09.08
+            
+            //2016.01.12
+            //融覆不需要自动收弧动作
+            //2016.01.13
+            //全部由动作来控制
+            if TxtFile:bWeldEnable  and TxtFile:trPointCount.y<400 and !DataBase:bIOControl
+              //为什么MOVEL不返回当前的ID?
+              l_nWeldID=l_nWeldID+1
+              // logMsg(toString(".3",l_nWeldID))
+              if (l_nWeldID>=TxtFile:nWeldActionId) and ((l_nWeldID-1)<=TxtFile:nWeldActionId) 
+                wait(getMoveId()>=TxtFile:nWeldActionId)
+                logMsg("收弧ID:"+toString(".3",getMoveId())+" 点号:"+toString("",l_nNum+1))
+                call IO:CloseWeld(TxtFile:trWorkplace.ry)
+                
+              endIf
+            endIf
+            
+            
+            
+            
+            
+            //动作
+            //如果动作不一样，则进行运行动作
+            
+            if  TxtFile:trCut[l_nNum].y>0
+              call GetActionData(TxtFile:nAction,nAction,TxtFile:trCut[l_nNum].y)
+              
+              //2016.01.26
+              //为融覆定制
+              if TxtFile:bWeldEnable and TxtFile:trPointCount.y>400 and DataBase:bIOControl
+                call IO:ActionLCF(nAction,true,l_nBuffCutCount,l_nActionIDbuff)
+                call IO:ActionLCF(nAction,false,l_nBuffCutCount,l_nActionIDbuff)
+              else
+                call IO:Action(nAction,true,l_nBuffCutCount)
+                call IO:Action(nAction,false,l_nBuffCutCount)
+              endIf
+            endIf
+            
+            
+            
+            
+            
+            
+            
+            
+            //累记添加
+            l_nBuffCutCount=l_nBuffCutCount+1
+            l_nNum=l_nNum+1
+          endWhile
+          
+          
+          
+          
+          //切割完成
+          waitEndMove() 
+          
+          
+          
+          
+          DataBase:nPointType=3
+          DataBase:bIOStart=false
+          //  resetMotion()  
+          
+          
+          
+          //为焊接时间
+          DataBase:nWeldEndTime=clock()-DataBase:nWeldEndStart
+          //2015.5.28
+          //气体选择
+          if DataBase:bGasChoose
+            call IO:GasChoose(0)
+          endIf
+          
+          //2016.04.11
+          //激光安全
+          if !TxtFile:bWeldEnable or !DataBase:bIOControl
+            call IO:SafteyIO()
+          endIf
+          
+          
+          if TxtFile:bWeldEnable and !DataBase:bIOControl
+            call IO:WeldProgChoose(0)
+          endIf
+          
+          DataBase:nCutTime=clock()-l_nStartCutTime
+          if  DataBase:nCutTime>0 
+            DataBase:nAvgCutSpeed=DataBase:nCutLength/ DataBase:nCutTime
+          endIf
+          
+          //激光关延时
+          delay(max(TxtFile:nTrajDelay[1],0))
+          call Custom:AfterCloseLaser()
+        endFor
+      endFor
+    endFor
+    
+    
+    //
+    //2016.03.06
+    //在阵列之后添加动作
+    
+    if TxtFile:bWeldEnable and DataBase:nArrayCutAction[1]>0 and DataBase:nArrayCutAction[1]<50
+      if roundDown(DataBase:nArrayCutAction[1])==roundUp(DataBase:nArrayCutAction[1])
+        logMsg("DataBase库中nArrayCutAction[1]响应")
+        waitEndMove()
+        call GetActionData(TxtFile:nAction,nAction,DataBase:nArrayCutAction[1])
+        call IO:Action(nAction,true,0)
+        call IO:Action(nAction,false,0)
+        
+      endIf
+    endIf
+    
+    
+    
+    //阵列后的用户自定义函数
+    call Custom:AfterArrayCut(TxtFile:nTrajIndex)
+    
+    
+    //再次确认激光关闭
+    call IO:SafteyIO()
+    
+    //焊接
+    if TxtFile:bWeldEnable
+      call IO:WeldProgChoose(0)
+    endIf
+    
+    
+    
+    
+    
+    
+    
+    
+    //2.10离开点  
+    if TxtFile:trPointCount.z>0
+      for l_nNum=0  to TxtFile:trPointCount.z-1
+        call SpeedFilter(TxtFile:trLeave[l_nNum],mRun)
+        mRun.reach=mRun.leave=2
+        TxtFile:pLeave[l_nNum].config=TxtFile:cCfg
+        // mRun.blend=Cartesian
+        mRun.blend=joint
+        if TxtFile:bLeave[l_nNum]
+          if TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+            movel(TxtFile:pLeave[l_nNum],TxtFile:tCfg,mRun)
+          else
+            call ExtAxis:SingleMove(2,l_jBuff,l_p,TxtFile:pLeave[l_nNum],TxtFile:tCfg,mRun,TxtFile:trLeaveAxis[l_nNum])
+          endIf
+          
+        else 
+          mRun.blend=joint
+          if TxtFile:fPofffset.trsf=={0,0,0,0,0,0} and  TxtFile:fToffset.trsf=={0,0,0,0,0,0} and TxtFile:fArray.trsf=={0,0,0,0,0,0}
+            l_jBuff=TxtFile:jLeave[l_nNum]
+          else
+            call Joint2Joint(TxtFile:jLeave[l_nNum],l_jBuff,l_bRes)
+            if !l_bRes
+              popUpMsg("关节点转换出现异常")
+              DataBase:bMoveTask=false
+              disablePower()
+              return
+            endIf
+          endIf
+          if TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+            movej(l_jBuff,TxtFile:tCfg,mRun)
+          else
+            call ExtAxis:SingleMove(1,l_jBuff,l_p,TxtFile:pLeave[l_nNum],TxtFile:tCfg,mRun,TxtFile:trLeaveAxis[l_nNum])
+          endIf
+        endIf
+      endFor
+    endIf
+    
+    
+    //5.用户自定义函数
+    call Custom:AfterTraj(TxtFile:nReadTrajIndex)
+    
+    
+    //2.11文件读取结束
+    if TxtFile:bReadProduct==false 
+      l_nNum[3]=nEndTraj
+    endIf
+    
+  endFor
+  
+  
+  //调用用户自定义程序结束函数
+  //在回零位置之后
+  //2015.07.08
+  if DataBase:nInterfaceType==6 or DataBase:nInterfaceType==13
+    call Custom:AfterProduct(DataBase:nWorkPlaceIndex)
+  endIf
+  
+  
+  //3.回零
+  if DataBase:nInterfaceType==6 or DataBase:nInterfaceType==13
+    
+    sMotionMess="机械手臂正在回零"
+    DataBase:mJHome.tvel=max(50,TxtFile:nHomeSpeed*1000/60)
+    DataBase:mJHome.blend=off
+    
+    //2014.07.29 同步七轴或者八轴
+    if TxtFile:bSync7Axis or TxtFile:bSync8Axis
+      l_trTrsf.x=TxtFile:trSync7Axis.y
+      l_trTrsf.y=TxtFile:trSync8Axis.y
+      call ExtAxis:SingleMove(1,TxtFile:jHome,l_p,l_p,TxtFile:tCfg,DataBase:mJHome,l_trTrsf) 
+    else
+      movej(TxtFile:jHome,TxtFile:tCfg,DataBase:mJHome)
+      
+    endIf
+    waitEndMove()
+    
+    if TxtFile:b7Axis
+      //等待异步7轴在安全点位置
+      if (DataBase:nWorkPlaceIndex==1 and DataBase:bMutexAxis ) or !DataBase:bMutexAxis 
+        call IO:AxisDoor(true,false)
+        // call IO:Axis7OnReady(max(0.001,DataBase:nAxisOffset[0]),TxtFile:trAxisData.y,TxtFile:trAxisData.z,l_bRes)
+        call IO:Axis7OnReady(TxtFile:trAxisData.x,TxtFile:trAxisData.y,TxtFile:trAxisData.z,l_bRes)
+        if !l_bRes
+          popUpMsg("异步七轴异常!")
+          DataBase:bMoveTask=false
+          disablePower()
+          DataBase:nPointType=5
+          return
+          // endIf
+        endIf
+        call IO:AxisDoor(false,false)
+      endIf
+      // 
+    endIf
+    
+    
+    if TxtFile:b8Axis
+      //等待异步8轴在安全点位置
+      
+      if (DataBase:nWorkPlaceIndex==2 and DataBase:bMutexAxis) or !DataBase:bMutexAxis
+        call IO:AxisDoor(true,true)
+        // call IO:Axis8OnReady(max(0.001,DataBase:nAxisOffset[1]),TxtFile:trAxis8Data.y,TxtFile:trAxis8Data.z,l_bRes)
+        call IO:Axis8OnReady(TxtFile:trAxis8Data.x,TxtFile:trAxis8Data.y,TxtFile:trAxis8Data.z,l_bRes)
+        if !l_bRes
+          popUpMsg("异步八轴异常!")
+          disablePower()
+          DataBase:bMoveTask=false
+          DataBase:nPointType=5
+          return
+        endIf
+        call IO:AxisDoor(false,true)
+      endIf
+      
+    endIf
+    
+  endIf
+  
+  
+  
+  
+  
+  //4.数据初始化
+  waitEndMove()
+  DataBase:nPointType=0
+  DataBase:bMoveTask=false
+  
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Code>
+  </Program>
+</Programs>

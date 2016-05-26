@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CellUserOptions>
+  <Controller Name="LasMAN">
+    <Application>Disk://Motion/MOTION.pjx</Application>
+    <Application>Disk://IO/IO.pjx</Application>
+    <Application>Disk://Teach/TEACH.pjx</Application>
+    <Application>Disk://DataBase/DataBase.pjx</Application>
+    <Application>Disk://TxtFile/TxtFile.pjx</Application>
+    <Application>Disk://FileDir/FileDir.pjx</Application>
+  </Controller>
+  <Option Name="DataTreeView">
+    <Nodes>
+      <Node Path="Val_LasMAN" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\DataBase\frame" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\DataBase\frame\fFrame" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\DataBase\mdesc" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\DataBase\trsf" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\TxtFile" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\TxtFile\trsf" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\TxtFile\trsf\trCut" IsExpanded="true" />
+    </Nodes>
+  </Option>
+  <Option Name="CellExplorer">
+    <Nodes>
+      <Node Path="Val_LasMAN" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN" IsExpanded="true" />
+    </Nodes>
+  </Option>
+  <Option Name="GeometryView">
+    <Nodes>
+      <Node Path="Val_LasMAN" IsExpanded="true" />
+    </Nodes>
+  </Option>
+  <Option Name="SynchronizerMode">
+    <Synchronizers>
+      <Synchronizer Controller="LasMAN" Mode="Emulator" />
+    </Synchronizers>
+  </Option>
+  <Option Name="3DView">
+    <_3DView Visible="true" />
+  </Option>
+</CellUserOptions>

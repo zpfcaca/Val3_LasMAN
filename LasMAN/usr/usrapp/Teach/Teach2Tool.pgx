@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="Teach2Tool" access="public">
+    <Locals>
+      <Local name="l_p" type="point" xsi:type="array" size="3" />
+      <Local name="l_nIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_sData" type="string" xsi:type="array" size="3" />
+      <Local name="l_tBuff" type="tool" xsi:type="array" size="1" />
+      <Local name="l_tTool" type="tool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  
+  //使用拆工具法进行示教
+  l_tBuff=TxtFile:tCfg
+  link(l_p[0],world)
+  link(l_p[1],world)
+  link(l_p[2],world)
+  link(l_tTool,flange)
+  resetMotion()
+  
+  resize(sSItem,1,6)
+  l_sData[0]="1.输入尖点值"
+  l_sData[1]="2.示教装尖点点"
+  l_sData[2]="3.示教带工具点"
+  
+  
+  sSItem[0]="X   :"+toString(".3",l_tBuff.trsf.x)
+  sSItem[1]="Y   :"+toString(".3",l_tBuff.trsf.y)
+  sSItem[2]="Z   :"+toString(".3",l_tBuff.trsf.z)
+  sSItem[3]="RX  :"+toString(".3",l_tBuff.trsf.rx)
+  sSItem[4]="RY  :"+toString(".3",l_tBuff.trsf.ry)
+  sSItem[5]="RZ  :"+toString(".3",l_tBuff.trsf.rz)
+  
+  
+  
+  cls()
+  call UI:Form_LabelList("LasMAN3.6->示教工具","工具值",sSItem,"示教点",l_sData,l_nIndex,"记录,对齐,,,上传,计算,保存,退出")
+  
+  while  true
+    l_nKey=getKey()
+    switch l_nKey
+      case 261
+        l_nIndex=max(l_nIndex-1,0)
+        
+        resetMotion()
+        mNomSpeed.blend=off
+        
+        switch l_nIndex
+          case 1
+            movej(l_p[1],l_tTool,mNomSpeed)
+          break
+          
+          case 2
+            movej(l_p[2],flange,mNomSpeed)
+          break
+        endSwitch
+        
+      break
+      
+      
+      case 266
+        l_nIndex=min(l_nIndex+1,2)
+        resetMotion()
+        mNomSpeed.blend=off
+        switch l_nIndex
+          case 1
+            movej(l_p[1],l_tTool,mNomSpeed)
+          break
+          
+          case 2
+            movej(l_p[2],flange,mNomSpeed)
+          break
+        endSwitch
+      break
+      
+      
+      
+      
+      //记录
+      case 271
+        call UI:Control_YesNO("确定要记录吗?",l_bRes)
+        l_tTool.trsf={0,0,0,0,0,0}
+        l_tTool.trsf.z=l_p[0].trsf.z
+        if l_bRes  
+          switch l_nIndex
+            case 1
+              l_p[1]=here(l_tTool,world)
+            break
+            
+            case 2
+              l_p[2]=here(flange,world)
+            break
+          endSwitch
+        endIf
+      break
+      
+      //对齐
+      case 272
+        call Kit:Align(l_tBuff)
+        
+      break
+      
+      
+      //上传
+      case 275
+        call UI:Control_YesNO("确定要上传吗?",l_bRes)
+        if l_bRes
+          call Kit:UpLoad()
+        endIf
+        
+      break
+      
+      
+      //计算
+      case 276
+        call UI:Control_YesNO("确定要计算吗?",l_bRes)
+        if l_bRes
+          l_tBuff.trsf=!l_p[2].trsf*l_p[1].trsf
+          
+          sSItem[0]="X   :"+toString(".3",l_tBuff.trsf.x)
+          sSItem[1]="Y   :"+toString(".3",l_tBuff.trsf.y)
+          sSItem[2]="Z   :"+toString(".3",l_tBuff.trsf.z)
+          sSItem[3]="RX  :"+toString(".3",l_tBuff.trsf.rx)
+          sSItem[4]="RY  :"+toString(".3",l_tBuff.trsf.ry)
+          sSItem[5]="RZ  :"+toString(".3",l_tBuff.trsf.rz)
+        endIf
+      break
+      
+      
+      
+      //保存
+      case 277
+        call UI:Control_YesNO("确定要保存吗?",l_bRes)
+        if l_bRes
+          
+          TxtFile:tCfg.trsf=l_tBuff.trsf
+          call TxtFile:SaveCfg(l_bRes)
+          if !l_bRes
+            popUpMsg("保存错误")
+          else
+            popUpMsg("保存成功")
+          endIf
+        endIf
+        
+        
+        
+      break
+      
+      
+      
+      
+      //退出
+      case 278
+        call UI:Control_YesNO("确定要退出吗?",l_bRes)
+        if l_bRes
+          
+          return
+        endIf
+      break
+      
+      //点位
+      case 270
+        call UI:Control_Point(l_p[l_nIndex])
+        if l_nIndex==0
+          l_p[0].trsf={0,0,l_p[0].trsf.z,0,0,0}          
+        endIf
+      break
+      
+    endSwitch
+    
+    if l_nKey!=-1
+      call UI:Form_LabelList("LasMAN3.6->示教工具","工具值",sSItem,"参考点",l_sData,l_nIndex,"记录,对齐,,,上传,计算,保存,退出")
+      
+    endIf
+    
+    delay(0)
+    
+  endWhile
+  
+  
+  
+  
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

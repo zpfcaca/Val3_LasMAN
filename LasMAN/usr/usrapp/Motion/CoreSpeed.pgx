@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="CoreSpeed">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nIndex" type="num" xsi:type="element" />
+      <Parameter name="x_mM" type="mdesc" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nDist" type="num" xsi:type="array" size="1" />
+      <Local name="l_nAngle" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  //拐角速度自适应
+  //强制把拐角速度给提升
+  //只有TxtFile:bBigFileMode 为true时才会调用
+  
+   if size(TxtFile:pCut)-1<x_nIndex and TxtFile:nSingleType!=10
+    return
+  endIf
+  
+  
+  l_nDist=distance(TxtFile:pCut[x_nIndex].trsf,TxtFile:pCut[x_nIndex-1].trsf)
+  l_nAngle=abs(TxtFile:pCut[x_nIndex].trsf.rx-TxtFile:pCut[x_nIndex-1].trsf.rx)+abs(TxtFile:pCut[x_nIndex].trsf.ry-TxtFile:pCut[x_nIndex-1].trsf.ry)
+  l_nAngle=l_nAngle+abs(TxtFile:pCut[x_nIndex].trsf.rz-TxtFile:pCut[x_nIndex-1].trsf.rz)
+  
+  
+  
+  
+  
+  
+  
+  //客户可以改距离和相应的拐角大小，加速度大小
+  //60指两个点的距离
+  //20两个点姿态角度变化大小
+  //30强制设置的加速度
+  if l_nDist<60 and l_nAngle>20 and x_mM.accel<30
+     x_mM.accel=x_mM.decel=30
+  endIf
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

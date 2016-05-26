@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://www.staubli.com/robotics/VAL3/Project/3">
+  <Parameters version="s7.7.1" stackSize="5000" millimeterUnit="true" />
+  <Programs>
+    <Program file="AdjustTraj.pgx" />
+    <Program file="Approach.pgx" />
+    <Program file="Cut.pgx" />
+    <Program file="GetListItems.pgx" />
+    <Program file="GetProductMess.pgx" />
+    <Program file="IdlePoint.pgx" />
+    <Program file="IsPointOK.pgx" />
+    <Program file="Leave.pgx" />
+    <Program file="OnAction.pgx" />
+    <Program file="OneWpMproChoose.pgx" />
+    <Program file="Product.pgx" />
+    <Program file="SetTrajPara.pgx" />
+    <Program file="Simulate.pgx" />
+    <Program file="SingleMove.pgx" />
+    <Program file="start.pgx" />
+    <Program file="stop.pgx" />
+    <Program file="Teach2Tool.pgx" />
+    <Program file="TeachAction.pgx" />
+    <Program file="TeachAxis.pgx" />
+    <Program file="TeachConfig.pgx" />
+    <Program file="TeachFrame.pgx" />
+    <Program file="TeachHome.pgx" />
+    <Program file="TeachNewTraj.pgx" />
+    <Program file="TeachOffset.pgx" />
+    <Program file="TeachPreset.pgx" />
+    <Program file="TeachProduct.pgx" />
+    <Program file="TeachRecipe.pgx" />
+    <Program file="TeachRemote.pgx" />
+    <Program file="TeachSyncAxis.pgx" />
+    <Program file="TeachTool.pgx" />
+    <Program file="TrajScreen.pgx" />
+    <Program file="WeldTraj.pgx" />
+    <Program file="WorkPlaceChose.pgx" />
+  </Programs>
+  <Database>
+    <Data file="Teach.dtx" />
+  </Database>
+  <Libraries>
+    <Library alias="TxtFile" path="Disk://TxtFile/TxtFile.pjx" />
+    <Library alias="DataBase" path="Disk://DataBase/DataBase.pjx" />
+    <Library alias="Kit" path="Disk://Kit/Kit.pjx" />
+    <Library alias="UI" path="Disk://StaubliUI/StaubliUI.pjx" />
+    <Library alias="Motion" path="Disk://Motion/Motion.pjx" />
+    <Library alias="IO" path="Disk://IO/IO.pjx" />
+    <Library alias="Algorith" path="Disk://Algorith/Algorith.pjx" />
+    <Library alias="CalTool" path="Disk://StaubliCalTool7/StaubliCalTool7.pjx" />
+    <Library alias="ExtAxis" path="Disk://extAxisCan/extAxisCan.pjx" autoload="false" />
+    <Library alias="Custom" path="Disk://Custom/Custom.pjx" />
+  </Libraries>
+</Project>

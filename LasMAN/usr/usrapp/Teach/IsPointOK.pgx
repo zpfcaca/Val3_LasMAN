@@ -1,0 +1,156 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="IsPointOK" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nIndex" type="num" xsi:type="element" />
+      <Parameter name="x_nType" type="num" xsi:type="element" />
+      <Parameter name="x_nMC" type="num" xsi:type="element" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_pPBuff" type="pointRx" xsi:type="array" size="1" />
+      <Local name="l_pHere" type="pointRx" xsi:type="array" size="1" />
+      <Local name="l_jJ" type="jointRx" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  //判断点位是否可以走到
+  //主要是MOVEC和MOVEL点
+  
+  
+  //2014.12.05
+  if (TxtFile:nSingleType==20 or TxtFile:nSingleType==9) and ExtAxis:bMoveType 
+    x_bRes=true
+    return
+  endIf
+    
+  
+  x_bRes=false
+  l_pHere=here(TxtFile:tCfg,TxtFile:fArray)
+  
+  switch x_nType
+    
+    //趋近
+    case 1
+      for l_nNum=0.1 to 1 step 0.1
+        link(l_pPBuff,world)
+        l_pPBuff.trsf={0,0,0,0,0,0}
+        l_pPBuff.trsf=interpolateL(l_pHere.trsf,TxtFile:pAppro[x_nIndex].trsf,l_nNum)
+        link(l_pPBuff,TxtFile:fArray)
+        x_bRes=pointToJoint(TxtFile:tCfg,herej(),l_pPBuff,l_jJ)
+        if !x_bRes
+          return
+        endIf
+        x_bRes=isInRange(l_jJ)
+        if !x_bRes
+          return
+        endIf
+      endFor
+    break
+    
+    //切割
+    case 2
+      if !TxtFile:bMoveC[x_nIndex] or (x_nMC!=0 and TxtFile:bMoveC[x_nIndex])
+        
+        
+        
+        for l_nNum=0.1 to 1 step 0.1
+          link(l_pPBuff,world)
+          l_pPBuff.trsf={0,0,0,0,0,0}
+          if !TxtFile:bMoveC[x_nIndex] or (x_nMC==2 and TxtFile:bMoveC[x_nIndex])
+            l_pPBuff.trsf=interpolateL(l_pHere.trsf,TxtFile:pCut[x_nIndex].trsf,l_nNum)
+          else
+            //圆弧中间点
+            l_pPBuff.trsf=interpolateL(l_pHere.trsf,TxtFile:pMoveC[x_nIndex].trsf,l_nNum)
+            
+          endIf
+          link(l_pPBuff,TxtFile:fArray)
+          x_bRes=pointToJoint(TxtFile:tCfg,herej(),l_pPBuff,l_jJ)
+          if !x_bRes
+            return
+          endIf
+          x_bRes=isInRange(l_jJ)
+          if !x_bRes
+            return
+          endIf
+        endFor
+      else
+        
+        //2014.11.28
+        //对于x_nIndex=0,则直接跳出
+        if x_nIndex<1
+          x_bRes=true
+          return
+        endIf
+        
+
+        
+        //中间点一定必须是钝角
+        l_pHere=TxtFile:pCut[x_nIndex-1]
+        if TxtFile:pMoveC[x_nIndex].trsf==TxtFile:pCut[x_nIndex].trsf or l_pHere.trsf==TxtFile:pCut[x_nIndex].trsf or l_pHere.trsf==TxtFile:pMoveC[x_nIndex].trsf
+          x_bRes=false
+          return
+        endIf
+        l_nNum=power(distance(l_pHere.trsf,TxtFile:pMoveC[x_nIndex].trsf),2)+power(distance(TxtFile:pCut[x_nIndex].trsf,TxtFile:pMoveC[x_nIndex].trsf),2)
+        if l_nNum>power(distance(l_pHere.trsf,TxtFile:pCut[x_nIndex].trsf),2)
+          x_bRes=false
+          return
+        endIf
+        
+        for l_nNum=0.1 to 1 step 0.1
+          link(l_pPBuff,world)
+          l_pPBuff.trsf={0,0,0,0,0,0}
+          if  nCutIndex>nCursonIndex
+            l_pPBuff.trsf=interpolateC(TxtFile:pCut[x_nIndex].trsf,TxtFile:pMoveC[x_nIndex].trsf,l_pHere.trsf,l_nNum)
+          else
+            l_pPBuff.trsf=interpolateC(l_pHere.trsf,TxtFile:pMoveC[x_nIndex].trsf,TxtFile:pCut[x_nIndex].trsf,l_nNum)
+            
+          endIf
+          
+          link(l_pPBuff,TxtFile:fArray)
+          x_bRes=pointToJoint(TxtFile:tCfg,herej(),l_pPBuff,l_jJ)
+          if !x_bRes
+            return
+          endIf
+          x_bRes=isInRange(l_jJ)
+          if !x_bRes
+            return
+          endIf
+        endFor
+        
+      endIf
+      
+      
+      
+      
+      
+      
+    break
+    //离开
+    case 3
+      for l_nNum=0.1 to 1 step 0.1
+        link(l_pPBuff,world)
+        l_pPBuff.trsf={0,0,0,0,0,0}
+        l_pPBuff.trsf=interpolateL(l_pHere.trsf,TxtFile:pLeave[x_nIndex].trsf,l_nNum)
+        link(l_pPBuff,TxtFile:fArray)
+        x_bRes=pointToJoint(TxtFile:tCfg,herej(),l_pPBuff,l_jJ)
+        if !x_bRes
+          return
+        endIf
+        x_bRes=isInRange(l_jJ)
+        if !x_bRes
+          return
+        endIf
+      endFor
+    break
+  endSwitch
+  x_bRes=true
+  
+  
+  
+end
+
+  ]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,439 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="Leave" access="public">
+    <Locals>
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_sProductName" type="string" xsi:type="array" size="1" />
+      <Local name="l_jJBuff" type="jointRx" xsi:type="array" size="1" />
+      <Local name="l_bCut" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bMoveL" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_nApproCount" type="num" xsi:type="array" size="1" />
+      <Local name="l_bFirst" type="bool" xsi:type="array" size="1" />
+      <Local name="l_trTrsf" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_nToolMode" type="num" xsi:type="array" size="1" />
+      <Local name="l_nAtPosition" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //离开点界面
+  DataBase:bMoveTask=false
+  call IO:KeyDigtalIO(false,false,false,0,0)
+  TxtFile:nWeldActionId=0
+  TxtFile:fArray.trsf={0,0,0,0,0,0}
+  //2014.2.17  在哪个坐标系中运动
+  if !DataBase:bWorldMove
+    $jogContext(TxtFile:tCfg,TxtFile:fArray,0)
+  else
+    $jogContext(TxtFile:tCfg,world,0)
+  endIf
+  
+  
+  //第一次示教,是否需要回退点
+  if bFirstTeach==false
+    bFirstTeach=true
+    if TxtFile:bMoveBack
+      l_nApproCount=size(TxtFile:pAppro)
+      resize(TxtFile:pLeave,1,l_nApproCount)
+      resize(TxtFile:jLeave,1,l_nApproCount)
+      resize(TxtFile:bLeave,1,l_nApproCount)
+      resize(TxtFile:trLeave,1,l_nApproCount)
+      resize(TxtFile:trLeaveAxis,1,l_nApproCount)
+      
+      for l_nNum=0 to l_nApproCount-1
+        TxtFile:bLeave[l_nNum]=TxtFile:bAppro[l_nApproCount-1-l_nNum]
+        TxtFile:jLeave[l_nNum]=TxtFile:jAppro[l_nApproCount-1-l_nNum]
+        TxtFile:pLeave[l_nNum]=TxtFile:pAppro[l_nApproCount-1-l_nNum]
+        TxtFile:trLeave[l_nNum]=TxtFile:trAppro[l_nApproCount-1-l_nNum]
+        
+        TxtFile:trLeaveAxis[l_nNum]=TxtFile:trApproAxis[l_nApproCount-1-l_nNum]
+        
+      endFor
+      
+    endIf
+    
+  endIf
+  
+  TxtFile:trPointCount.z=size(TxtFile:pLeave)
+  
+  //界面初始化 
+  nPointType=3
+  cls()
+  while  nPointType==3
+    l_nKey=getKey()
+    DataBase:bMoveTask=false
+    TxtFile:nWeldActionId=0
+    switch l_nKey
+      
+      //配置
+      case 112
+        call SetTrajPara()
+        
+      break
+      
+      
+      
+      case 261
+        nLeaveIndex=max(nLeaveIndex-1,0)
+        
+        
+      break
+      
+      
+      case 266
+        nLeaveIndex=min(nLeaveIndex+1,size(TxtFile:pLeave)-1)
+        
+        
+      break
+      //向左
+      case 264
+        //2015.08.16
+        
+        nPointType=2
+        
+      break
+      
+      //插入
+      case 271
+        
+        insert(TxtFile:pLeave[nLeaveIndex+1]) 
+        insert(TxtFile:jLeave[nLeaveIndex+1])
+        insert(TxtFile:bLeave[nLeaveIndex+1]) 
+        insert(TxtFile:trLeave[nLeaveIndex+1])
+        insert(TxtFile:trLeaveAxis[nLeaveIndex+1])
+        
+        TxtFile:pLeave[nLeaveIndex+1]=TxtFile:pLeave[nLeaveIndex]
+        TxtFile:jLeave[nLeaveIndex+1]=TxtFile:jLeave[nLeaveIndex]
+        TxtFile:bLeave[nLeaveIndex+1]=TxtFile:bLeave[nLeaveIndex]
+        TxtFile:trLeave[nLeaveIndex+1]=TxtFile:trLeave[nLeaveIndex]
+        TxtFile:trLeaveAxis[nLeaveIndex+1]=TxtFile:trLeaveAxis[nLeaveIndex]
+        nLeaveIndex=nLeaveIndex+1
+        
+        TxtFile:trPointCount.z=size(TxtFile:pLeave)
+        //2014.05.30
+        //××××××××××××××××××××××××××××××××××××××8
+        if TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+          TxtFile:pLeave[nLeaveIndex]=here(TxtFile:tCfg,TxtFile:fArray)
+          if TxtFile:fPofffset.trsf=={0,0,0,0,0,0} and TxtFile:fToffset.trsf=={0,0,0,0,0,0}
+            TxtFile:jLeave[nLeaveIndex]=herej()
+          else
+            call Motion:Point2Joint(TxtFile:pLeave[nLeaveIndex], TxtFile:jLeave[nLeaveIndex],l_bRes)
+            if !l_bRes
+              popUpMsg("Joint数据转换出错")
+            endIf
+          endIf
+        endIf
+        
+        //×××××××××××××××××××××××××××××××××××××××××
+        
+        
+        
+        
+        
+      break
+      
+      
+      //记录
+      case 272
+        TxtFile:fArray.trsf={0,0,0,0,0,0}
+        //2015.08.10
+        l_bRes=true
+        // call UI:Control_YesNO("确定要记录吗?",l_bRes)
+        if l_bRes
+          TxtFile:pLeave[nLeaveIndex]=here(TxtFile:tCfg,TxtFile:fArray)
+          if TxtFile:fPofffset.trsf=={0,0,0,0,0,0} and TxtFile:fToffset.trsf=={0,0,0,0,0,0}
+            TxtFile:jLeave[nLeaveIndex]=herej()
+          else
+            call Motion:Point2Joint(TxtFile:pLeave[nLeaveIndex], TxtFile:jLeave[nLeaveIndex],l_bRes)
+            if !l_bRes
+              popUpMsg("Joint数据转换出错")
+            endIf
+          endIf
+          //2014.07.28记录同步外部轴
+          if TxtFile:nSingleType==20 or TxtFile:nSingleType==9
+            call ExtAxis:RecordExtAxis(TxtFile:trLeaveAxis[nLeaveIndex],TxtFile:pLeave[nLeaveIndex].trsf,TxtFile:tCfg)
+          endIf
+          
+        endIf
+        
+      break
+      
+      //参数
+      case 273
+        l_bMoveL=TxtFile:bLeave[nLeaveIndex]
+        call UI:Control_Para(TxtFile:trLeave,TxtFile:bLeave,false,TxtFile:nSingleType,nLeaveIndex,TxtFile:trLeaveAxis)
+        //改变标志符
+        if l_bMoveL!=TxtFile:bLeave[nLeaveIndex]
+          //MOVEL
+          if TxtFile:bLeave[nLeaveIndex]
+            call Motion:Joint2Point(TxtFile:jLeave[nLeaveIndex],TxtFile:pLeave[nLeaveIndex])
+          else
+            //MOVEJ
+            call Motion:Point2Joint(TxtFile:pLeave[nLeaveIndex], TxtFile:jLeave[nLeaveIndex],l_bRes)
+            if !l_bRes
+              popUpMsg("Joint数据转换出错")
+            endIf
+          endIf
+          
+          
+          //2014.07.28记录同步外部轴
+          if TxtFile:nSingleType==20 or TxtFile:nSingleType==9
+            call ExtAxis:RecordExtAxis(TxtFile:trLeaveAxis[nLeaveIndex],TxtFile:pLeave[nLeaveIndex].trsf,TxtFile:tCfg)
+          endIf
+          
+        endIf
+      break
+      
+      //删除
+      case 274
+        if size(TxtFile:pLeave)==1
+          popUpMsg("离开点必须有一个")
+        else
+          call UI:Control_YesNO("确定要删除吗?",l_bRes)
+          if l_bRes
+            delete(TxtFile:pLeave[nLeaveIndex]) 
+            delete(TxtFile:jLeave[nLeaveIndex])
+            delete(TxtFile:bLeave[nLeaveIndex]) 
+            delete(TxtFile:trLeave[nLeaveIndex])
+            delete(TxtFile:trLeaveAxis[nLeaveIndex])
+            
+          endIf
+          TxtFile:trPointCount.z=size(TxtFile:pLeave)
+          nLeaveIndex=min(TxtFile:trPointCount.z-1,nLeaveIndex)
+          
+        endIf
+        
+        
+      break
+      //模拟
+      case 275
+        call UI:Control_YesNO("确定要模拟吗?",l_bRes)
+        if l_bRes
+          DataBase:bKeyIO[0]= DataBase:bKeyIO[1]= DataBase:bKeyIO[2]=false
+          call TxtFile:RegulaPoint(true)
+          switch TxtFile:nSingleType
+            case 24
+              if TxtFile:trDownLead.rz<=0
+                call Algorith:GetArcAngle(TxtFile:pCut[0].trsf,TxtFile:pCut[1].trsf,TxtFile:pCut[2].trsf,TxtFile:trDownLead.rz,l_bRes)
+                TxtFile:trDownLead.rz=TxtFile:trDownLead.rz/10
+              endIf
+            break
+            case 12,2
+              if TxtFile:trDownLead.ry<=0
+                
+                TxtFile:trDownLead.ry=8
+              endIf
+              
+            break
+            case 10,20
+              if TxtFile:trPointCount.y<500
+                TxtFile:trPointCount.y=size(TxtFile:pCut)
+              endIf
+              
+              
+            break
+            
+          endSwitch
+          
+          //个数赋值
+          TxtFile:trPointCount.x=size(TxtFile:pAppro)
+          TxtFile:trPointCount.z=size(TxtFile:pLeave)
+          
+          //超过五百个点的情况
+          if (TxtFile:nSingleType!=10 and TxtFile:nSingleType!=20) or TxtFile:trPointCount.y<500
+            TxtFile:nReadCutCount=TxtFile:trPointCount.y
+            call Simulate(-1)
+          else
+            //先保存在模拟
+            call Simulate(nTrajIndex+1)
+          endIf
+          call TxtFile:RegulaPoint(false)
+          call IO:SafteyIO()
+          nPointType=3
+          TxtFile:fArray.trsf={0,0,0,0,0,0}
+          DataBase:bKeyIO[0]= DataBase:bKeyIO[1]= DataBase:bKeyIO[2]=false
+          call UI:Control_PanelMd("模拟结束")
+          delay(2)
+          
+        endIf
+        
+        //        //*************************
+        //        //20150616
+        //        //如果不是远程模式，则等待按下
+        //        //安全机制
+        //        DataBase:nToolMode=workingMode()
+        //        l_nToolMode=-1
+        //        if DataBase:nToolMode!=4
+        //          while l_nToolMode!=6
+        //            DataBase:nToolMode=workingMode(l_nToolMode)
+        //            delay(0)
+        //          endWhile
+        //        endIf
+        //        //**************************
+        
+        //2015.12.30
+        //安全因素进行切换
+        while workingMode()!=1
+          popUpMsg("请先切换到手动模式,然后点击OK")
+          delay(0.1)
+        endWhile
+        
+        
+        
+        cls()
+      break
+      
+      
+      
+      
+      //保存
+      case 278
+        //计算总个数
+        TxtFile:trPointCount.y=0
+        for l_nNum=0 to size(TxtFile:nPartTrajCount)-1
+          TxtFile:trPointCount.y=TxtFile:trPointCount.y+TxtFile:nPartTrajCount[l_nNum]
+        endFor
+        if TxtFile:trPointCount.y==0
+          TxtFile:trPointCount.y=size(TxtFile:pCut)
+        endIf
+        
+        //保存
+        DataBase:bStopPoll=true
+        call UI:Control_YesNO("确定要保存吗?",l_bRes)
+        if l_bRes
+          call UI:Control_PanelMd("请等待，正在保存...")  
+          call TxtFile:SaveTraj(l_bRes)
+          if !l_bRes
+            popUpMsg("保存路径文件出错")
+          else
+            call TxtFile:EditRecipe(TxtFile:nTrajIndex,false,l_bRes)
+            if !l_bRes
+              popUpMsg("保存生产文件出错")
+            else
+              call TxtFile:ReadProduct("Disk://Txt/Recipe.txt",TxtFile:sProductName,true,l_bRes)
+              if !l_bRes
+                popUpMsg("读取生产文件出错")
+              else
+                popUpMsg("保存成功")
+                bSaveTxt=true
+              endIf
+            endIf
+          endIf
+        endIf
+        call TxtFile:CloseFile()
+        cls()
+        
+        
+      break
+      
+      
+      
+      //返回
+      case 277
+        nPointType=2
+      break
+      
+      //退出
+      case 276
+        if bSaveTxt
+          call UI:Control_YesNO("确定要退出吗?",l_bRes)
+        else
+          call UI:Control_YesNO("路径没有被保存,确定要退出吗?",l_bRes)
+        endIf
+        if l_bRes
+          nPointType=-1
+          return
+        endIf
+      break
+      
+      //点位
+      case 270
+        if TxtFile:bLeave[nLeaveIndex]
+          call UI:Control_Point(TxtFile:pLeave[nLeaveIndex] )
+        else
+          call UI:Control_Joint(TxtFile:jLeave[nLeaveIndex])
+        endIf
+        cls()
+      break
+      
+    endSwitch
+    if (l_nKey<279 and l_nKey>=260)or l_nKey==112 or !l_bFirst
+      call SingleMove(3)
+      l_bFirst=true
+      call GetListItems()
+      call UI:Form_PanelList("LasMAN3.6->示教路径","离开点",sSItem,nLeaveIndex,"插入,记录,参数,删除,模拟,退出,返回,保存")
+      call UI:Control_Mess("类型:"+TxtFile:sTrajType[TxtFile:nSingleType],"离开点个数:"+toString("",size(TxtFile:pLeave)))
+      
+      
+      
+      
+      
+    endIf
+    
+    //2014.07.30
+    //同步七八轴
+    if TxtFile:nSingleType==20 and (TxtFile:bSync7Axis or TxtFile:bSync8Axis)
+      call ExtAxis:RecordExtAxis(l_trTrsf,l_trTrsf,TxtFile:tCfg)
+      
+      gotoxy(1,12)
+      put("七轴:"+toString(".3",l_trTrsf.x))
+      if TxtFile:bSync8Axis
+        gotoxy(20,12)
+        put("八轴:"+toString(".3",l_trTrsf.y))
+      endIf
+    endIf
+    //
+    
+    
+    //为了表示到达位置
+    //2015.08.10
+    //为整个列表进行修改
+    
+    if nLeaveIndex>10
+      l_nAtPosition=nLeaveIndex-10
+    else
+      l_nAtPosition=0
+    endIf
+    
+    for l_nNum=0 to min(size(TxtFile:bLeave)-1,10)
+      gotoxy(22,min(l_nNum+1,10))
+      
+      //  setTextMode(1)
+      setTextMode(sel((l_nAtPosition+l_nNum)==nLeaveIndex,1,0))
+      if TxtFile:bLeave[nLeaveIndex]
+        if distance(TxtFile:pLeave[l_nAtPosition+l_nNum],here(TxtFile:tFileTool,TxtFile:fArray))<0.1
+          put("@")
+        else
+          put("│")
+        endIf
+        
+      else
+        if distance(jointToPoint(TxtFile:tFileTool,TxtFile:fArray,herej()),jointToPoint(TxtFile:tFileTool,TxtFile:fArray,TxtFile:jLeave[l_nAtPosition+l_nNum]))<0.1
+          put("@")
+        else
+          put("│")
+        endIf
+      endIf
+    endFor
+    
+    
+    //*************************
+    
+    
+    
+    
+    
+    delay(0)
+    DataBase:bStopPoll=false
+  endWhile
+  
+  
+  
+end
+
+
+
+
+]]></Code>
+  </Program>
+</Programs>

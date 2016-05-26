@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="ReadMe" access="private" >
+    <Code><![CDATA[begin
+  //trDownLead
+  //rz 圆弧度
+  //ry 圆直径 
+
+  //bWeldEnable  是否焊接
+
+
+end]]></Code>
+  </Program>
+</Programs>

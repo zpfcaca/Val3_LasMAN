@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="start" access="public" >
+    <Code><![CDATA[begin
+  //所有的IO动作都要写入log文件中
+  //信号一般作为脉冲信号来处理
+  //
+
+
+
+  call Init()
+
+  while true
+
+
+    call Digtal2Analog()
+    delay(0)
+  endWhile
+end]]></Code>
+  </Program>
+</Programs>

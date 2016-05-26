@@ -1,0 +1,314 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="Approach" access="public">
+    <Locals>
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_sProductName" type="string" xsi:type="array" size="1" />
+      <Local name="l_jBuff" type="jointRx" xsi:type="array" size="1" />
+      <Local name="l_bCut" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bMoveL" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bFirst" type="bool" xsi:type="array" size="1" />
+      <Local name="l_trTrsf" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_nAtPosition" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //趋近点主界面
+  //  $jogContext(TxtFile:tCfg,TxtFile:fArray,0)
+  
+  
+  
+  
+  
+  
+  
+  
+  TxtFile:fArray.trsf={0,0,0,0,0,0}
+  
+  //2014.2.17  在哪个坐标系中运动
+  if !DataBase:bWorldMove
+    $jogContext(TxtFile:tCfg,TxtFile:fArray,0)
+  else
+    $jogContext(TxtFile:tCfg,world,0)
+  endIf
+  
+  
+  call IO:KeyDigtalIO(false,false,false,0,0)
+  
+  TxtFile:fArray.trsf={0,0,0,0,0,0}
+  cls()
+  while  nPointType==1
+    l_nKey=getKey()
+    switch l_nKey
+      //上移
+      case 261
+        nApproIndex=max(nApproIndex-1,0)
+        
+        
+      break
+      
+      //下移
+      case 266
+        nApproIndex=min(nApproIndex+1,size(TxtFile:pAppro)-1)
+        
+      break
+      
+      
+      //向右
+      //2015.08.10
+      case 268
+        nPointType=2
+      break
+      
+      
+      //插入
+      case 271
+        
+        insert(TxtFile:pAppro[nApproIndex+1]) 
+        insert(TxtFile:jAppro[nApproIndex+1])
+        insert(TxtFile:bAppro[nApproIndex+1]) 
+        insert(TxtFile:trAppro[nApproIndex+1])
+        //外部轴
+        insert(TxtFile:trApproAxis[nApproIndex+1])
+        TxtFile:pAppro[nApproIndex+1]=TxtFile:pAppro[nApproIndex]
+        TxtFile:jAppro[nApproIndex+1]=TxtFile:jAppro[nApproIndex]
+        TxtFile:bAppro[nApproIndex+1]=TxtFile:bAppro[nApproIndex]
+        TxtFile:trAppro[nApproIndex+1]=TxtFile:trAppro[nApproIndex]
+        //外部轴
+        TxtFile:trApproAxis[nApproIndex+1]=TxtFile:trApproAxis[nApproIndex]
+        
+        
+        nApproIndex=nApproIndex+1
+        TxtFile:trPointCount.x=size(TxtFile:pAppro)
+        
+        //2014.5.30
+        //××××××××××××××××××××××
+        if TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+          TxtFile:pAppro[nApproIndex]=here(TxtFile:tCfg,TxtFile:fArray)
+          if TxtFile:fPofffset.trsf=={0,0,0,0,0,0} and TxtFile:fToffset.trsf=={0,0,0,0,0,0} and TxtFile:fArray.trsf=={0,0,0,0,0,0}
+            TxtFile:jAppro[nApproIndex]=herej()
+          else
+            call Motion:Point2Joint(TxtFile:pAppro[nApproIndex], TxtFile:jAppro[nApproIndex],l_bRes)
+            if !l_bRes
+              popUpMsg("Joint数据转换出错")
+            endIf 
+          endIf
+        endIf
+        
+        //××××××××××××××××××××××××
+        
+        
+        
+        
+      break
+      
+      
+      //记录
+      case 272
+        TxtFile:fArray.trsf={0,0,0,0,0,0}
+        //2015.08.10
+        l_bRes=true
+        //call UI:Control_YesNO("确定要记录吗?",l_bRes)
+        
+        if l_bRes
+          TxtFile:pAppro[nApproIndex]=here(TxtFile:tCfg,TxtFile:fArray)
+          if TxtFile:fPofffset.trsf=={0,0,0,0,0,0} and TxtFile:fToffset.trsf=={0,0,0,0,0,0} and TxtFile:fArray.trsf=={0,0,0,0,0,0}
+            TxtFile:jAppro[nApproIndex]=herej()
+          else
+            call Motion:Point2Joint(TxtFile:pAppro[nApproIndex], TxtFile:jAppro[nApproIndex],l_bRes)
+            if !l_bRes
+              popUpMsg("Joint数据转换出错")
+            endIf 
+          endIf
+          
+          //2014.07.28记录同步外部轴
+          if TxtFile:nSingleType==20 or TxtFile:nSingleType==9
+            call ExtAxis:RecordExtAxis(TxtFile:trApproAxis[nApproIndex],TxtFile:pAppro[nApproIndex].trsf,TxtFile:tCfg)
+          endIf
+          
+          
+        endIf
+      break
+      
+      //参数
+      case 273
+        l_bMoveL=TxtFile:bAppro[nApproIndex]
+        // call UI:Control_Para(TxtFile:trAppro[nApproIndex],TxtFile:bAppro[nApproIndex],false,0)
+        call UI:Control_Para(TxtFile:trAppro,TxtFile:bAppro,false,TxtFile:nSingleType,nApproIndex,TxtFile:trApproAxis)
+        //改变标志符
+        if l_bMoveL!=TxtFile:bAppro[nApproIndex]
+          //MOVEL
+          if TxtFile:bAppro[nApproIndex]
+            call Motion:Joint2Point(TxtFile:jAppro[nApproIndex],TxtFile:pAppro[nApproIndex])
+          else
+            //MOVEJ
+            call Motion:Point2Joint(TxtFile:pAppro[nApproIndex], TxtFile:jAppro[nApproIndex],l_bRes)
+            if !l_bRes
+              popUpMsg("Joint数据转换出错")
+            endIf
+          endIf
+          
+          //2014.12.05记录同步外部轴
+          if TxtFile:nSingleType==20 or TxtFile:nSingleType==9
+            call ExtAxis:RecordExtAxis(TxtFile:trApproAxis[nApproIndex],TxtFile:pAppro[nApproIndex].trsf,TxtFile:tCfg)
+          endIf
+          
+          
+        endIf
+      break
+      
+      //删除
+      case 274
+        if size(TxtFile:pAppro)==1
+          popUpMsg("趋近点必须有一个")
+        else
+          call UI:Control_YesNO("确定要删除吗?",l_bRes)
+          if l_bRes
+            delete(TxtFile:pAppro[nApproIndex]) 
+            delete(TxtFile:jAppro[nApproIndex])
+            delete(TxtFile:bAppro[nApproIndex]) 
+            delete(TxtFile:trAppro[nApproIndex])
+            delete(TxtFile:trApproAxis[nApproIndex])
+          endIf
+        endIf
+        TxtFile:trPointCount.x=size(TxtFile:pAppro)
+      break
+      
+      
+      //配置
+      case 112,275
+        call SetTrajPara()
+        
+        
+      break
+      
+      //退出
+      case 277
+        call UI:Control_YesNO("确定要退出吗?",l_bRes)
+        if l_bRes
+          nPointType=-1
+          return
+        endIf
+      break
+      
+      //上传
+      case 278
+        nPointType=2
+      break
+      
+      //点位
+      case 270
+        if TxtFile:bAppro[nApproIndex]
+          call UI:Control_Point(TxtFile:pAppro[nApproIndex] )
+        else
+          call UI:Control_Joint(TxtFile:jAppro[nApproIndex])
+        endIf
+        cls()
+      break
+      
+      //****************************************
+      //V
+      //2014.12.02
+      //外部PLC控制第七轴
+      case 118
+        if DataBase:bExtraContrAxis 
+          call UI:Control_YesNO("确定移动外部第七轴吗？",l_bRes)
+          if l_bRes
+            call UI:Control_PanelMd("外部第七轴正在运动....")
+            resetMotion()
+            call IO:ExtraContrAxis(TxtFile:trWorkplace.x,l_bRes)
+            if !l_bRes
+              popUpMsg("PLC控制外部轴数据错误,检查第七轴数据!")
+              disablePower()
+            endIf
+          endIf
+          cls()
+        endIf
+      break
+      //****************************************** 
+      
+      
+      
+      
+    endSwitch
+    
+    
+    
+    
+    
+    if (l_nKey<279  and l_nKey>=260)or l_nKey==112 or !l_bFirst or l_nKey==118
+      l_bFirst=true
+      call GetListItems()
+      call UI:Form_PanelList("LasMAN3.6->示教路径","趋近点",sSItem,nApproIndex,"插入,记录,参数,删除,全局,,退出,继续")
+      call UI:Control_Mess("类型:"+TxtFile:sTrajType[TxtFile:nSingleType],"趋近点个数:"+toString("",size(TxtFile:pAppro)))  
+      call SingleMove(1)
+      
+      
+      
+    endIf
+    //2014.07.30
+    //同步七八轴
+    if (TxtFile:nSingleType==20 or TxtFile:nSingleType==9) and (TxtFile:bSync7Axis or TxtFile:bSync8Axis)
+      call ExtAxis:RecordExtAxis(l_trTrsf,l_trTrsf,TxtFile:tCfg)
+      
+      gotoxy(1,12)
+      put("七轴:"+toString(".3",l_trTrsf.x))
+      if TxtFile:bSync8Axis
+        gotoxy(20,12)
+        put("八轴:"+toString(".3",l_trTrsf.y))
+      endIf
+    endIf
+    //
+    
+    //为了表示到达位置
+    //2015.08.10
+    //2015.09.22
+    //为整个列表进行修改
+    
+    if nApproIndex>10
+      l_nAtPosition=nApproIndex-10
+    else
+      l_nAtPosition=0
+    endIf
+    
+    for l_nNum=0 to min(size(TxtFile:bAppro)-1,10)
+      gotoxy(22,min(l_nNum+1,10))
+      setTextMode(sel((l_nAtPosition+l_nNum)==nApproIndex,1,0))
+      
+      
+      if TxtFile:bAppro[l_nAtPosition+l_nNum]
+        if distance(TxtFile:pAppro[l_nAtPosition+l_nNum],here(TxtFile:tFileTool,TxtFile:fArray))<0.1
+          put("@")
+        else
+          put("│")
+        endIf
+        
+      else
+        if distance(jointToPoint(TxtFile:tFileTool,TxtFile:fArray,herej()),jointToPoint(TxtFile:tFileTool,TxtFile:fArray,TxtFile:jAppro[l_nAtPosition+l_nNum]))<0.1
+          put("@")
+        else
+          put("│")
+        endIf
+      endIf
+    endFor
+    
+    //*************************
+    
+    delay(0)
+    
+  endWhile
+  
+  
+  
+end
+
+  
+  
+  
+
+
+
+]]></Code>
+  </Program>
+</Programs>

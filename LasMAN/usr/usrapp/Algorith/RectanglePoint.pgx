@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="RectanglePoint" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_trSource" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_trDest" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_fFrame" type="frame" xsi:type="array" size="1" />
+      <Local name="l_Dia" type="num" xsi:type="array" size="1" />
+      <Local name="l_nLegth" type="num" xsi:type="array" size="1" />
+      <Local name="l_pBuff" type="point" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //矩形
+  
+  //根据三个trsf建立frame
+  call SetFrame(x_trSource,l_fFrame,x_bRes)
+  if !x_bRes
+    return
+  endIf
+
+  
+  //矩形的宽
+  l_Dia=distance(x_trSource[1],x_trSource[2])
+  //矩形的长
+  l_nLegth=distance(x_trSource[0],x_trSource[1])
+  
+
+  
+  link(l_pBuff,l_fFrame)
+  l_pBuff.trsf={l_nLegth/2,0,0,0,0,0}
+  x_trDest[0]=position(l_pBuff,world)
+  
+  l_pBuff.trsf={l_nLegth,0,0,0,0,0}
+  x_trDest[1]=position(l_pBuff,world)
+  
+  l_pBuff.trsf={l_nLegth,l_Dia,0,0,0,0}
+  x_trDest[2]=position(l_pBuff,world)
+  
+  l_pBuff.trsf={0,l_Dia,0,0,0,0}
+  x_trDest[3]=position(l_pBuff,world)
+  
+  
+  l_pBuff.trsf={0,0,0,0,0,0}
+  x_trDest[4]=position(l_pBuff,world)
+  
+  x_trDest[5]=x_trDest[0]
+    
+    //圆心点
+  l_pBuff.trsf={l_nLegth/2,min(l_nLegth/2,l_Dia/2),0,0,0,0}
+  x_trDest[20]=position(l_pBuff,world)
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

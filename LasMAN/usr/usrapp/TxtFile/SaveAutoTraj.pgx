@@ -1,0 +1,165 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="SaveAutoTraj" access="public" >
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_sFileName" type="string" xsi:type="array" size="1" />
+      <Local name="l_sSBuff" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+  //示教或者调图过程中，对于其进行自动保存
+
+
+
+
+
+  //参数初始化
+  //x_bRes=false
+  l_sFileName="Disk://BackUp/Traj.txt"
+
+
+  //关闭所有文件
+  call FileDir:CloseAllFile()
+
+
+  //文件是否可以打开
+  nFileID=$fileOpen(l_sFileName,"w")
+  if nFileID<0 or nFileID>9
+    return
+  endIf
+
+  l_sSBuff="//Auto Save"+getDate("%d, %Y %H:%M:%S")
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+
+  l_sSBuff="BEGIN="+sProductName+"_"+toString("",nTrajIndex)
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+  l_sSBuff="BYPASS=FALSE"
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+  l_sSBuff="CUTTYPE="+toString("",nSingleType)
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+  l_sSBuff="ARRAY="+toString("",trArray.x)+","+toString(".3",trArray.y)+","+toString("",trArray.z)+","+toString(".3",trArray.rx)
+  l_sSBuff=l_sSBuff+","+toString("",trArray.ry)+","+toString(".3",trArray.rz)
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+  l_sSBuff="POINTCOUNT="+toString("",size(pAppro))+","+toString("",size(pCut))+","+toString("",size(pLeave))
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+  l_sSBuff="FRAME="+toString(".3",fTraj.trsf.x)+","+toString(".3",fTraj.trsf.y)+","+toString(".3",fTraj.trsf.z)
+  l_sSBuff=l_sSBuff+","+toString(".3",fTraj.trsf.rx)+","+toString(".3",fTraj.trsf.ry)+","+toString(".3",fTraj.trsf.rz)
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+  l_sSBuff="OFFSET="+toString(".3",fToffset.trsf.x)+","+toString(".3",fToffset.trsf.y)+","+toString(".3",fToffset.trsf.z)
+  l_sSBuff=l_sSBuff+","+toString(".3",fToffset.trsf.rx)+","+toString(".3",fToffset.trsf.ry)+","+toString(".3",fToffset.trsf.rz)
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+  l_sSBuff="DOWNLEAD="+toString(".3",trDownLead.x)+","+toString(".3",trDownLead.y)+","+toString(".3",trDownLead.z)
+  l_sSBuff=l_sSBuff+","+toString(".3",trDownLead.rx)+","+toString(".3",trDownLead.ry)+","+toString(".3",trDownLead.rz)
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+  l_sSBuff="WORKPLACE="+toString(".3",trWorkplace.x)+","+toString(".3",trWorkplace.y)+","+toString(".3",trWorkplace.z)
+  l_sSBuff=l_sSBuff+","+toString(".3",trWorkplace.rx)+","+toString(".3",trWorkplace.ry)+","+toString(".3",trWorkplace.rz)
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+  //趋近点
+  for l_nNum=0 to size(pAppro)-1
+    if bAppro[l_nNum]
+      l_sSBuff="MOVEL="+toString(".3",pAppro[l_nNum].trsf.x)+","+toString(".3",pAppro[l_nNum].trsf.y)+","+toString(".3",pAppro[l_nNum].trsf.z)+","
+      l_sSBuff=l_sSBuff+toString(".3",pAppro[l_nNum].trsf.rx)+","+toString(".3",pAppro[l_nNum].trsf.ry)+","+toString(".3",pAppro[l_nNum].trsf.rz)
+    else
+      l_sSBuff="MOVEJ="+toString(".3",jAppro[l_nNum].j1)+","+toString(".3",jAppro[l_nNum].j2)+","+toString(".3",jAppro[l_nNum].j3)+","
+      l_sSBuff=l_sSBuff+toString(".3",jAppro[l_nNum].j4)+","+toString(".3",jAppro[l_nNum].j5)+","+toString(".3",jAppro[l_nNum].j6)
+    endIf
+    l_sSBuff=l_sSBuff+"/"+toString("",trAppro[l_nNum].z)+","+toString("",trAppro[l_nNum].rx)
+    if $fileSet(nFileID,l_sSBuff,1)!=1
+      return
+    endIf
+  endFor
+
+  //Delayon
+  l_sSBuff="DELAYON="+toString(".3",nTrajDelay[0])
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+  //切割点
+  for l_nNum=0 to size(pCut)-1
+    if bMoveC[l_nNum]
+      l_sSBuff="MOVEC="
+    else
+      l_sSBuff="MOVEL="
+    endIf
+    if bMoveC[l_nNum]
+      l_sSBuff=l_sSBuff+toString(".3",pMoveC[l_nNum].trsf.x)+","+toString(".3",pMoveC[l_nNum].trsf.y)+","+toString(".3",pMoveC[l_nNum].trsf.z)+","
+      l_sSBuff=l_sSBuff+toString(".3",pMoveC[l_nNum].trsf.rx)+","+toString(".3",pMoveC[l_nNum].trsf.ry)+","+toString(".3",pMoveC[l_nNum].trsf.rz)+"/"
+    endIf
+
+    l_sSBuff=l_sSBuff+toString(".3",pCut[l_nNum].trsf.x)+","+toString(".3",pCut[l_nNum].trsf.y)+","+toString(".3",pCut[l_nNum].trsf.z)+","
+    l_sSBuff=l_sSBuff+toString(".3",pCut[l_nNum].trsf.rx)+","+toString(".3",pCut[l_nNum].trsf.ry)+","+toString(".3",pCut[l_nNum].trsf.rz)
+
+
+    l_sSBuff=l_sSBuff+"/"+toString("",trCut[l_nNum].x)+","+toString("",trCut[l_nNum].y)+"/"
+    l_sSBuff=l_sSBuff+toString("",trCut[l_nNum].z)+","+toString("",trCut[l_nNum].rx)+","+toString(".2",trCut[l_nNum].ry)
+    if $fileSet(nFileID,l_sSBuff,1)!=1
+      return
+    endIf
+  endFor
+
+  l_sSBuff="DELAYOFF="+toString(".3",nTrajDelay[1])
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+  //离开点
+  for l_nNum=0 to size(pLeave)-1
+    if bLeave[l_nNum]
+      l_sSBuff="MOVEL="+toString(".3",pLeave[l_nNum].trsf.x)+","+toString(".3",pLeave[l_nNum].trsf.y)+","+toString(".3",pLeave[l_nNum].trsf.z)+","
+      l_sSBuff=l_sSBuff+toString(".3",pLeave[l_nNum].trsf.rx)+","+toString(".3",pLeave[l_nNum].trsf.ry)+","+toString(".3",pLeave[l_nNum].trsf.rz)
+    else
+      l_sSBuff="MOVEJ="+toString(".3",jLeave[l_nNum].j1)+","+toString(".3",jLeave[l_nNum].j2)+","+toString(".3",jLeave[l_nNum].j3)+","
+      l_sSBuff=l_sSBuff+toString(".3",jLeave[l_nNum].j4)+","+toString(".3",jLeave[l_nNum].j5)+","+toString(".3",jLeave[l_nNum].j6)
+    endIf
+    l_sSBuff=l_sSBuff+"/"+toString("",trLeave[l_nNum].z)+","+toString("",trLeave[l_nNum].rx)
+    if $fileSet(nFileID,l_sSBuff,1)!=1
+      return
+    endIf
+  endFor
+
+  //结束符
+  l_sSBuff="END="+sProductName+"_"+toString("",nTrajIndex)
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+  call FileDir:CloseAllFile()
+
+  //x_bRes=true
+
+end]]></Code>
+  </Program>
+</Programs>

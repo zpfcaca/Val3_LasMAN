@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="Axis7OnReady" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nPosition" type="num" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_nSpeed" type="num" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_nPrecent" type="num" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_bRes" type="bool" use="reference" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_bBool" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+  //异步七轴运动到位
+
+
+  x_bRes=false
+
+  //参数合法性
+  if x_nSpeed<=0 or x_nPrecent<=0 or x_nPosition<=0
+    return
+  endIf
+
+
+  //没有电或者报警
+  if dDio["In4_b7MotorPower"]==false or dDio["In4_b7MotorError"]==true or dDio["In4_b7BackHome"]==false
+    return
+  endIf
+
+  call AxisIsNeg(false,l_bBool)
+  if l_bBool
+    return
+  endIf
+
+
+  dDio["O4_b7RecordPos"]=true
+  delay(0.2)
+  dDio["O4_b7RecordPos"]=false
+
+  call GetAxis7Pos(l_nNum,x_nPrecent)
+  if abs(l_nNum-x_nPosition)!=0
+    waitEndMove()
+  else
+    x_bRes=true
+    return
+  endIf
+  dDio["O4_b7StopMotor"]=false
+  delay(0.2)
+  x_nPosition=x_nPosition*x_nPrecent
+  aioSet(aAio["O4_a7Velocity"],max(1,x_nSpeed*x_nPrecent*16.666667))
+  aioSet(aAio["O4_a7MovePosL"],x_nPosition%power(2,16))
+  aioSet(aAio["O4_a7MovePosH"],roundDown(x_nPosition/power(2,16)))
+  dDio["O4_b7MoveToPos"]=true
+  delay(0.2)
+  dDio["O4_b7MoveToPos"]=false
+
+  x_nPosition=x_nPosition/x_nPrecent
+  while dDio["In4_b7Reached"]!=true or abs(l_nNum-x_nPosition)>10
+    call GetAxis7Pos(l_nNum,x_nPrecent)
+    if dDio["O4_b7StopMotor"]==true
+      x_bRes=false
+      return
+    endIf
+    delay(0)
+  endWhile
+
+  x_bRes=true
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

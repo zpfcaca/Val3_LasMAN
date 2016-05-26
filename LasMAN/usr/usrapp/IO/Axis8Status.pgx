@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="Axis8Status" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_bPowerOn" type="bool" use="reference" xsi:type="element" dimensions="1" />
+      <Parameter name="x_bAlarm" type="bool" use="reference" xsi:type="element" dimensions="1" />
+      <Parameter name="x_bhome" type="bool" use="reference" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Code><![CDATA[begin
+  //  x_bAlarm=true
+  //  x_bPowerOn=false
+  x_bhome=dDio["In4_b8BackHome"]==true
+  x_bPowerOn=dDio["In4_b8MotorPower"]==true
+  x_bAlarm=dDio["In4_b8MotorError"]==true
+
+
+end]]></Code>
+  </Program>
+</Programs>

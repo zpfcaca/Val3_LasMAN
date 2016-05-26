@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="SetFrame" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_trSource" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_fFrame" type="frame" xsi:type="element" use="reference" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_pPoint" type="point" xsi:type="array" size="3" />
+      <Local name="l_ni" type="num" xsi:type="array" size="1" />
+      <Local name="l_bIn" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //把三个trsf转换为frame
+  //如果x_frame是局部变量,需要在建立的程序中先link
+  link(x_fFrame,world)
+  x_fFrame.trsf={0,0,0,0,0,0}
+  x_bRes=false
+  if size(x_trSource)<3
+    return
+  endIf
+  
+  
+  //建立frame
+  for l_ni=0 to 2
+    l_pPoint[l_ni].trsf=x_trSource[l_ni]
+    link(l_pPoint[l_ni],world)
+  endFor
+  
+  x_bRes=setFrame(l_pPoint[0],l_pPoint[1],l_pPoint[2],x_fFrame)==0
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

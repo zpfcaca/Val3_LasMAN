@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="Task4ms" access="public">
+    <Locals>
+      <Local name="l_i" type="num" xsi:type="array" size="1" />
+      <Local name="l_nWorking" type="num" xsi:type="array" size="1" />
+      <Local name="l_nStatus" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //4ms的任务,检测外部轴的状态信息
+  while true
+    //检查通讯是否正常
+    call chkLife()
+    if !blifebit_all_ok
+      resetMotion()
+      stopMove()
+      disablePower()
+      popUpMsg("同步外部轴异常")
+      bSysShut=true
+      return
+    endIf
+    //检查错误
+    call chkDrivesFault()
+    //检查状态
+    for l_i=0 to nAxesSum-1
+      call chkDrvState(l_i)
+    endFor
+    //反馈位置
+    call getFbkPos()
+    // 检查所有驱动器是否在operation enabled
+    call chkDrivesOpEnab()
+    //检测quickstop
+    call chkQuickStop()
+    //s7.6以上版本
+    
+    
+    //使用在s7.5及以下系统时，命令行注释
+    bEnableRequest=isPowered()
+    //使用在s7.6，命令行注释
+    $XdrvEnable(bEnableRequest,bDrivesOpEnable)
+    //
+    if bEnableRequest
+      if bMemPower==false
+        // 触发使能次数
+        for l_i=0 to nAxesSum-1
+          nCntDrvEnable[l_i]=0
+        endFor
+        bMemPower=true
+      endIf
+      //
+      if bNoDrivesFault
+        if bDrivesOpEnable
+          //从$XMovel,$XMovej和$XMovec指令中获得外部轴离散位置(4ms的距离)
+          $XgetDrvCmdPos(nDrvPos)
+          for l_i=0 to nAxesSum-1
+            aioSet(aoIPPos[l_i],(nDrvPos[l_i]/nGearratio[l_i]*nResolution[l_i]/nScaleFact[l_i]))
+          endFor
+          bSysShut=false
+        else
+          //增加触发使能次数
+          l_i=0
+          for l_i=0 to nAxesSum-1
+            if bOpeEnabled==false
+              // cst:nTO_DRVDISABLE=2
+              if nCntDrvEnable[l_i]<250*cst:nTO_DRVDISABLE
+                call cmdEnableOp(l_i)
+              else
+                sMsg="轴"+toString("",l_i+7)+"使能超时"
+                popUpMsg(sMsg)
+                logMsg(sMsg)
+                bSysShut=true
+                disablePower()
+                return
+              endIf
+            endIf
+            nCntDrvEnable[l_i]=nCntDrvEnable[l_i]+1
+          endFor
+        endIf
+      else
+        $setMaxPosErr(jZero)
+        disablePower()
+      endIf
+    else
+      bMemPower=false
+      for l_i=0 to nAxesSum-1
+        call cmdQuickStop(l_i)
+      endFor
+      //jDummy=$setMaxPosErr(jPosErrMax)
+      // 设置驱动器位置反馈
+      for l_i=0 to nAxesSum-1
+        aioSet(aoIPPos[l_i],aioGet(aiPosFbk[l_i]))
+      endFor
+      $XsetDrvFbkPos(nDrvFbkPos)
+    endIf
+    delay(0)
+  endWhile
+end
+  ]]></Code>
+  </Program>
+</Programs>

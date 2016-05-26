@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="OnEvent6" access="private" >
+    <Code><![CDATA[begin
+  //-----------------------------------------------------------------------
+  //Header begin
+  //LasMAN3.6
+  //Description of program
+  // 
+  //Input parameters
+  //
+  //Output paramaters
+  //Example
+  //  call OnEvent1()
+  //History
+  //  Creation : 2013-06-23  y.ye@staubli.com
+  //Header end
+  //-----------------------------------------------------------------------
+  if DataBase:nRemoteProduct==8888
+    call Teach:TeachRemote()
+  else
+    popUpMsg("远程生产密码不正确")
+  endIf
+  DataBase:nInterfaceType=9
+end]]></Code>
+  </Program>
+</Programs>

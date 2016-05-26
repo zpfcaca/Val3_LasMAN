@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="Axis7Action" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nType" type="num" use="value" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Code><![CDATA[begin
+
+  //七轴的IO动作
+
+  switch x_nType
+
+    //点动正
+    case 1
+      if dDio["O4_b7StopMotor"]==true
+        dDio["O4_b7StopMotor"]=false
+        delay(0.05)
+      endIf
+      dDio["O4_b7MoveDir"]=true
+      // aioSet(aAio["O4_a7JogVelo"],50)
+      delay(0.2)
+
+    break
+
+
+    //点动负
+    case 2
+      if dDio["O4_b7StopMotor"]==true
+        dDio["O4_b7StopMotor"]=false
+        delay(0.05)
+      endIf
+
+      dDio["O4_b7MoveDirM"]=true
+      //  aioSet(aAio["O4_a7JogVelo"],50)
+      delay(0.2)
+    break
+
+    //回到机械零位
+    case 4
+      dDio["O4_b7StopMotor"]=false
+      dDio["O4_b7AxisHome"]=true
+      delay(0.2)
+    break
+
+
+
+
+
+    //停止运动
+    case 6
+      dDio["O4_b7StopMotor"]=true
+      delay(0.2)
+      dDio["O4_b7StopMotor"]=false
+    break
+
+
+
+
+    //没有按钮按下
+    case 9
+      dDio["O4_b7ResetError"]=false
+      dDio["O4_b7AxisHome"]=false
+      dDio["O4_b7MoveDirM"]=false
+      dDio["O4_b7MoveDir"]=false
+    break
+
+
+    //复位
+    case 10
+      dDio["O4_b7StopMotor"]=false
+      dDio["O4_b7ResetError"]=true
+      delay(0.2)
+      // dDio["O4_b7ResetError"]=false
+    break
+    default
+    break
+
+  endSwitch
+
+
+end]]></Code>
+  </Program>
+</Programs>

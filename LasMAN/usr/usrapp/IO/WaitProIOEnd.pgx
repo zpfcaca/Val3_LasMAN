@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="WaitProIOEnd" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nIndex" type="num" use="value" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Code><![CDATA[begin
+  //等待触发信号初始化
+  //在teach库中的product
+  switch x_nIndex
+    case 1
+      wait(dDio["In1_bPrdSta1"]==false)
+    break
+    case 2
+      wait(dDio["In1_bPrdSta2"]==false)
+    break
+
+    case 3
+      wait(dDio["In2_bPrdSta3"]==false)
+    break
+
+    case 4
+      wait(dDio["In2_bPrdSta4"]==false)
+    break
+
+  endSwitch
+end]]></Code>
+  </Program>
+</Programs>

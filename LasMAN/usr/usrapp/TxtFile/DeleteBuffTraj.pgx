@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="DeleteBuffTraj" access="public">
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_sSFileName" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  //2015.04.24
+  //为大数据文件报错
+  
+  for l_nNum=1 to 1000
+    
+    if $fileExists("Disk://Txt/"+toString("",l_nNum)+".txt")
+      
+      $delete("Disk://Txt/"+toString("",l_nNum)+".txt")
+    else
+      return
+    endIf
+    
+    
+  endFor
+  
+  
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

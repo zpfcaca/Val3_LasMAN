@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="CutIn" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_trCenter" type="trsf" xsi:type="element" />
+      <Parameter name="x_trLine" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_trDest" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_trCut" type="trsf" xsi:type="element" use="reference" />
+      <Parameter name="x_nType" type="num" xsi:type="element" />
+      <Parameter name="x_nPercent" type="num" xsi:type="element" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_trCutInP" type="pointRx" xsi:type="array" size="1" />
+      <Local name="l_fFrame" type="frame" xsi:type="array" size="1" />
+      <Local name="l_trBuff" type="trsf" xsi:type="array" size="3" />
+      <Local name="l_nR" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //切入引线
+  //x_nType==0  无引线
+  //==1   直线
+  //==2   圆弧
+  
+  
+  //如果是直线，直接退出
+  if x_nType==0
+    x_bRes=true
+    return
+  else
+    x_bRes=false
+  endIf
+  
+  
+  //参数合法性判断
+  if x_nType<0 or x_nType>2
+    return
+  endIf
+  
+  
+  
+  //根据三点求用户坐标系
+  l_trBuff[0]=x_trLine[0]
+  l_trBuff[1]=x_trLine[1]
+  l_trBuff[2]=x_trCenter
+  
+  call SetFrame(l_trBuff,l_fFrame,x_bRes)
+  if !x_bRes
+    return
+  endIf
+  
+  //**********************************
+  //2014.10.23
+  //从圆心开始调整
+  //为切厚板改写的程序
+  if  x_nPercent==101
+    //2015.01.22
+    //添加新的变量来支持厚板切割
+    //厚板切割内切圆的圆心的长度
+    if distance(x_trLine[0],x_trCenter)<=max(5,nThickRadio)
+      x_trDest[0]=x_trCenter
+    else
+      l_trCutInP.trsf={0,10,0,0,0,0}
+      link(l_trCutInP,l_fFrame)
+      x_trDest[0]=position(l_trCutInP,world)
+    endIf
+    return
+  endIf
+  
+  //*********************************
+  
+  
+  
+  
+  
+  l_trCutInP.trsf=x_trCenter
+  link(l_trCutInP,world)
+  l_trCutInP.trsf=position(l_trCutInP,l_fFrame)
+  //2014.7.24
+  l_nR=min(abs(l_trCutInP.trsf.y)/2,10)
+  //l_nR=min(abs(l_trCutInP.trsf.y),10)
+  
+  
+  if l_nR==0
+    x_bRes=false
+    return
+  endIf
+  
+  //切入切出比例
+  if x_nPercent>0 and x_nPercent<100
+    
+    l_nR=l_nR*x_nPercent/100
+  endIf
+  
+  
+  l_trCutInP.trsf.y=0
+  link(l_trCutInP,l_fFrame)
+  l_trCutInP.trsf=position(l_trCutInP,world)
+  
+  x_trCut=l_trCutInP.trsf
+  
+  
+  l_trBuff[0]=l_trCutInP.trsf
+  call SetFrame(l_trBuff,l_fFrame,x_bRes)
+  if !x_bRes
+    return
+  endIf
+  
+  l_trCutInP.trsf={-l_nR,l_nR,0,0,0,0}
+  link(l_trCutInP,l_fFrame)
+  x_trDest[0]=position(l_trCutInP,world)
+  
+  if x_nType==2
+    l_trCutInP.trsf={-sin(45)*l_nR,l_nR-sin(45)*l_nR,0,0,0,0}
+    link(l_trCutInP,l_fFrame)
+    x_trDest[1]=position(l_trCutInP,world)
+  endIf
+  
+end
+]]></Code>
+  </Program>
+</Programs>

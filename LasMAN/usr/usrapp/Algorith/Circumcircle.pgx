@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="Circumcircle" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_trSource" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_trCenter" type="trsf" xsi:type="element" use="reference" />
+      <Parameter name="x_nDia" type="num" xsi:type="element" use="reference" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_pPoint" type="point" xsi:type="array" size="3" />
+      <Local name="l_ni" type="num" xsi:type="array" size="1" />
+      <Local name="l_fFrame" type="frame" xsi:type="array" size="1" />
+      <Local name="l_pCenter" type="point" xsi:type="array" size="1" />
+      <Local name="x1" type="num" xsi:type="array" size="1" />
+      <Local name="x2" type="num" xsi:type="array" size="1" />
+      <Local name="x3" type="num" xsi:type="array" size="1" />
+      <Local name="y1" type="num" xsi:type="array" size="1" />
+      <Local name="y2" type="num" xsi:type="array" size="1" />
+      <Local name="y3" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //由圆的三点获得圆的圆心与直径
+  //外接圆圆心
+  
+ call SetFrame(x_trSource,l_fFrame,x_bRes)
+ if !x_bRes
+  return
+endIf
+  
+  //外接圆圆心与直径
+  
+  
+  //参数传递
+  for l_ni=0 to 2
+    l_pPoint[l_ni].trsf=x_trSource[l_ni]
+    link(l_pPoint[l_ni],world)
+    l_pPoint[l_ni].trsf=position(l_pPoint[l_ni],l_fFrame)
+  endFor
+  
+  
+  
+  //如果原点的坐标不是三个零，则报错
+  if l_pPoint[0].trsf.x!=0 or l_pPoint[0].trsf.y!=0 or  l_pPoint[0].trsf.z!=0 
+    x_bRes=false
+    return
+  endIf
+
+
+//利用公式求圆心
+
+//******************************************
+//求圆公式
+  x1=l_pPoint[0].trsf.x
+  x2=l_pPoint[1].trsf.x  
+  x3=l_pPoint[2].trsf.x  
+  y1=l_pPoint[0].trsf.y 
+  y2=l_pPoint[1].trsf.y 
+  y3=l_pPoint[2].trsf.y  
+  
+  
+  if((x3-x1)*(y2-y1)-(x2-x1)*(y3-y1))!=0
+    link(l_pCenter,l_fFrame)
+    l_pCenter.trsf={0,0,0,0,0,0}
+    l_pCenter.trsf.x=((y2-y1)*(y3*y3-y1*y1+x3*x3-x1*x1)-(y3-y1)*(y2*y2-y1*y1+x2*x2-x1*x1))/(2*(x3-x1)*(y2-y1)-2*(x2-x1)*(y3-y1)) 
+    l_pCenter.trsf.y=((x2-x1)*(x3*x3-x1*x1+y3*y3-y1*y1)-(x3-x1)*(x2*x2-x1*x1+y2*y2-y1*y1))/(2*(y3-y1)*(x2-x1)-2*(y2-y1)*(x3-x1)) 
+    x_trCenter=position(l_pCenter,world)
+    x_nDia=2*distance(l_pCenter.trsf,l_pPoint[0].trsf)
+    x_bRes=x_nDia>0
+  else
+    x_bRes=false
+    return
+  endIf
+//**********************************************  
+  
+end]]></Code>
+  </Program>
+</Programs>

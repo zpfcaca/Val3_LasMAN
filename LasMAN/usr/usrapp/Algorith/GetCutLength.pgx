@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="GetCutLength" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_pCut" type="point" xsi:type="array" use="reference" />
+      <Parameter name="x_pMC" type="point" xsi:type="array" use="reference" />
+      <Parameter name="x_bMC" type="bool" xsi:type="array" use="reference" />
+      <Parameter name="x_nLength" type="num" xsi:type="element" use="reference" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_trBuff" type="trsf" xsi:type="array" size="3" />
+      <Local name="l_trTe" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_nArc" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //获得切割的真正长度是多少
+  
+  
+  
+  x_bRes=false
+  x_nLength=0
+  if size(x_pCut)!=size(x_pMC) or size(x_pCut)!=size(x_bMC) 
+    return
+  endIf
+  
+  //如果只有一个点，则退出
+   if size(x_bMC)==1
+    x_bRes=true
+    return
+  endIf
+  
+  
+  //多于一个点进行计算
+  for l_nNum=1 to size(x_bMC)-1
+
+ 
+    if !x_bMC[l_nNum]
+      x_nLength=distance(x_pCut[l_nNum-1].trsf,x_pCut[l_nNum].trsf)+x_nLength
+      
+    else
+      l_trBuff[0]=x_pCut[l_nNum-1].trsf
+      l_trBuff[1]=x_pMC[l_nNum].trsf
+      l_trBuff[2]=x_pCut[l_nNum].trsf
+      //获取圆弧长度
+      call GetArcLength(l_trBuff,l_nArc,x_bRes)
+      if !x_bRes
+        return
+      endIf
+      x_nLength=x_nLength+l_nArc
+      
+    endIf
+      
+      
+  endFor
+  
+  x_bRes=true
+  
+end]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="KillTask" access="public">
+    <Code><![CDATA[begin
+  
+  
+  
+  if taskStatus("Move")!=-1
+    taskKill("Move")
+  endIf
+  if taskStatus("ReadFile")!=-1
+    taskKill("ReadFile")
+  endIf
+  
+  if taskStatus("Preset")!=-1
+    taskKill("Preset")
+  endIf
+  
+  if taskStatus("WeldEnd")!=-1
+    taskKill("WeldEnd")
+  endIf
+  
+end
+]]></Code>
+  </Program>
+</Programs>

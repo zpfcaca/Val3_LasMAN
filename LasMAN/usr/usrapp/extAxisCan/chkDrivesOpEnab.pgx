@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="chkDrivesOpEnab">
+    <Locals>
+      <Local name="l_i" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //检查驱动器是否使能
+  bDrivesOpEnable=true
+  for l_i=0 to nAxesSum-1
+    if  nDrvState[l_i]==5
+      bOpeEnabled[l_i]=true
+    else
+      bOpeEnabled[l_i]=false
+    endIf
+    bDrivesOpEnable=bDrivesOpEnable and  bOpeEnabled[l_i]
+  endFor
+  
+//    
+//  bDrivesOpEnable=bOpeEnabled[0]=(diOpeEnabled[0]==true and diSwitchedOn[0]==true and diQuickStop[0]==true )
+//  for l_i=1 to nAxesSum-1
+//    bOpeEnabled[l_i]=(diOpeEnabled[l_i]==true and diQuickStop[l_i]==true and  diSwitchedOn[l_i]==true )
+//   // bOpeEnabled[l_i]=(diOpeEnabled[0]==true  and  diSwitchedOn[0]==true )
+//    bDrivesOpEnable=bDrivesOpEnable and bOpeEnabled[l_i]
+//  endFor
+end]]></Code>
+  </Program>
+</Programs>

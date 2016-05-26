@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="SingleMove" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nType" type="num" xsi:type="element" />
+      <Parameter name="x_j" type="jointRx" xsi:type="element" />
+      <Parameter name="x_pM" type="pointRx" xsi:type="element" />
+      <Parameter name="x_pE" type="pointRx" xsi:type="element" />
+      <Parameter name="x_tTool" type="tool" xsi:type="element" />
+      <Parameter name="x_m" type="mdesc" xsi:type="element" />
+      <Parameter name="x_trExtAxis" type="trsf" xsi:type="element" />
+    </Parameters>
+    <Locals>
+      <Local name="l_pP" type="pointRx" xsi:type="array" size="2" />
+    </Locals>
+    <Code><![CDATA[begin
+  if x_nType<1 or x_nType>3
+    return
+  endIf
+  
+  resize(nAxesData,1,nAxesSum)
+  nAxesData[0]=x_trExtAxis.x
+  if nAxesSum>=2
+    nAxesData[1]=x_trExtAxis.y
+    
+  endIf
+  
+  
+  
+  if !bMoveType or x_nType==1
+    
+    switch x_nType
+      case 1
+        $Xmovej(x_j,nAxesData,x_tTool,x_m)
+      break
+      
+      
+      case 2
+        $Xmovel(x_pE,nAxesData,x_tTool,x_m)
+      break
+      
+      case 3
+        $Xmovec(x_pM,x_pE,nAxesData,x_tTool,x_m)
+      break
+      
+      
+    endSwitch
+    return
+    
+    
+  endIf
+  
+  
+  
+  
+  
+  //2014.12.04
+  //对于离线进行修改
+  //fFrame.trsf={0,0,0,0,0,0}
+  if bMoveType
+    $XframeLink(fFrame)
+  else
+    link(fFrame,world)
+  endIf
+  
+  
+  
+  
+  
+  link(l_pP[0],fFrame)
+  link(l_pP[1],fFrame)
+  
+  
+  l_pP[0].trsf=x_pM.trsf
+  l_pP[1].trsf=x_pE.trsf
+  
+  //×××××××××××××××××××××××××××××××××××××××××××
+  switch x_nType
+    case 1
+      $Xmovej(x_j,nAxesData,x_tTool,x_m)
+    break
+    
+    case 2
+      $Xmovel(l_pP[1],nAxesData,x_tTool,x_m)
+    break
+    
+    case 3
+      $Xmovec(l_pP[0],l_pP[1],nAxesData,x_tTool,x_m)
+    break
+    
+  endSwitch
+  
+  
+end
+
+
+    
+]]></Code>
+  </Program>
+</Programs>

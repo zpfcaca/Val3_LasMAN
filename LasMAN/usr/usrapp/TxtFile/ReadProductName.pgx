@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="ReadProductName" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_sFileName" type="string" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_bRes" type="bool" use="reference" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="3" />
+      <Local name="l_sBuff" type="string" xsi:type="array" size="1" />
+      <Local name="l_sFileName" type="string" xsi:type="array" size="1" />
+      <Local name="l_trTrsf" type="trsf" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+  //读取生产文件
+
+  //参数初始化
+  x_bRes=false
+  l_sFileName=x_sFileName
+
+  //判断文件是否存在
+  if !$fileExists(l_sFileName)
+    return
+  endIf
+
+  //关闭所有文件
+  call FileDir:CloseAllFile()
+
+  //文件是否可以打开
+  nFileID=$fileOpen(l_sFileName,"r")
+  if nFileID<0 or nFileID>9
+    return
+  endIf
+
+
+  //读取每行并解析
+  if $fileGet(nFileID,l_sBuff,1)!=1 or find(l_sBuff,"PRODUCT=")<0
+    logMsg("读取产品名不正确")
+    return
+  else
+    sProductName=right(l_sBuff,len(l_sBuff)-find(l_sBuff,"=")-1)
+    logMsg("读取文件名："+sProductName)
+    x_bRes=true
+  endIf
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

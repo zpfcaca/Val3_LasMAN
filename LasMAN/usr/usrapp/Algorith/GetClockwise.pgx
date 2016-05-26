@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="GetClockwise" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_trSource" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_trRes" type="trsf" xsi:type="element" use="reference" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_fFrame" type="frame" xsi:type="array" size="1" />
+      <Local name="l_trBuff" type="trsf" xsi:type="array" size="3" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_pP" type="pointRx" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //获得三个点是否是顺时针还是逆时针
+  //获得顺时针与逆时针的方向
+  //主要是RX,RY,RZ
+  
+  //  设   p1=(x1,y1)，   p2=(x2,y2)，   p3=(x3,y3)  
+  //   
+  //  求向量  
+  //          p12=(x2-x1,y2-y1)    
+  //          p23=(x3-x2,y3-y2)  
+  //   
+  //  则当   p12   与   p23   的叉乘（向量积）  
+  //   
+  //      p12   x   p23   =   (x2-x1)*(y3-y2)-(y2-y1)*(x3-x2)  
+  //   
+  //  为正时，p1-p2-p3   路径的走向为逆时针，  
+  //  为负时，p1-p2-p3   走向为顺时针，  
+  //  为零时，p1-p2-p3   所走的方向不变，亦即三点在一直线上。  
+  
+  
+  
+  for l_nNum=0 to 2
+    l_trBuff[l_nNum]=x_trSource[l_nNum]
+  endFor
+  
+  //  //(x2-x1)*(y3-y2)-(y2-y1)*(x3-x2)  
+  //  if((l_trBuff[1].x-l_trBuff[0].x)*(l_trBuff[2].y-l_trBuff[1].y)-(l_trBuff[2].x-l_trBuff[1].x)*(l_trBuff[1].y-l_trBuff[0].y))>0
+  //    //如果路径的走向为逆时针，
+  //    for l_nNum=0 to 2
+  //      l_trBuff[l_nNum]=x_trSource[2-l_nNum]
+  //    endFor
+  //  endIf
+  call SetFrame(l_trBuff,l_fFrame,x_bRes)
+  if !x_bRes
+    return
+  endIf
+  
+  if abs($rotAngle(!l_trBuff[0]*l_fFrame.trsf))<90
+    
+    x_trRes=l_fFrame.trsf
+    x_bRes=true
+    return
+    
+  endIf
+  
+  for l_nNum=0 to 2
+    l_trBuff[l_nNum]=x_trSource[2-l_nNum]
+  endFor
+  
+  call SetFrame(l_trBuff,l_fFrame,x_bRes)
+  if !x_bRes
+    return
+  endIf
+  x_trRes=l_fFrame.trsf
+  x_bRes=true
+  
+  
+  //  l_trBuff[0]={0,0,0,l_trBuff[0].rx,l_trBuff[0].ry,0}
+  //  l_trBuff[1]={0,0,0,l_fFrame.trsf.rx,l_fFrame.trsf.ry,0}
+  //  l_nNum=$rotAngle(!l_trBuff[0]*l_trBuff[1])
+  //  if abs(l_nNum)<90
+  //    x_trRes=l_fFrame.trsf
+  //  else
+  //    
+  //    //判断
+  //        for l_nNum=0 to 2
+  //      l_trBuff[l_nNum]=x_trSource[2-l_nNum]
+  //    endFor
+  // 
+  //  call SetFrame(l_trBuff,l_fFrame,x_bRes)
+  //  if !x_bRes
+  //    return
+  //  endIf
+  //  l_trBuff[0]={0,0,0,l_trBuff[0].rx,l_trBuff[0].ry,0}
+  //  l_trBuff[1]={0,0,0,l_fFrame.trsf.rx,l_fFrame.trsf.ry,0}
+  //  l_nNum=$rotAngle(!l_trBuff[0]*l_trBuff[1])
+  //    if abs(l_nNum)>90
+  //      x_bRes=false
+  //      return
+  //      
+  //    endIf
+  //    x_trRes=l_fFrame.trsf
+  //    x_bRes=true
+  //    
+  //  endIf
+  
+end]]></Code>
+  </Program>
+</Programs>

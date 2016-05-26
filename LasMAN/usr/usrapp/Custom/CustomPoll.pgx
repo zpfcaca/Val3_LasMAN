@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="CustomPoll" access="public">
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //用户在轮询函数中添加自己需要检查的内容
+  //  可以添加报警信号
+  //如果报警，则下电 dispower()
+  //logmess
+  
+  
+//  if dAlarm==true
+//    disablePower()
+//    logMsg("aAlarm 报警触发")
+//    
+//  endIf
+  
+  
+  
+  
+  
+  
+end
+
+]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="ExampleTest" access="private" >
+    <Locals>
+      <Local name="l_nStart" type="num" xsi:type="array" size="1" />
+      <Local name="l_nEnd" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_sBuff" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+
+  //××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××
+  //××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××
+  //把product文件中的某条路径给替换掉
+  //
+
+
+
+
+
+  //查询
+  call GetTrajFlag(l_bRes,"Disk://product1.txt",3,l_nStart,l_nEnd)
+  if !l_bRes
+    return
+  endIf
+
+
+  //产生文件
+  call CreatFile("Disk://Buff.txt",l_bRes)
+  if !l_bRes
+    return
+  endIf
+
+  //添加开头
+  call CopyFileContext(l_bRes,"Disk://product1.txt","Disk://Buff.txt",0,l_nStart-2)
+  if !l_bRes
+    return
+  endIf
+  //***************************************************************************************
+  //输入内容
+  nFileID=$fileOpen("Disk://Buff.txt","a")
+  if nFileID<0 or nFileID>9
+    return
+  endIf
+
+  l_sBuff="=BEGIN"
+  l_nNum=$fileSet(nFileID,l_sBuff,l_nNum)
+
+  for l_nNum=0 to 100
+    l_sBuff=toString("",l_nNum)
+    if $fileSet(nFileID,l_sBuff,1)!=1
+      return
+    endIf
+  endFor
+
+  l_sBuff="=END"
+  l_nNum=$fileSet(nFileID,l_sBuff,l_nNum)
+  call CloseAllFile()
+  //************************************************************************************
+
+  //把末尾给附加上去
+  call CopyFileContext(l_bRes,"Disk://product1.txt","Disk://Buff.txt",l_nEnd+1,-1)
+  if !l_bRes
+    return
+  endIf
+
+  //把临时文件给删除掉
+  //使用rename必须把需要命名的文件的名字不能存在，否则报错
+  $delete("Disk://product1.txt")
+  if !$rename("Disk://Buff.txt","Disk://product1.txt")
+  endIf
+end]]></Code>
+  </Program>
+</Programs>

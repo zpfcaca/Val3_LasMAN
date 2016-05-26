@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="pwrOffDrives" access="public" >
+    <Locals>
+      <Local name="l_i" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  for l_i=0 to nNUMOFAXES-1
+    doEnableVoltage[l_i]=false
+    doQuickStop[l_i]=false
+    doSwitchOn[l_i]=false
+    doEnableOp[l_i]=false
+  endFor
+end]]></Code>
+  </Program>
+</Programs>

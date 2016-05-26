@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="setPos" access="private" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nAxisNum" type="num" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_nCurrentPos" type="num" use="value" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Code><![CDATA[begin
+  //
+  aioSet(aoPosCmd[x_nAxisNum],x_nCurrentPos)
+end]]></Code>
+  </Program>
+</Programs>

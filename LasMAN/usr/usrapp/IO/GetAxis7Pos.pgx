@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="GetAxis7Pos" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nPosition" type="num" use="reference" xsi:type="element" dimensions="1" />
+      <Parameter name="x_nPrecent" type="num" use="value" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Code><![CDATA[begin
+
+  dDio["O4_b7RecordPos"]=true
+  delay(0.05)
+  dDio["O4_b7RecordPos"]=false
+
+  x_nPosition=aioGet(aAio["In4_a7CurPosH"])*power(2,16)+aioGet(aAio["In4_a7CurPosL"])
+  x_nPosition=x_nPosition/max(x_nPrecent,0.001)
+
+end]]></Code>
+  </Program>
+</Programs>

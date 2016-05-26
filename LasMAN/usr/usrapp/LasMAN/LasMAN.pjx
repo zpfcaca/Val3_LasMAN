@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://www.staubli.com/robotics/VAL3/Project/3" >
+  <Parameters version="s7.7" stackSize="10000" millimeterUnit="true" />
+  <Programs>
+    <Program file="Main.pgx" />
+    <Program file="OnEvent1.pgx" />
+    <Program file="OnEvent10.pgx" />
+    <Program file="OnEvent11.pgx" />
+    <Program file="OnEvent12.pgx" />
+    <Program file="OnEvent13.pgx" />
+    <Program file="OnEvent14.pgx" />
+    <Program file="OnEvent15.pgx" />
+    <Program file="OnEvent16.pgx" />
+    <Program file="OnEvent17.pgx" />
+    <Program file="OnEvent18.pgx" />
+    <Program file="OnEvent19.pgx" />
+    <Program file="OnEvent2.pgx" />
+    <Program file="OnEvent3.pgx" />
+    <Program file="OnEvent4.pgx" />
+    <Program file="OnEvent5.pgx" />
+    <Program file="OnEvent6.pgx" />
+    <Program file="OnEvent7.pgx" />
+    <Program file="OnEvent8.pgx" />
+    <Program file="OnEvent9.pgx" />
+    <Program file="Welcome.pgx" />
+    <Program file="start.pgx" />
+    <Program file="stop.pgx" />
+  </Programs>
+  <Database>
+    <Data file="LasMAN.dtx" />
+  </Database>
+  <Libraries>
+    <Library alias="TxtFile" path="Disk://TxtFile/TxtFile.pjx" autoload="true" password="" />
+    <Library alias="UI" path="Disk://StaubliUI/StaubliUI.pjx" autoload="true" password="" />
+    <Library alias="DataBase" path="Disk://DataBase/DataBase.pjx" autoload="true" password="" />
+    <Library alias="Kit" path="Disk://Kit/Kit.pjx" autoload="true" password="" />
+    <Library alias="Teach" path="Disk://Teach/Teach.pjx" autoload="true" password="" />
+    <Library alias="IO" path="Disk://IO/IO.pjx" autoload="true" password="" />
+    <Library alias="ExtAxis" path="Disk://extAxisCan/extAxisCan.pjx" autoload="false" password="" />
+  </Libraries>
+  <Types>
+  </Types>
+</Project>

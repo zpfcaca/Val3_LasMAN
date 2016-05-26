@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="GetProductMess">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_sMess" type="string" xsi:type="element" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //生产信息列表
+  //专为生产界面
+  
+  
+  sMess[0]="---生产日志---"
+  sSItem[1]="               "
+  if sMess[2]!=x_sMess
+    
+    
+    for l_nNum=10 to 3 step -1
+      sMess[l_nNum]=sMess[l_nNum-1]
+    endFor
+    sMess[2]=x_sMess
+  endIf
+end]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="TeachNewTraj" access="public">
+    <Locals>
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nType" type="num" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //示教路径
+  //新建一条路径
+  
+  
+  //初始化
+  TxtFile:fTraj.trsf={0,0,0,0,0,0}
+  TxtFile:fToffset.trsf={0,0,0,0,0,0}
+  TxtFile:fArray.trsf={0,0,0,0,0,0}
+
+  TxtFile:trWorkplace={0,0,0,0,0,1}
+//  TxtFile:trDownLead=TxtFile:trDownleadData
+//  TxtFile:trDownLead.ry=TxtFile:trDownLead.rz=0
+  TxtFile:trArray={1,0,1,0,0,0}
+  //参数初始化
+  TxtFile:trPointCount={0,0,0,0,0,0}
+  
+  
+  
+  
+
+  //圆的长度和圆弧度为0
+
+  call UI:Form_SelSharp(TxtFile:nSingleType,l_bRes)
+  if !l_bRes
+    return
+  endIf
+  
+//第一次示教点
+bFirstTeach=false
+
+
+  
+ call TrajScreen()
+
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

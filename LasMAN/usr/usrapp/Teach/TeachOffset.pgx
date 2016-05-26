@@ -1,0 +1,346 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="TeachOffset" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_fOffset" type="frame" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_fFrame" type="frame" xsi:type="array" size="1" />
+      <Local name="l_p" type="point" xsi:type="array" size="6" />
+      <Local name="l_nIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nErr" type="num" xsi:type="array" size="1" />
+      <Local name="l_fBuff" type="frame" xsi:type="array" size="2" />
+      <Local name="l_sData" type="string" xsi:type="array" size="6" />
+      <Local name="l_bOnePoint" type="bool" xsi:type="array" size="1" />
+      <Local name="l_trTrsf" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_sOorT" type="string" xsi:type="array" size="1" />
+      <Local name="l_pP" type="pointRx" xsi:type="array" size="1" />
+      <Local name="l_nDistance" type="num" xsi:type="array" size="2" />
+      <Local name="l_bFirst" type="bool" xsi:type="array" size="1" />
+      <Local name="l_pF" type="point" xsi:type="array" size="2" />
+    </Locals>
+    <Code><![CDATA[begin
+  //l_trTrsf   临时偏差保存点
+  //
+  
+  
+  
+  
+  //安全机制
+  resetMotion()
+  userPage()
+  cls()
+  link(l_fFrame,world)
+  //设置frame.进行验证
+  
+  //数据初始化
+  link(l_fBuff[0],world)
+  link(l_fBuff[1],world)
+  
+    link(l_pF[0],world)
+  link(l_pF[1],world)
+  
+  
+  l_fFrame=x_fOffset
+  l_trTrsf=x_fOffset.trsf
+  l_fFrame.trsf={0,0,0,0,0,0}
+  
+  
+  //2013.10.28
+  //DataBase:fJogContext=x_fOffset
+  
+  link(DataBase:fJogContext,world)
+  DataBase:fJogContext.trsf=position(l_fFrame,world)
+  
+  if DataBase:bWorldMove
+    $jogContext(TxtFile:tCfg,world,0)
+  else
+    $jogContext(TxtFile:tCfg,DataBase:fJogContext,0)
+  endIf
+  
+  for l_nErr=0 to 5
+    link(l_p[l_nErr],l_fFrame)
+    l_p[l_nErr]=here(TxtFile:tCfg,l_fFrame)
+  endFor
+  
+  
+  //说明类型是三点法
+  //给其赋值
+  if TxtFile:nSingleType!=10 and TxtFile:nSingleType!=2 and TxtFile:nSingleType!=12 and size(TxtFile:pCut)>=3
+    
+    l_p[0]=TxtFile:pCut[0]
+    l_p[1]=TxtFile:pCut[1]
+    l_p[2]=TxtFile:pCut[2]
+    l_bOnePoint=false
+  endIf
+  
+  if DataBase:nInterfaceType==5 and  TxtFile:nSingleType==2 and TxtFile:nSingleType==12 and size(TxtFile:pCut)>=1
+    
+    l_p[0]=TxtFile:pCut[0]
+    l_bOnePoint=true
+  endIf
+  
+  if DataBase:nInterfaceType==11
+    
+    l_p[0].trsf=DataBase:trOffset[0]
+    l_p[1].trsf=DataBase:trOffset[1]
+    l_p[2].trsf=DataBase:trOffset[2]
+    l_bOnePoint=false
+  endIf
+  
+  
+  
+  //  //界面初始化
+  //  l_sData[0]="X   :"+toString(".3",l_trTrsf.x)
+  //  l_sData[1]="Y   :"+toString(".3",l_trTrsf.y)
+  //  l_sData[2]="Z   :"+toString(".3",l_trTrsf.z)
+  //  l_sData[3]="RX  :"+toString(".3",l_trTrsf.rx)
+  //  l_sData[4]="RY  :"+toString(".3",l_trTrsf.ry)
+  //  l_sData[5]="RZ  :"+toString(".3",l_trTrsf.rz)
+  //  
+  //  
+  //  if l_bOnePoint
+  //    resize(sSItem,1,2)
+  //    sSItem[0]="标定点"
+  //    sSItem[1]="修正点"
+  //    // l_sData[2]="Y方向点"
+  //    l_sOorT="一点法"
+  //  else
+  //    resize(sSItem,1,6)
+  //    sSItem[0]="标定点1"
+  //    sSItem[1]="标定点2"
+  //    sSItem[2]="标定点3"
+  //    
+  //    sSItem[3]="修正点1"
+  //    sSItem[4]="修正点2"
+  //    sSItem[5]="修正点3"
+  //    l_sOorT="三点法"
+  //  endIf
+  //  
+  //  if DataBase:nInterfaceType==5
+  //    call UI:Form_LabelList("LasMAN3.6->示教偏差","偏差值",l_sData,l_sOorT,sSItem,l_nIndex,"记录,计算,一点,三点,对齐,保存,数值,退出")
+  //    
+  //  else
+  //    
+  //    call UI:Form_LabelList("LasMAN3.6->示教偏差","偏差值",l_sData,l_sOorT,sSItem,l_nIndex,"记录,计算,一点,三点,对齐,保存,上传,退出")
+  //    
+  //  endIf
+  
+  
+  
+  mNomSpeed.blend=off
+  
+  movej(l_p[l_nIndex],TxtFile:tCfg,mNomSpeed)
+  //按键响应模式
+  while  true
+    l_nKey=getKey()
+    switch l_nKey
+      
+      //向上
+      case 261
+        l_nIndex=max(l_nIndex-1,0)
+        
+        resetMotion()
+        mNomSpeed.blend=off
+        
+        movej(l_p[l_nIndex],TxtFile:tCfg,mNomSpeed)
+        
+      break
+      
+      //向下
+      case 266
+        l_nIndex=min(l_nIndex+1,size(sSItem)-1)
+        resetMotion()
+        mNomSpeed.blend=off
+        movej(l_p[l_nIndex],TxtFile:tCfg,mNomSpeed)
+        
+        
+      break
+      
+      
+      
+      
+      //记录
+      case 271
+        call UI:Control_YesNO("确定要记录吗?",l_bRes)
+        if l_bRes
+          l_p[l_nIndex]=here(TxtFile:tCfg,l_fFrame)
+        endIf
+      break
+      
+      
+      
+      //计算
+      case 272
+        l_nErr=0
+        call UI:Control_YesNO("确定要计算吗?",l_bRes)
+        if l_bRes
+          if !l_bOnePoint
+            if l_p[0].trsf==l_p[1].trsf or l_p[1].trsf==l_p[2].trsf or l_p[3].trsf==l_p[4].trsf or l_p[3].trsf==l_p[5].trsf 
+              popUpMsg("点没有完全记录")
+              l_nErr=1
+            else
+              
+              l_nErr=setFrame(l_p[0],l_p[1],l_p[2],l_fBuff[0])
+              if l_nErr==-1
+                popUpMsg("参考点X方向点离原点太近")
+              endIf
+              if l_nErr==-2
+                popUpMsg("参考点Y方向点离原点太近")
+              endIf
+              
+              if l_nErr==0
+                l_nErr=setFrame(l_p[3],l_p[4],l_p[5],l_fBuff[1])
+                if l_nErr==-1
+                  popUpMsg("修正点X方向点离原点太近")
+                else
+                  if l_nErr==-2
+                    popUpMsg("修正点Y方向点离原点太近")
+                  else
+                    //2014.3.7
+                    //用来测试三点法
+                    link(l_pF[0],l_fBuff[0])
+                    link(l_pF[1],l_fBuff[1])
+                    l_pF[0].trsf=l_pF[1].trsf={0,0,0,0,0,0}
+                    l_trTrsf=position(l_pF[1],l_fFrame)*!(position(l_pF[0],l_fFrame))
+                  endIf
+                endIf
+              endIf
+            endIf
+            
+          else
+            //作为偏差
+            
+            l_trTrsf=l_p[1].trsf*!l_p[0].trsf
+            
+          endIf
+          
+          //主要用来做提示用
+          if l_nErr==0
+            l_nDistance[0]=distance(world.trsf,l_trTrsf)
+            if l_bOnePoint
+              l_nDistance[1]=distance(l_p[0].trsf,l_p[1].trsf)
+            else
+              l_nDistance[1]=distance(l_p[0].trsf,l_p[3].trsf)
+            endIf
+            popUpMsg("原点间距离是"+toString(".3",l_nDistance[1])+",偏差距离是"+toString(".3",l_nDistance[0]))
+            
+          endIf
+        endIf
+        
+      break
+      
+      //一点法
+      case 273
+        l_bOnePoint=true
+        l_sOorT="一点法"
+        
+      break
+      //三点法
+      case 274
+        l_bOnePoint=false
+        l_sOorT="三点法"
+        
+      break
+      //对齐
+      case 275
+        call Kit:Align(TxtFile:tCfg)
+        
+      break
+      
+      
+      
+      //保存
+      case 276
+        call UI:Control_YesNO("确定要保存吗?",l_bRes)
+        if l_bRes
+          x_fOffset.trsf=l_trTrsf
+        endIf
+      break
+      
+      
+      case 277
+        //示教局部时需要上传
+        if DataBase:nInterfaceType==11
+          call UI:Control_YesNO("确定要上传吗?",l_bRes)
+          if l_bRes
+            call Kit:UpLoad()
+          endIf
+          
+        else
+          l_pP.trsf=l_trTrsf
+          call UI:Control_Point(l_pP)
+          l_trTrsf=l_pP.trsf
+          
+        endIf
+      break
+      
+      
+      //退出
+      case 278
+        call UI:Control_YesNO("确定要退出吗?",l_bRes)
+        if l_bRes
+          
+          return
+        endIf
+      break
+      
+      //点位
+      case 270
+        call UI:Control_Point(l_p[l_nIndex])
+      break
+      
+    endSwitch
+    
+    
+    
+    //界面刷新
+    if l_nKey!=-1 or !l_bFirst
+      l_bFirst=true
+      l_sData[0]="X   :"+toString(".3",l_trTrsf.x)
+      l_sData[1]="Y   :"+toString(".3",l_trTrsf.y)
+      l_sData[2]="Z   :"+toString(".3",l_trTrsf.z)
+      l_sData[3]="RX  :"+toString(".3",l_trTrsf.rx)
+      l_sData[4]="RY  :"+toString(".3",l_trTrsf.ry)
+      l_sData[5]="RZ  :"+toString(".3",l_trTrsf.rz)  
+      if l_bOnePoint
+        resize(sSItem,1,2)
+        sSItem[0]="标定点"
+        sSItem[1]="修正点"
+        
+      else
+        resize(sSItem,1,6)
+        sSItem[0]="标定点1"
+        sSItem[1]="标定点2"
+        sSItem[2]="标定点3"
+        
+        sSItem[3]="修正点1"
+        sSItem[4]="修正点2"
+        sSItem[5]="修正点3"
+      endIf
+      if DataBase:nInterfaceType==5
+        call UI:Form_LabelList("LasMAN3.6->示教偏差","偏差值",l_sData,l_sOorT,sSItem,l_nIndex,"记录,计算,一点,三点,对齐,保存,数值,退出")
+        
+      else
+        
+        call UI:Form_LabelList("LasMAN3.6->示教偏差","偏差值",l_sData,l_sOorT,sSItem,l_nIndex,"记录,计算,一点,三点,对齐,保存,上传,退出")
+        
+      endIf
+      
+      
+      
+      
+    endIf
+    
+    delay(0)
+    
+  endWhile
+  
+end
+
+
+      ]]></Code>
+  </Program>
+</Programs>

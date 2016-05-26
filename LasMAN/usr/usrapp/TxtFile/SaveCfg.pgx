@@ -1,0 +1,254 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="SaveCfg" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_bRes" type="bool" use="reference" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_sFileName" type="string" xsi:type="array" size="1" />
+      <Local name="l_sSBuff" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+
+  //参数初始化
+  x_bRes=false
+  l_sFileName="Disk://Txt/Configure.txt"
+
+
+  //关闭所有文件
+  call FileDir:CloseAllFile()
+
+
+  //文件是否可以打开
+  nFileID=$fileOpen(l_sFileName,"w")
+  if nFileID<0 or nFileID>9
+    return
+  endIf
+
+
+  //安全点
+  l_sSBuff="HOME="
+  l_sSBuff=l_sSBuff+toString(".3",jHome.j1)+","+toString(".3",jHome.j2)+","+toString(".3",jHome.j3)+","
+  l_sSBuff=l_sSBuff+toString(".3",jHome.j4)+","+toString(".3",jHome.j5)+","+toString(".3",jHome.j6)
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+  //工具
+  l_sSBuff="TOOL="
+  l_sSBuff=l_sSBuff+toString(".3",tCfg.trsf.x)+","+toString(".3",tCfg.trsf.y)+","+toString(".3",tCfg.trsf.z)+","
+  l_sSBuff=l_sSBuff+toString(".3",tCfg.trsf.rx)+","+toString(".3",tCfg.trsf.ry)+","+toString(".3",tCfg.trsf.rz)
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+  //拐角速度
+  l_sSBuff="CORNERDATA="
+  l_sSBuff=l_sSBuff+toString(".3",trCorner.x)+","+toString(".3",trCorner.y)+","+toString(".3",trCorner.z)+","
+  l_sSBuff=l_sSBuff+toString(".3",trCorner.rx)+","+toString(".3",trCorner.ry)+","+toString(".3",trCorner.rz)
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+  //异步7外部轴
+  //l_sSBuff="AXIS7HOME="
+  l_sSBuff="EXTAXIS="
+  l_sSBuff=l_sSBuff+toString(".3",trAxisData.x)+","+toString(".3",trAxisData.y)+","+toString(".3",trAxisData.z)+","
+  l_sSBuff=l_sSBuff+toString(".3",trAxisData.rx)+","+toString(".3",trAxisData.ry)+","+toString(".3",trAxisData.rz)
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+  //异步8外部轴
+  l_sSBuff="EXT8AXIS="
+  l_sSBuff=l_sSBuff+toString(".3",trAxis8Data.x)+","+toString(".3",trAxis8Data.y)+","+toString(".3",trAxis8Data.z)+","
+  l_sSBuff=l_sSBuff+toString(".3",trAxis8Data.rx)+","+toString(".3",trAxis8Data.ry)+","+toString(".3",trAxis8Data.rz)
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+
+  //同步七轴
+  l_sSBuff="7AXISSYNC="
+  l_sSBuff=l_sSBuff+toString(".3",trSync7Axis.x)+","+toString(".3",trSync7Axis.y)+","+toString(".3",trSync7Axis.z)+","
+  l_sSBuff=l_sSBuff+toString(".3",trSync7Axis.rx)+","+toString(".3",trSync7Axis.ry)+","+toString(".3",trSync7Axis.rz)
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+
+
+
+  //同步八轴
+  l_sSBuff="8AXISSYNC="
+  l_sSBuff=l_sSBuff+toString(".3",trSync8Axis.x)+","+toString(".3",trSync8Axis.y)+","+toString(".3",trSync8Axis.z)+","
+  l_sSBuff=l_sSBuff+toString(".3",trSync8Axis.rx)+","+toString(".3",trSync8Axis.ry)+","+toString(".3",trSync8Axis.rz)
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+
+  //工艺参数
+  l_sSBuff="PRESETDATA="
+  l_sSBuff=l_sSBuff+toString(".3",trPresetData.x)+","+toString(".3",trPresetData.y)+","+toString(".3",trPresetData.z)+","
+  l_sSBuff=l_sSBuff+toString(".3",trPresetData.rx)+","+toString(".3",trPresetData.ry)+","+toString(".3",trPresetData.rz)
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+
+  //IO延时
+  l_sSBuff="IODELAY="
+  l_sSBuff=l_sSBuff+toString(".3",trIODelay.x)+","+toString(".3",trIODelay.y)+","+toString(".3",trIODelay.z)+","
+  l_sSBuff=l_sSBuff+toString(".3",trIODelay.rx)+","+toString(".3",trIODelay.ry)+","+toString(".3",trIODelay.rz)
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+  //设置BOXCAR
+  l_sSBuff="BOXCAR="
+  l_sSBuff=l_sSBuff+toString(".3",trBoxcar.x)+","+toString(".3",trBoxcar.y)+","+toString(".3",trBoxcar.z)+","
+  l_sSBuff=l_sSBuff+toString(".3",trBoxcar.rx)+","+toString(".3",trBoxcar.ry)+","+toString(".3",trBoxcar.rz)
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+  //步进高度
+  l_sSBuff="STEPLENGTH="+toString(".3",nStepLength)
+
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+  //回零速度
+  l_sSBuff="HOMESPEED="+toString(".3",nHomeSpeed)
+
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+
+
+
+  //是否存在伪七轴
+  if b7Axis
+    l_sSBuff="7AXISENABLE=TRUE"
+  else
+    l_sSBuff="7AXISENABLE=FALSE"
+  endIf
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+  //是否存在伪八轴
+  if b8Axis
+    l_sSBuff="8AXISENABLE=TRUE"
+  else
+    l_sSBuff="8AXISENABLE=FALSE"
+  endIf
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+
+
+  //是否步进
+  if bTrajFilter
+    l_sSBuff="TRAJFILTERENABLE=TRUE"
+  else
+    l_sSBuff="TRAJFILTERENABLE=FALSE"
+  endIf
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+  //boxcar是否开启
+  if bAdjustSpEnable
+    l_sSBuff="AUTOADJSUTSPEEDENABLE=TRUE"
+  else
+    l_sSBuff="AUTOADJSUTSPEEDENABLE=FALSE"
+  endIf
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+  //是否是激光焊接
+  if bWeldEnable
+    l_sSBuff="WELDENABLE=TRUE"
+  else
+    l_sSBuff="WELDENABLE=FALSE"
+  endIf
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+  //是否回退
+  if bMoveBack
+    l_sSBuff="MOVEBACKENABLE=TRUE"
+  else
+    l_sSBuff="MOVEBACKENABLE=FALSE"
+  endIf
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+
+  //示教工具方法
+  if bTeachToolMode
+    l_sSBuff="TEACHTOOLCALENABLE=TRUE"
+  else
+    l_sSBuff="TEACHTOOLCALENABLE=FALSE"
+  endIf
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+
+  //单工位多产品
+  if bMoreProd1Wp
+    l_sSBuff="MOREPRODUCT1WORKPLACE=TRUE"
+  else
+    l_sSBuff="MOREPRODUCT1WORKPLACE=FALSE"
+  endIf
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+  //单工位多产品
+  if bMoreProd1Wp
+    l_sSBuff="BIGFILEMODE=TRUE"
+  else
+    l_sSBuff="BIGFILEMODE=FALSE"
+  endIf
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+  call FileDir:CloseAllFile()
+
+  x_bRes=true
+
+end]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="Preset" access="public">
+    <Locals>
+      <Local name="l_nId" type="num" xsi:type="array" size="1" />
+      <Local name="l_nBuffSpeed" type="num" xsi:type="array" size="1" />
+      <Local name="l_nIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_nBuffTime" type="num" xsi:type="array" size="1" />
+      <Local name="l_nFileID" type="num" xsi:type="array" size="1" />
+      <Local name="l_sBuff" type="string" xsi:type="array" size="1" />
+      <Local name="l_p" type="pointRx" xsi:type="array" size="1" />
+      <Local name="l_sS" type="string" xsi:type="array" size="1" />
+      <Local name="l_jBuff" type="jointRx" xsi:type="array" size="1" />
+      <Local name="l_nForce" type="num" xsi:type="array" size="6" />
+      <Local name="l_nVelCmd" type="num" xsi:type="array" size="6" />
+      <Local name="l_nOffset" type="num" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_nBuff" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //记录路径切割点与工艺动作相互斥
+  //如果记录则保存在BackUp中
+  
+  l_nId=0
+  
+  wait(DataBase:bMoveTask)
+  //记录所有点
+  l_nFileID=-1
+  l_nVelCmd[0]=l_nVelCmd[1]=l_nVelCmd[2]=100
+  l_nVelCmd[3]=l_nVelCmd[4]=l_nVelCmd[5]=100
+  while DataBase:bMoveTask
+    
+    
+    //切割点时进行IO
+    DataBase:nID=getMoveId()
+    
+    if DataBase:nPointType==2 and DataBase:nID>1
+      
+      //离散工艺与动作
+      //l_nOffset=max(min(0.9999,l_nOffset),0.84)
+      if DataBase:nID>l_nId+l_nOffset
+        l_nId=max(roundDown(DataBase:nID),l_nId+1)
+      else
+        // l_nId=sel(l_nId-DataBase:nID>0.3,roundDown(DataBase:nID),l_nId)
+        l_nId=roundDown(DataBase:nID)
+      endIf
+      
+      //工艺,离散工艺
+      l_nIndex=max(min(l_nId%500,size(TxtFile:trCut))-1,0)
+      //这句很重要
+      l_nOffset=TxtFile:trCut[min(l_nIndex+1,size(TxtFile:trCut)-1)].rz
+      
+      if l_nFileID!=l_nIndex
+        l_nFileID=l_nIndex
+        //测试使用
+        nTestBuff=l_nIndex
+        
+        //离散工艺
+        if !TxtFile:bMatchPreset
+          
+          //××××××××××××××××××××××××××××××××××××××××××××
+          //2014.10.23
+          //离散工艺
+          //为根据当前的位置进行工艺，根据客户要求进行修改
+          
+          //  call IO:Preset(TxtFile:nPreset,TxtFile:trCut[l_nIndex].x,TxtFile:trPresetData.z,TxtFile:trPresetData.x,TxtFile:trPresetData.y)
+          
+          //2015.03.10
+          //当点工艺一开始就进行使用
+          if TxtFile:trCut[max(l_nIndex,0)].x>0
+            call IO:Preset(TxtFile:nPreset,TxtFile:trCut[max(l_nIndex,0)].x,TxtFile:trPresetData.z,TxtFile:trPresetData.x,TxtFile:trPresetData.y)
+          else
+            call IO:PresetLaser(TxtFile:trCutAxis[max(l_nIndex,0)].rx,TxtFile:trCutAxis[max(l_nIndex,0)].ry,TxtFile:trPresetData.z)
+          endIf
+          
+          //××××××××××××××××××××××××××××××××××××××××××××××
+          
+          //通过距离来判断MOVEID
+          //2014.2.28
+//          if size(TxtFile:pCut)>l_nIndex+1
+//            l_nNum=distance(TxtFile:pCut[l_nIndex+1].trsf,TxtFile:pCut[l_nIndex].trsf)/100
+//            if l_nNum>0
+//              l_nNum=roundDown(max(ln(l_nNum),0))
+//            endIf
+//            l_nBuff=0.08
+//            l_nOffset=0.84
+//            while l_nNum>0
+//              l_nOffset=l_nOffset+l_nBuff
+//              l_nBuff=l_nBuff/2
+//              l_nNum=l_nNum-1
+//            endWhile
+//          endIf
+          //×××××××××××××××××××××××××××××××××××
+          
+          
+          //          //动作
+          //          if size(TxtFile:pCut)>l_nIndex+1
+          //            call GetActionData(TxtFile:nAction,nMoveidAction,TxtFile:trCut[l_nIndex+1].y)
+          //            call IO:Action(nMoveidAction,true,l_nNum)
+          //          endIf
+          //          
+          //          
+        endIf
+      endIf
+      
+      
+      
+      
+      //速度匹配,与MOVEID无关
+      if TxtFile:bMatchPreset
+        DataBase:nRobotSpeed=getSpeed(TxtFile:tCfg)
+        l_nIndex=DataBase:nRobotSpeed+((DataBase:nRobotSpeed-l_nBuffSpeed)/(max(clock()-l_nBuffTime,0.001))*max(0,TxtFile:trPresetData.rx))
+        l_nBuffTime=clock()
+        l_nBuffSpeed=DataBase:nRobotSpeed
+        l_nIndex=max(0,min(round(l_nIndex),200))
+        DataBase:nDebugData=l_nIndex
+        
+        
+        call IO:MatchSpdPreset(TxtFile:nMatchPreset,l_nIndex,TxtFile:trPresetData.z,TxtFile:trPresetData.x,TxtFile:trPresetData.y)
+        
+      endIf
+      
+      
+      
+      
+      //记录路径点
+      //***************************************************************************************
+      //      if DataBase:bSaveTrajPoint
+      //        l_sBuff="Disk://BackUp/"+DataBase:sProductName[DataBase:nWorkPlaceIndex-1]+"_"+toString("",TxtFile:nReadTrajIndex)+".txt"
+      //        if !$fileExists(l_sBuff)
+      //          l_nFileID=$fileOpen(l_sBuff,"w")
+      //        endIf
+      //        if l_nFileID>=0
+      //          l_jBuff=$getJntFbk()
+      //          l_p=jointToPoint(TxtFile:tCfg,world,l_jBuff)
+      //          l_sBuff=toString(".3",l_p.trsf.x)+","+toString(".3",l_p.trsf.y)+","+toString(".3",l_p.trsf.z)
+      //          l_sBuff=l_sBuff+","+toString(".3",l_p.trsf.rx)+","+toString(".3",l_p.trsf.ry)+","+toString(".3",l_p.trsf.rz)
+      //          getJointForce(l_nForce)
+      //          l_sBuff=l_sBuff+","+toString(".3",l_nForce[0])+","+toString(".3",l_nForce[1])+","+toString(".3",l_nForce[2])
+      //          l_sBuff=l_sBuff+","+toString(".3",l_nForce[3])+","+toString(".3",l_nForce[4])+","+toString(".3",l_nForce[5])
+      //          if l_sBuff!=l_sS
+      //            l_sS=l_sBuff
+      //            $fileSet(l_nFileID,l_sBuff,1)
+      //          endIf
+      //        endIf
+      //        //*****************************************************************************************
+      //      endIf
+    else
+      nTestBuff=0
+      l_nId=0
+      // l_bWeldAction=false
+      //如果记录点
+      //      if DataBase:bSaveTrajPoint and l_nFileID>=0
+      //        $fileClose(l_nFileID)
+      //      endIf
+      l_nFileID=-1
+      
+    endIf
+    
+    delay(0)
+  endWhile
+  
+  
+end
+
+    
+    
+]]></Code>
+  </Program>
+</Programs>

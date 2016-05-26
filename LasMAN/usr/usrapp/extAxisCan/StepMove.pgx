@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="StepMove" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nAxisNum" type="num" xsi:type="element" />
+      <Parameter name="x_nKey" type="num" xsi:type="element" />
+      <Parameter name="x_bJog" type="bool" xsi:type="element" />
+    </Parameters>
+    <Code><![CDATA[begin
+  //
+  if isKeyPressed(x_nKey)
+    //x_bjog=true:正向运动
+    if x_bJog
+      ? "+"
+      aioSet(aoWorkMode[x_nAxisNum],-1)
+      doStartHoming[x_nAxisNum]=true
+    else
+      ? "-"
+      aioSet(aoWorkMode[x_nAxisNum],-1)
+      doManual[x_nAxisNum]=true
+    endIf
+    wait(isKeyPressed(x_nKey)==false)
+  else
+    doStartHoming[x_nAxisNum]=false
+    doManual[x_nAxisNum]=false
+  endIf
+end]]></Code>
+  </Program>
+</Programs>

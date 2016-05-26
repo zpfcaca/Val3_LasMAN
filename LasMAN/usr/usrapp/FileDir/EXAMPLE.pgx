@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="Example" access="public" >
+    <Locals>
+      <Local name="l_nLine" type="num" xsi:type="array" size="1" />
+      <Local name="l_bBool" type="bool" xsi:type="array" size="1" />
+      <Local name="l_sString" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  cls()
+  title("读写文本实例")
+
+
+  //*********************************************************************
+  //新建文本
+  gotoxy(0,0)
+  put("新建文本HelloVal3.txt")
+  nFileID=$fileOpen("Disk://txt/HelloVal3.txt","w")
+  if nFileID<0 or nFileID>9
+    gotoxy(0,1)
+    put("新建打开文件出错！")
+    return
+  endIf
+
+  //书写文本
+  call WriteLine(nFileID,"Hello Val3!",l_bBool)
+  if !l_bBool
+    gotoxy(0,2)
+    put("写入文件出错！")
+    return
+  endIf
+
+  //关闭文件
+  $fileClose(nFileID)
+
+  //*************************************************************************
+  //读取文件
+  gotoxy(0,0)
+  put("读取文本HelloVal3.txt")
+  nFileID=$fileOpen("Disk://txt/HelloVal3.txt","r")
+  if nFileID<0 or nFileID>9
+    gotoxy(0,1)
+    put("读取打开文件出错！")
+    return
+  endIf
+
+  call GetLine(nFileID,l_sString,l_bBool)
+  gotoxy(0,2)
+  if !l_bBool
+    put("读取文件出错！")
+    return
+  else
+    put(l_sString)
+  endIf
+
+  //关闭文件
+  $fileClose(nFileID)
+
+  //****************************************************************************
+  //添加文本
+  gotoxy(0,0)
+  put("添加文本HelloVal3.txt")
+  nFileID=$fileOpen("Disk://txt/HelloVal3.txt","a")
+  if nFileID<0 or nFileID>9
+    gotoxy(0,1)
+    put("添加打开文件出错！")
+    return
+  endIf
+
+  //书写文本
+  call WriteLine(nFileID,"Hello Val3!",l_bBool)
+  if !l_bBool
+    gotoxy(0,2)
+    put("添加写入文件出错！")
+    return
+  endIf
+
+  //关闭文件
+  $fileClose(nFileID)
+
+
+  //****************************************************************************
+  // 删除文本
+  gotoxy(0,6)
+  if $delete("Disk://txt/HelloVal3.txt")
+    put("删除文本成功!")
+    return
+  else
+    put("删除文本失败!")
+  endIf
+
+end]]></Code>
+  </Program>
+</Programs>

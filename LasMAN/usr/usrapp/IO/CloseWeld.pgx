@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="CloseWeld" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nWeldTime" type="num" xsi:type="element" />
+    </Parameters>
+    <Code><![CDATA[begin
+  //收弧关闭
+  
+  
+  
+  //  x_nWeldTime=max(0,min(0.999,x_nWeldTime))
+  //  
+  //  //动作
+  //  if !x_bAction
+  //   // $waitEndMove(x_nWeldTime)
+  //    
+  ////    dDio["UsO_bNull5"]=true
+  ////    call Digtal2AnalogS(0)
+  //    
+  //  endIf
+  
+  //2015.09.08
+  //为收弧修改时间
+  // waitEndMove()
+  
+  if dDio["UsO_bNull5"]==false and dDio["UsO_bNull4"]==true
+    
+    dDio["UsO_bNull5"]=true
+    // delay(0.1)
+    //用户自定义IO强制设为0
+    call Digtal2AnalogS(0)
+    delay(0.05)
+  endIf
+  
+  //用户自定义IO强制设为0
+  dDio["UsO_bNull5"]=false
+  //  delay(0.1)
+  call Digtal2AnalogS(0)
+  //delay(0.)
+  
+  
+end
+
+  ]]></Code>
+  </Program>
+</Programs>

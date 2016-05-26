@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://www.staubli.com/robotics/VAL3/Project/3">
+  <Parameters version="s7.7" stackSize="5000" millimeterUnit="true" />
+  <Programs>
+    <Program file="Action.pgx" />
+    <Program file="ActionLCF.pgx" />
+    <Program file="Alarm.pgx" />
+    <Program file="AtHome.pgx" />
+    <Program file="AtHomePulse.pgx" />
+    <Program file="Axis7Action.pgx" />
+    <Program file="Axis7onPosition.pgx" />
+    <Program file="Axis7OnReady.pgx" />
+    <Program file="Axis7Status.pgx" />
+    <Program file="Axis8Action.pgx" />
+    <Program file="Axis8onPosition.pgx" />
+    <Program file="Axis8OnReady.pgx" />
+    <Program file="Axis8Status.pgx" />
+    <Program file="AxisDoor.pgx" />
+    <Program file="AxisIsNeg.pgx" />
+    <Program file="AxisJogSpeed.pgx" />
+    <Program file="AxisTest.pgx" />
+    <Program file="CanProduct.pgx" />
+    <Program file="ChoosehansPro.pgx" />
+    <Program file="ChooseMultPro.pgx" />
+    <Program file="CloseWeld.pgx" />
+    <Program file="Digtal2Analog.pgx" />
+    <Program file="Digtal2AnalogS.pgx" />
+    <Program file="ExtraContrAxis.pgx" />
+    <Program file="GasChoose.pgx" />
+    <Program file="GetAxis7Pos.pgx" />
+    <Program file="GetAxis8Pos.pgx" />
+    <Program file="GetAxisStatus.pgx" />
+    <Program file="GetKeyIO.pgx" />
+    <Program file="GetPreset.pgx" />
+    <Program file="Init.pgx" />
+    <Program file="IOName.pgx" />
+    <Program file="IOvalue.pgx" />
+    <Program file="IsDigtal.pgx" />
+    <Program file="IsInput.pgx" />
+    <Program file="KeyDigtalIO.pgx" />
+    <Program file="Light.pgx" />
+    <Program file="MatchSpdPreset.pgx" />
+    <Program file="PerforatiAction.pgx" />
+    <Program file="Preset.pgx" />
+    <Program file="PresetLaser.pgx" />
+    <Program file="ProductPoll.pgx" />
+    <Program file="ProductReady.pgx" />
+    <Program file="ReadMe.pgx" />
+    <Program file="SafteyIO.pgx" />
+    <Program file="SendSpeed.pgx" />
+    <Program file="start.pgx" />
+    <Program file="stop.pgx" />
+    <Program file="TrajBypass.pgx" />
+    <Program file="WaitProIOEnd.pgx" />
+    <Program file="WeldAction.pgx" />
+    <Program file="WeldProgChoose.pgx" />
+    <Program file="WorkPlaceFinish.pgx" />
+  </Programs>
+  <Database>
+    <Data file="IO.dtx" />
+  </Database>
+  <Libraries />
+</Project>

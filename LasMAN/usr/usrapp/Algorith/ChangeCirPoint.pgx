@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="ChangeCirPoint" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_trCenter" type="trsf" xsi:type="element" />
+      <Parameter name="x_nDia" type="num" xsi:type="element" />
+      <Parameter name="x_trSource" type="trsf" xsi:type="element" use="reference" />
+      <Parameter name="x_trSupport" type="trsf" xsi:type="element" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_fFrame" type="frame" xsi:type="array" size="1" />
+      <Local name="l_pPoint" type="point" xsi:type="array" size="3" />
+    </Locals>
+    <Code><![CDATA[begin
+  //根据边长和圆心点来修改相应的点。
+  
+  x_bRes=false
+  
+  if x_nDia<=0
+    return
+  endIf
+  
+  l_pPoint[0].trsf=x_trCenter
+  l_pPoint[1].trsf=x_trSource
+  l_pPoint[2].trsf=x_trSupport
+  
+  link(l_pPoint[0],world)
+  link(l_pPoint[1],world)
+  link(l_pPoint[2],world)
+  link(l_fFrame,world)
+  
+  if setFrame(l_pPoint[0],l_pPoint[1],l_pPoint[2],l_fFrame)!=0
+    return
+  endIf
+  
+  l_pPoint[1].trsf=position(l_pPoint[1],l_fFrame)
+  l_pPoint[1].trsf.x=x_nDia/2
+  link(l_pPoint[1],l_fFrame)
+  x_trSource=position(l_pPoint[1],world)
+  x_bRes=true
+  
+end]]></Code>
+  </Program>
+</Programs>

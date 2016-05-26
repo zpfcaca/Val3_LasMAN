@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="IOvalue" access="private" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nIOid" type="num" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_nIoValue" type="num" use="value" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_IsInput" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bFollowOn" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bGasOn" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bLaserOn" type="bool" xsi:type="array" size="1" />
+      <Local name="l_sName" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //2014.05.23
+  //通过对输入信号进行处理
+  //
+
+
+
+  //0 表示无
+
+  //165表示 延时
+
+  x_nIoValue=max(x_nIoValue,0)
+
+
+  //无动作
+  if x_nIOid<=0 or x_nIOid>168
+    return
+  endIf
+
+  //延时
+  if x_nIOid==165
+    waitEndMove()
+    delay(max(0,x_nIoValue))
+    return
+  endIf
+
+
+  //焊接收弧时间
+  if x_nIOid==166
+    //    delay(max(0,x_nIoValue))
+    // $waitEndMove(max(0,min(0.999,x_nIoValue))*-1)
+    //$waitEndMove(-2)
+    return
+  endIf
+
+
+  //焊接收弧长度
+  if x_nIOid==167
+    //    delay(max(0,x_nIoValue))
+    // $waitEndMove(max(0,min(0.999,x_nIoValue))*-1)
+    //$waitEndMove(-2)
+    return
+  endIf
+
+
+
+  x_nIoValue=round(x_nIoValue)
+  call IsInput(x_nIOid,l_IsInput)
+  call IOName(x_nIOid,l_sName)
+  if l_IsInput
+    //*********************************************************
+    //2014.05.23
+    //对于输入信号进行判断
+    while !isEmpty()
+      if find(l_sName,"_b")>=0
+        if dDio[l_sName]==(x_nIoValue>=1)
+          return
+        endIf
+
+        //  wait(dDio[l_sName]==(x_nIoValue>=1) or !isEmpty())
+      else
+        if aioGet(aAio[l_sName])==x_nIoValue
+          return
+        endIf
+      endIf
+      delay(0)
+    endWhile
+
+    call GetKeyIO(l_bGasOn,l_bFollowOn,l_bLaserOn)
+
+
+    //如果有等待信号，那么激光则关
+    if !bWaitActionOff
+      call KeyDigtalIO(l_bGasOn,l_bFollowOn,false,0,0)
+    endIf
+    if find(l_sName,"_b")>=0
+      wait(dDio[l_sName]==(x_nIoValue>=1))
+    else
+      wait(aioGet(aAio[l_sName])==x_nIoValue)
+    endIf
+    call KeyDigtalIO(l_bGasOn,l_bFollowOn,l_bLaserOn,0,0)
+    //**************************
+    //******************************************************************
+  else
+    if find(l_sName,"_b")>=0
+      dDio[l_sName]=(x_nIoValue>=1)
+    else
+      aioSet(aAio[l_sName],x_nIoValue)
+    endIf
+
+  endIf
+
+
+end]]></Code>
+  </Program>
+</Programs>

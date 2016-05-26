@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="ExtraContrAxis" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nPosition" type="num" xsi:type="element" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Code><![CDATA[begin
+
+  //2014.11.25
+  //利用外部PLC来控制异步外部第七轴的运动
+  //客户可以重构此函数
+  //只支持四个位置，1，2，3，4
+  //使用说明请查看 lasman使用手册 PLC控制外部轴
+  //每条路径对应不同的外部轴位置
+  
+
+  x_bRes=false
+
+  //检查参数是否合法
+  if roundDown(x_nPosition)!=x_nPosition or x_nPosition<0 or x_nPosition>4
+    return
+  endIf
+
+
+
+  //等待手臂到位信号
+  wait(dDio["UsIn_bNull1"]==true)
+
+
+  //让机械手臂停止
+  if x_nPosition!=0
+    waitEndMove()
+  else
+    x_bRes=true
+    return
+  endIf
+
+  switch x_nPosition
+
+    //转盘第一位置
+    case 1
+      dDio["UsO_bNull3"]=true
+      delay(0.5)
+      dDio["UsO_bNull3"]=false
+    break
+
+
+    //转盘第二位置
+    case 2
+      dDio["UsO_bNull4"]=true
+      delay(0.5)
+      dDio["UsO_bNull4"]=false
+
+    break
+
+    //转盘第二位置
+    case 3
+      dDio["UsO_bNull5"]=true
+      delay(0.5)
+      dDio["UsO_bNull5"]=false
+    break
+
+    //转盘第三位置
+    case 4
+      dDio["UsO_bNull6"]=true
+      delay(0.5)
+      dDio["UsO_bNull6"]=false
+    break
+
+
+
+  endSwitch
+
+
+  
+  if x_nPosition!=0
+    delay(0.5)
+    //位置确认信号
+    dDio["UsO_bNull1"]=true
+    delay(0.5)
+    dDio["UsO_bNull1"]=false
+    delay(0.5)
+    //位置启动
+    dDio["UsO_bNull7"]=true
+    delay(0.5)
+    dDio["UsO_bNull7"]=false
+    delay(0.5)
+  endIf
+  
+
+  //等待到位信号
+  wait(dDio["UsIn_bNull1"]==true)
+
+  x_bRes=true
+end]]></Code>
+  </Program>
+</Programs>

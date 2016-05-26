@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="chkPosStatus" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_bIsSame" type="bool" xsi:type="element" use="reference" />
+      <Parameter name="x_nAxisNum" type="num" xsi:type="element" />
+      <Parameter name="x_nAxisPos" type="num" xsi:type="element" />
+    </Parameters>
+    <Code><![CDATA[begin
+  //检查外部轴是否在指定位置上
+  x_bIsSame=abs(aioGet(aiPosFbk[x_nAxisNum])-x_nAxisPos*nGearratio[x_nAxisNum]*nResolution[x_nAxisNum]/nScaleFact[x_nAxisNum])<=5
+end]]></Code>
+  </Program>
+</Programs>

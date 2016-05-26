@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="TeachSimu" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nStart" type="num" xsi:type="element" />
+      <Parameter name="x_nEnd" type="num" xsi:type="element" />
+    </Parameters>
+    <Code><![CDATA[begin
+  //示教或者调图时模拟
+  //不需要进行读取文件
+  
+  
+  
+  
+  call KillTask()
+  setMoveId(0)
+  nStartTraj=nEndTraj
+  //DataBase:bSimuIO=false
+  
+  if TxtFile:bWeldEnable
+    taskCreateSync "Preset",0.008,bSync,Preset()
+    // taskCreateSync "WeldEnd",0.008,bSync,WeldEnd()
+    
+  else
+    taskCreate "Preset",100,Preset()
+  endIf
+  
+  if x_nEnd<=0 or x_nStart<=0
+    taskCreate "Move",100,Move()
+  else
+     taskCreate "Move",100,PartMove(x_nStart,x_nEnd)
+  endIf
+  wait(DataBase:bMoveTask==false)
+  //焊接的回退
+  if (DataBase:nInterfaceType==13 or DataBase:nInterfaceType==6) and TxtFile:bWeldEnable
+    DataBase:nInterfaceType=9
+  endIf
+  
+end]]></Code>
+  </Program>
+</Programs>

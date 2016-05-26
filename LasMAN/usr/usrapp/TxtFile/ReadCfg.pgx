@@ -1,0 +1,279 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="ReadCfg" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_bRes" type="bool" use="reference" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_bBool" type="bool" xsi:type="array" size="3" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="3" />
+      <Local name="l_sBuff" type="string" xsi:type="array" size="1" />
+      <Local name="l_sFileName" type="string" xsi:type="array" size="1" />
+      <Local name="l_sString" type="string" xsi:type="array" size="1" />
+      <Local name="l_trBuff" type="trsf" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+  //参数初始化
+  x_bRes=false
+  l_sFileName="Disk://Txt/Configure.txt"
+
+  //判断文件是否存在
+  if !$fileExists(l_sFileName)
+    return
+  endIf
+
+  //关闭所有文件
+  call FileDir:CloseAllFile()
+
+  //文件是否可以打开
+  nFileID=$fileOpen(l_sFileName,"r")
+  if nFileID<0 or nFileID>9
+    return
+  endIf
+
+  //读取每行并解析
+  while $fileGet(nFileID,l_sBuff,1)==1
+
+    if find(l_sBuff,"AXIS7HOME=")==0
+      call FileDir:SplitTrsf(l_sBuff,"AXIS7HOME=",trAxisData,x_bRes)
+      if !x_bRes
+        return
+      endIf
+      trAxisData.rx=max(1,trAxisData.rx)
+      trAxisData.z=round(sel(trAxisData.z<=1,1,trAxisData.z))
+      trAxisData.y=sel(trAxisData.y<=0,0.001,trAxisData.y)
+    endIf
+
+
+
+    if find(l_sBuff,"EXTAXIS=")==0
+      call FileDir:SplitTrsf(l_sBuff,"EXTAXIS=",trAxisData,x_bRes)
+      if !x_bRes
+        return
+      endIf
+      trAxisData.rx=max(1,trAxisData.rx)
+      trAxisData.z=round(sel(trAxisData.z<=1,1,trAxisData.z))
+      trAxisData.y=sel(trAxisData.y<=0,0.001,trAxisData.y)
+    endIf
+
+
+    if find(l_sBuff,"EXT8AXIS=")==0
+      call FileDir:SplitTrsf(l_sBuff,"EXT8AXIS=",trAxis8Data,x_bRes)
+      if !x_bRes
+        return
+      endIf
+      trAxis8Data.rx=max(1,trAxis8Data.rx)
+      trAxis8Data.z=round(sel(trAxis8Data.z<=1,1,trAxis8Data.z))
+      trAxis8Data.y=sel(trAxis8Data.y<=0,0.001,trAxis8Data.y)
+    endIf
+
+
+    //同步七轴
+    if find(l_sBuff,"7AXISSYNC=")==0
+      call FileDir:SplitTrsf(l_sBuff,"7AXISSYNC=",trSync7Axis,x_bRes)
+      if !x_bRes
+        return
+      endIf
+    endIf
+
+    //同步八轴
+    if find(l_sBuff,"8AXISSYNC=")==0
+      call FileDir:SplitTrsf(l_sBuff,"8AXISSYNC=",trSync8Axis,x_bRes)
+      if !x_bRes
+        return
+      endIf
+
+    endIf
+
+
+
+
+    //********************************
+    //utf-8 文件最开始有个开始符
+    //
+    if find(l_sBuff,"HOME=")>=0 and find(l_sBuff,"AXIS7HOME=")<0
+      l_sString=left(l_sBuff,find(l_sBuff,"=")+1)
+      //      if find(l_sBuff,"HOME=")==0
+      call FileDir:SplitJoint(l_sBuff,l_sString,jHome,x_bRes)
+      //      else
+      //         call FileDir:SplitJoint(l_sBuff," HOME=",jHome,x_bRes)
+      //      endIf
+      if !x_bRes
+        logMsg("读取configure的home出错")
+        return
+      else
+        l_bBool[1]=true
+      endIf
+    endIf
+
+    if find(l_sBuff,"TOOL=")>=0
+      l_sString=left(l_sBuff,find(l_sBuff,"=")+1)
+      call FileDir:SplitTrsf(l_sBuff,l_sString,tCfg.trsf,x_bRes)
+      if !x_bRes
+        logMsg("读取configure的tool出错")
+        return
+      else
+        l_bBool[0]=true
+      endIf
+
+    endIf
+
+    if find(l_sBuff,"CORNERDATA=")==0
+      call FileDir:SplitTrsf(l_sBuff,"CORNERDATA=",trCorner,x_bRes)
+      if !x_bRes
+        return
+      endIf
+
+    endIf
+
+    //    if find(l_sBuff,"DOWNLEADDATA=")>=0
+    //      call FileDir:SplitTrsf(l_sBuff,"DOWNLEADDATA=",trDownleadData,x_bRes)
+    //      if !x_bRes
+    //        return
+    //      endIf
+    //
+    //    endIf
+
+
+
+    if find(l_sBuff,"IODELAY=")>=0
+      call FileDir:SplitTrsf(l_sBuff,"IODELAY=",trIODelay,x_bRes)
+      if !x_bRes
+        return
+      endIf
+
+    endIf
+
+
+
+
+
+    if find(l_sBuff,"PRESETDATA=")>=0
+      call FileDir:SplitTrsf(l_sBuff,"PRESETDATA=",trPresetData,x_bRes)
+      if !x_bRes
+        return
+      endIf
+
+    endIf
+
+    if find(l_sBuff,"BOXCAR=")>=0
+      call FileDir:SplitTrsf(l_sBuff,"BOXCAR=",trBoxcar,x_bRes)
+      if !x_bRes
+        return
+      endIf
+    endIf
+
+
+
+
+
+
+    if find(l_sBuff,"STEPLENGTH=")>=0
+      toNum(right(l_sBuff,len(l_sBuff)-len("STEPLENGTH=")),nStepLength,x_bRes)
+      if !x_bRes
+        return
+      endIf
+    endIf
+
+    if find(l_sBuff,"HOMESPEED=")>=0
+      toNum(right(l_sBuff,len(l_sBuff)-len("HOMESPEED=")),nHomeSpeed,x_bRes)
+      if !x_bRes
+        return
+      endIf
+    endIf
+
+
+    //读取异步第七轴使能
+    if find(l_sBuff,"7AXISENABLE=")>=0
+      b7Axis=find(l_sBuff,"7AXISENABLE=TRUE")>=0
+
+    endIf
+
+    //读取异步第八轴使能
+    if find(l_sBuff,"8AXISENABLE=")>=0
+      b8Axis=find(l_sBuff,"8AXISENABLE=TRUE")>=0
+
+    endIf
+
+
+    //路径是否由外部PLC来进行控制
+    if find(l_sBuff,"TRAJFILTERENABLE=")>=0
+      bTrajFilter=find(l_sBuff,"TRAJFILTERENABLE=TRUE")>=0
+
+    endIf
+
+    //拐角速度自适应
+    if find(l_sBuff,"AUTOADJSUTSPEEDENABLE=")>=0
+      bAdjustSpEnable=find(l_sBuff,"AUTOADJSUTSPEEDENABLE=TRUE")>=0
+
+    endIf
+
+
+    //是否是焊接
+    if find(l_sBuff,"WELDENABLE=")>=0
+      bWeldEnable=find(l_sBuff,"WELDENABLE=TRUE")>=0
+
+    endIf
+
+
+
+    //回退
+    if find(l_sBuff,"MOVEBACKENABLE=")>=0
+      bMoveBack=find(l_sBuff,"MOVEBACKENABLE=TRUE")>=0
+
+    endIf
+
+
+    //不拆工具示教
+    if find(l_sBuff,"TEACHTOOLCALENABLE=")>=0
+      bTeachToolMode=find(l_sBuff,"TEACHTOOLCALENABLE=TRUE")>=0
+
+    endIf
+    //    if find(l_sBuff,"TEACHTOOLCAlENABLE=")>=0
+    //      bTeachToolMode=find(l_sBuff,"TEACHTOOLCAlENABLE=TRUE")>=0
+    //      
+    //    endIf
+
+    //大文件模式
+    //回退
+    if find(l_sBuff,"MOREPRODUCT1WORKPLACE=")>=0
+      bMoreProd1Wp=find(l_sBuff,"MOREPRODUCT1WORKPLACE=TRUE")>=0
+    endIf
+
+
+
+
+    //*******************************************************
+    //*******************************************************
+
+    //    if find(l_sBuff,"STEPMOVEENABLE=")>=0
+    //      bStepMove=find(l_sBuff,"STEPMOVEENABLE=TRUE")>=0
+    //      
+    //    endIf
+    //    
+    //    
+    if find(l_sBuff,"BIGFILEMODE=")>=0
+      bMoreProd1Wp=find(l_sBuff,"BIGFILEMODE=TRUE")>=0
+
+    endIf
+    //    
+    //***********************************************
+
+
+
+
+
+
+
+  endWhile
+  //关闭所有文件
+  call FileDir:CloseAllFile()
+  bTrajFilter=false
+  x_bRes=(l_bBool[1] and l_bBool[0])
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

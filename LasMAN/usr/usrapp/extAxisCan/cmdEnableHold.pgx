@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="cmdEnableHold" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nAxNum" type="num" use="value" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Code><![CDATA[begin
+  // this program issues an 'Enable Hold'  command to the selected drive.
+  // This bit must be set to enable drive power
+  //发送“enable hold”指令到所选控制器
+  //用于设置驱动器电源开启
+  //  doEnableHold[x_nAxNum]=true
+end]]></Code>
+  </Program>
+</Programs>

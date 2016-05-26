@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="OnAction">
+    <Locals>
+      <Local name="l_nX" type="num" xsi:type="array" size="1" />
+      <Local name="l_nY" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //示教动作
+  //示教动作执行
+  
+  wait(isPowered())
+  for l_nX=0 to 11
+    for l_nY=0 to 1
+     Motion:nMoveidAction[l_nX,l_nY]=TxtFile:nAction[nTeachAction,l_nX,l_nY]
+      
+    endFor
+  endFor
+  
+  
+  call IO:Action(Motion:nMoveidAction,true,-1)
+  call IO:Action(Motion:nMoveidAction,false,-1)
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

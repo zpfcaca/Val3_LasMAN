@@ -1,0 +1,328 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="IsAdjustTraj" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_sFileName" type="string" xsi:type="element" />
+      <Parameter name="x_sProductName" type="string" xsi:type="element" />
+      <Parameter name="x_nFrom" type="num" xsi:type="element" />
+      <Parameter name="x_nTo" type="num" xsi:type="element" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_sFileName" type="string" xsi:type="array" size="1" />
+      <Local name="l_sBuff" type="string" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="3" />
+      <Local name="l_trTrsf" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_nTrajIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_nCount" type="num" xsi:type="array" size="1" />
+      <Local name="l_sCount" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+  //读取生产文件
+  //生产文件格式按照LasMAN3.6格式进行
+
+
+  //参数初始化
+  x_bRes=false
+  l_sFileName=x_sFileName
+  x_nFrom=max(1,x_nFrom)
+  if x_nTo<x_nFrom
+    return
+  endIf
+  x_nTo=min(x_nTo,nTotalTraj)
+
+  //局部变量,路径个数
+  l_nTrajIndex=0
+  //判断文件是否存在
+  if !$fileExists(l_sFileName)
+    return
+  endIf
+
+  //关闭所有文件
+  call FileDir:CloseAllFile()
+
+  //文件是否可以打开
+  nFileID=$fileOpen(l_sFileName,"r")
+  if nFileID<0 or nFileID>9
+    return
+  endIf
+
+
+
+  //读取每行并解析
+  if $fileGet(nFileID,l_sBuff,1)!=1 or find(l_sBuff,"PRODUCT="+x_sProductName)<0
+    return
+  endIf
+
+  //定位到开始循环
+  while l_nTrajIndex<x_nFrom
+    if $fileGet(nFileID,l_sBuff,1)==1
+      if find(l_sBuff,"BEGIN=")>=0
+        l_nTrajIndex=l_nTrajIndex+1
+      endIf
+    else
+      return
+    endIf
+  endWhile
+
+
+
+  while $fileGet(nFileID,l_sBuff,1)==1
+    if find(l_sBuff,"BEGIN=")>=0
+      l_nTrajIndex=l_nTrajIndex+1
+    endIf
+    //查找到有关是否过滤
+    while find(l_sBuff,"BYPASS=FALSE")<0
+      if $fileGet(nFileID,l_sBuff,1)==1
+        if find(l_sBuff,"BEGIN=")>=0
+          l_nTrajIndex=l_nTrajIndex+1
+        endIf
+      else
+        return
+      endIf
+    endWhile
+    //判断是否到达路径条数
+    if l_nTrajIndex>x_nTo
+      x_bRes=true
+      bStartRead=false
+      return
+    endIf
+
+    //等待读取信号
+    wait(bStartRead)
+
+    //当前在读那个路径
+    nReadTrajIndex=l_nTrajIndex
+    nReadCutCount=0
+    //读取类型
+    if $fileGet(nFileID,l_sBuff,1)==1
+      toNum(right(l_sBuff,len(l_sBuff)-len("CUTTYPE=")),nSingleType,x_bRes)
+      if !x_bRes
+        return
+      endIf
+    endIf
+
+
+    //Array
+    if $fileGet(nFileID,l_sBuff,1)==1
+      call FileDir:SplitTrsf(l_sBuff,"ARRAY=",trArray,x_bRes)
+      if !x_bRes
+        return
+      endIf
+    endIf
+    //对Array进行赋值
+    fArray.trsf.x=fArray.trsf.y=fArray.trsf.z=fArray.trsf.rx=fArray.trsf.ry=fArray.trsf.rz=0
+
+
+    //PointCount
+    if $fileGet(nFileID,l_sBuff,1)==1
+      call FileDir:SplitTrsf(l_sBuff,"POINTCOUNT=",trPointCount,x_bRes)
+      if !x_bRes
+        return
+      else
+        
+        //趋近点
+        //        x_bRes=trPointCount.y<500
+        //        return
+        //趋近点
+        
+        resize(bAppro,1,max(trPointCount.x,1))
+        resize(jAppro,1,max(trPointCount.x,1))
+        resize(pAppro,1,max(trPointCount.x,1))
+        resize(trAppro,1,max(trPointCount.x,1))
+        resize(trApproAxis,1,max(trPointCount.x,1))
+        
+        //切割点
+        
+        resize(pCut,1,min(max(trPointCount.y,1),500))
+        resize(pMoveC,1,min(max(trPointCount.y,1),500))
+        resize(bMoveC,1,min(max(trPointCount.y,1),500))
+        resize(trCut,1,min(max(trPointCount.y,1),500))
+        resize(trCutAxis,1,min(max(trPointCount.y,1),500))
+        
+        //离开点
+        resize(pLeave,1,max(trPointCount.z,1))
+        resize(jLeave,1,max(trPointCount.z,1))
+        resize(bLeave,1,max(trPointCount.z,1))
+        resize(trLeave,1,max(trPointCount.z,1))
+        resize(trLeaveAxis,1,max(trPointCount.z,1))
+        
+        
+      endIf
+    endIf
+        
+
+
+    //frame
+    if $fileGet(nFileID,l_sBuff,1)==1
+      call FileDir:SplitTrsf(l_sBuff,"FRAME=",fTraj.trsf,x_bRes)
+      if !x_bRes
+        return
+      endIf
+    endIf
+
+
+    //OFFSET
+    if $fileGet(nFileID,l_sBuff,1)==1
+      call FileDir:SplitTrsf(l_sBuff,"OFFSET=",fToffset.trsf,x_bRes)
+      if !x_bRes
+        return
+      endIf
+    endIf
+
+
+    //Downlead
+    if $fileGet(nFileID,l_sBuff,1)==1
+      call FileDir:SplitTrsf(l_sBuff,"DOWNLEAD=",trDownLead,x_bRes)
+      if !x_bRes
+        return
+      endIf
+    endIf
+
+    //WorkPlace
+    if $fileGet(nFileID,l_sBuff,1)==1
+      call FileDir:SplitTrsf(l_sBuff,"WORKPLACE=",trWorkplace,x_bRes)
+      if !x_bRes
+        return
+      endIf
+    endIf
+
+    //点信息
+
+    //×××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××
+    //趋近点
+    l_nNum[0]=0
+    while $fileGet(nFileID,l_sBuff,1)==1 and find(l_sBuff,"DELAYON")<0 and (find(l_sBuff,"MOVEJ=")>=0 or find(l_sBuff,"MOVEL=")>=0)
+      bAppro[l_nNum[0]]=find(l_sBuff,"MOVEL")>=0
+       call GetAsyncAxis(nSingleType,l_sBuff,trApproAxis[l_nNum[0]])
+      if bAppro[l_nNum[0]]
+        call FileDir:SplitMoveL(l_sBuff,pAppro[l_nNum[0]].trsf,trAppro[l_nNum[0]],false,x_bRes)
+        if !x_bRes
+          return
+        endIf
+      else
+        call FileDir:SplitMoveJ(l_sBuff,jAppro[l_nNum[0]],trAppro[l_nNum[0]],false,x_bRes)
+        if !x_bRes
+          return
+        endIf
+
+      endIf
+      l_nNum[0]=l_nNum[0]+1
+    endWhile
+
+
+    //*****************************************************************8
+    if find(l_sBuff,"DELAYON=")<0
+      x_bRes=false
+      return
+    endIf
+    toNum(right(l_sBuff,len(l_sBuff)-len("DELAYON=")),nTrajDelay[0],x_bRes)
+    if !x_bRes
+      return
+    endIf
+
+    //*****************************************************************
+    //切割点
+    l_nNum[0]=0
+    l_nNum[1]=1
+    while $fileGet(nFileID,l_sBuff,1)==1 and find(l_sBuff,"DELAYOFF=")<0 and (find(l_sBuff,"MOVEC=")>=0 or find(l_sBuff,"MOVEL=")>=0)
+  
+      if l_nNum[0]>=500
+        l_nNum[0]=0
+        $fileClose(l_nNum[2])
+        l_nNum[1]=l_nNum[1]+1
+      endIf
+      call GetAsyncAxis(nSingleType,l_sBuff,trCutAxis[l_nNum[0]])
+      if l_nNum[0]==0 and trPointCount.y>500
+        l_sFileName="Disk://Txt/"+toString("",l_nNum[1])+".txt"
+        l_nNum[2]=$fileOpen(l_sFileName,"w")
+        if l_nNum[2]<0
+          x_bRes=false
+          return
+        endIf
+        l_nCount=sel(trPointCount.y<(l_nNum[1]*500),trPointCount.y-(l_nNum[1]-1)*500,500)
+        l_sCount=toString("",l_nCount)
+        $fileSet(l_nNum[2],l_sCount,1)
+      endIf
+
+      if trPointCount.y>500
+        $fileSet(l_nNum[2],l_sBuff,1)
+      else
+        bMoveC[l_nNum[0]]=find(l_sBuff,"MOVEC")>=0
+        if bMoveC[l_nNum[0]]
+          call FileDir:SplitMoveC(l_sBuff,pMoveC[l_nNum[0]].trsf,pCut[l_nNum[0]].trsf,trCut[l_nNum[0]],x_bRes)
+          if !x_bRes
+            return
+          endIf
+        else
+          call FileDir:SplitMoveL(l_sBuff,pCut[l_nNum[0]].trsf,trCut[l_nNum[0]],true,x_bRes)
+          if !x_bRes
+            return
+          endIf
+        endIf
+      endIf
+
+
+      //2015.03.10
+      //可自定义工艺
+      if trCut[l_nNum[0]].x==0 and nSingleType!=20 and  nSingleType!=9
+        call FileDir:SplitCutPreset(l_sBuff,trCutAxis[l_nNum],x_bRes)
+        if !x_bRes
+          return
+        endIf
+      endIf
+      //
+      
+
+
+
+
+
+      l_nNum[0]=l_nNum[0]+1
+    endWhile
+
+
+    //************************************
+    if find(l_sBuff,"DELAYOFF=")<0
+      x_bRes=false
+      return
+    endIf
+
+    toNum(right(l_sBuff,len(l_sBuff)-len("DELAYOFF=")),nTrajDelay[1],x_bRes)
+    if !x_bRes
+      return
+    endIf
+
+    //*******************************************
+    //离开点
+    l_nNum[0]=0
+    while $fileGet(nFileID,l_sBuff,1)==1 and find(l_sBuff,"END=")<0 and (find(l_sBuff,"MOVEJ=")>=0 or find(l_sBuff,"MOVEL=")>=0)
+      call GetAsyncAxis(nSingleType,l_sBuff,trLeaveAxis[l_nNum[0]])
+      bLeave[l_nNum[0]]=find(l_sBuff,"MOVEL")>=0
+      if bLeave[l_nNum[0]]
+        call FileDir:SplitMoveL(l_sBuff,pLeave[l_nNum[0]].trsf,trLeave[l_nNum[0]],false,x_bRes)
+        if !x_bRes
+          return
+        endIf
+      else
+        call FileDir:SplitMoveJ(l_sBuff,jLeave[l_nNum[0]],trLeave[l_nNum[0]],false,x_bRes)
+        if !x_bRes
+          return
+        endIf
+
+      endIf
+      l_nNum[0]=l_nNum[0]+1
+    endWhile
+
+
+    call RegulaPoint(true)
+    //×××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××
+    bStartRead=false
+  endWhile
+
+  //关闭所有文件
+  call FileDir:CloseAllFile()
+end]]></Code>
+  </Program>
+</Programs>

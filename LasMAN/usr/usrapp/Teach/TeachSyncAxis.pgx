@@ -1,0 +1,265 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="TeachSyncAxis" access="public">
+    <Locals>
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_bFirst" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nBuff" type="num" xsi:type="array" size="1" />
+      <Local name="l_sBottom" type="string" xsi:type="array" size="1" />
+      <Local name="l_trExtAxis" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_sS" type="string" xsi:type="array" size="2" />
+      <Local name="l_p" type="point" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  //示教同步七八轴
+  resetMotion()
+  call TxtFile:ReadCfg(l_bRes)
+  IO:bWeldEnable=TxtFile:bWeldEnable
+  IO:bExt7AxisEnable=TxtFile:b7Axis
+  IO:bExt8AxisEnable=TxtFile:b8Axis
+  if !l_bRes
+    popUpMsg("读取配置文件不正确")
+    return
+  endIf
+  wait(isKeyPressed(272)==false)
+  
+  //2014.07.28
+  //同步七八轴
+  if TxtFile:bSync7Axis or TxtFile:bSync8Axis
+    if !ExtAxis:libExist("Disk://extAxisCan/extAxisCan.pjx")
+      if ExtAxis:libLoad("Disk://extAxisCan/extAxisCan.pjx")!=0
+        popUpMsg("加载外部轴出错")
+        return
+      endIf
+    endIf
+  endIf
+  
+  
+  cls()
+  
+  resize(sSItem,1,2)
+  l_sS[1]="开"
+  l_sS[0]="关"
+  l_trExtAxis.x=TxtFile:trSync7Axis.y
+  l_trExtAxis.y=TxtFile:trSync8Axis.y
+  
+  
+  //l_trExtAxis.rx=TxtFile:trSync7Axis.x
+  // l_trExtAxis.ry=TxtFile:trSync8Axis.x
+  
+  while  DataBase:nInterfaceType==19 or DataBase:nInterfaceType==18 
+    
+    
+    //判断按键是否一直按着
+    l_nKey=getKey()
+    
+    
+    
+    switch l_nKey
+      
+      
+      case 261
+        l_nIndex=max(0,l_nIndex-1)
+        
+      break
+      
+      //向下
+      case 266
+        l_nIndex=min(6,l_nIndex+1)
+      break
+      
+      
+      //参考
+      case 271
+        if TxtFile:bSync7Axis==false and TxtFile:bSync8Axis==false
+          popUpMsg("同步七八轴未配置")
+        else
+          call UI:Control_YesNO("确定需要设置参考位吗？",l_bRes)
+          if l_bRes
+            //call ExtAxis:Reset()
+            call ExtAxis:homing(ExtAxis:nAxesSum,l_bRes)
+            if l_bRes
+              popUpMsg("设置成功")
+            else
+              popUpMsg("设置失败")
+            endIf
+          endIf
+        endIf
+        
+      break
+      
+      
+      
+      //复位
+      case 272
+        if TxtFile:bSync7Axis==false and TxtFile:bSync8Axis==false
+          popUpMsg("同步七八轴未配置")
+        else
+          call UI:Control_YesNO("确定需要复位吗？",l_bRes)
+          if l_bRes
+            call ExtAxis:Reset()
+          endIf
+        endIf
+        
+      break
+      
+      
+      
+      
+      //记录
+      case 273
+        
+        if TxtFile:bSync7Axis==false and TxtFile:bSync8Axis==false
+          popUpMsg("同步七八轴未配置")
+        else
+          call UI:Control_YesNO("确定需要记录吗？",l_bRes)
+          if l_bRes
+            call ExtAxis:RecordExtAxis(l_trExtAxis,l_trExtAxis,TxtFile:tCfg)
+          endIf
+        endIf
+        
+      break
+      
+      
+      //回零
+      case 274
+        
+        if TxtFile:bSync7Axis==false and TxtFile:bSync8Axis==false
+          popUpMsg("同步七八轴未配置")
+        else
+          call UI:Control_YesNO("同步轴需要回零吗？",l_bRes)
+          if l_bRes
+            call UI:Control_PanelMd("同步轴正在回零")
+            call ExtAxis:SingleMove(1,TxtFile:jHome,l_p,l_p,TxtFile:tCfg,mNomSpeed,l_trExtAxis)
+            cls()
+          endIf
+        endIf
+      break
+      
+      
+      
+      //上传
+      case 276
+        call UI:Control_YesNO("确定要上传吗?",l_bRes)
+        if l_bRes
+          call Kit:UpLoad()
+          //return
+        endIf
+      break
+      
+      
+      
+      
+      //保存
+      case 277
+        
+        call UI:Control_YesNO("确定需要保存吗？",l_bRes)
+        if l_bRes
+          TxtFile:trSync7Axis.y=l_trExtAxis.x
+          TxtFile:trSync8Axis.y=l_trExtAxis.y
+          
+          //   TxtFile:trSync7Axis.x=l_trExtAxis.rx
+          //   TxtFile:trSync8Axis.x=l_trExtAxis.ry
+          
+          call TxtFile:SaveCfg(l_bRes)
+          if l_bRes
+            popUpMsg("保存成功")
+          else
+            popUpMsg("保存失败")
+          endIf
+          
+        endIf
+      break
+      
+      //
+      case 278,255
+        if l_trExtAxis.x!=TxtFile:trSync7Axis.y or  l_trExtAxis.y!=TxtFile:trSync8Axis.y 
+          call UI:Control_YesNO("参数未保存,确定需要退出吗？",l_bRes)
+          if l_bRes
+            cls()
+            return
+          endIf
+        else
+          cls()
+          return
+        endIf
+        
+      break
+      
+      
+      case 270
+        switch l_nIndex
+          //          case 0
+          ////            call UI:Sel_Edit(l_trExtAxis.rx,32,min(10,l_nIndex+1),l_sS)
+          ////          break
+          case 0
+            call UI:Float_Edit(l_trExtAxis.x,32,min(10,l_nIndex+1))
+          break
+          
+          //          case 2
+          //            call UI:Sel_Edit(l_trExtAxis.ry,32,min(10,l_nIndex+1),l_sS)
+          //          break
+          
+          case 1
+            call UI:Float_Edit(l_trExtAxis.y,32,min(10,l_nIndex+1))
+          break
+        endSwitch
+        
+      break
+      
+      
+      
+    endSwitch
+    
+    
+    
+    //当前七轴位置
+    if l_nKey!=-1 or !l_bFirst
+      
+      l_bFirst=true
+      
+      //××××××××××××××××××××××××××××
+      
+      
+      //  sSItem[0]="七轴开启:"+l_sS[l_trExtAxis.rx]
+      sSItem[0]="七轴home:"+toString(".3",l_trExtAxis.x)
+      // sSItem[2]="八轴开启:"+l_sS[l_trExtAxis.ry]
+      sSItem[1]="八轴home:"+toString("",l_trExtAxis.y)
+      
+      l_sBottom="参考,复位,记录,回零,,上传,保存,退出"
+      
+      
+      call UI:Form_PanelList("LasMAN3.6->示教同步轴","同步轴",sSItem,l_nIndex,l_sBottom)
+      
+      
+      
+      
+    endIf
+    
+    
+    delay(0)
+    
+  endWhile
+  
+end
+      
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Code>
+  </Program>
+</Programs>

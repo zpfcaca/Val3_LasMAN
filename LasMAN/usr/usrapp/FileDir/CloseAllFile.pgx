@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="CloseAllFile" access="public">
+    <Code><![CDATA[begin
+
+  call CloseFile(0)
+  call CloseFile(1)
+  call CloseFile(2)
+  call CloseFile(3)
+  call CloseFile(4)
+  call CloseFile(5)
+  call CloseFile(6)
+  call CloseFile(7)
+  call CloseFile(8)
+  call CloseFile(9)
+  delay(0)
+
+end]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://www.staubli.com/robotics/VAL3/Project/3">
+  <Parameters version="s7.7.1" stackSize="5000" millimeterUnit="true" />
+  <Programs>
+    <Program file="CloseAllFile.pgx" />
+    <Program file="CloseFile.pgx" />
+    <Program file="CopyFileContext.pgx" />
+    <Program file="CreatDir.pgx" />
+    <Program file="CreatFile.pgx" />
+    <Program file="Example.pgx" />
+    <Program file="ExampleTest.pgx" />
+    <Program file="GetLine.pgx" />
+    <Program file="GetTrajFlag.pgx" />
+    <Program file="ReadMe.pgx" />
+    <Program file="SplitActionLine.pgx" />
+    <Program file="SplitCutPreset.pgx" />
+    <Program file="SplitJoint.pgx" />
+    <Program file="SplitMoveC.pgx" />
+    <Program file="SplitMoveJ.pgx" />
+    <Program file="SplitMoveL.pgx" />
+    <Program file="SplitNumS.pgx" />
+    <Program file="SplitPresetLine.pgx" />
+    <Program file="SplitString.pgx" />
+    <Program file="SplitTrsf.pgx" />
+    <Program file="start.pgx" />
+    <Program file="stop.pgx" />
+    <Program file="WriteLine.pgx" />
+  </Programs>
+  <Database>
+    <Data file="FileDir.dtx" />
+  </Database>
+  <Libraries />
+</Project>

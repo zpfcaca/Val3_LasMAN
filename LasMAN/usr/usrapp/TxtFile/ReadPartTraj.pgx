@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="ReadPartTraj" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nPartId" type="num" xsi:type="element" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="3" />
+      <Local name="l_nTrajIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_sBuff" type="string" xsi:type="array" size="1" />
+      <Local name="l_sFileName" type="string" xsi:type="array" size="1" />
+      <Local name="l_trTrsf" type="trsf" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+  //读取生产文件
+  //生产文件格式按照LasMAN3.6格式进行
+
+
+  //参数初始化
+  x_bRes=false
+  //  l_sFileName=x_sFileName
+  //  x_nFrom=max(1,x_nFrom)
+  //  if x_nTo<x_nFrom
+  //    return
+  //  endIf
+  //  x_nTo=min(x_nTo,nTotalTraj)
+  //  
+  //局部变量,路径个数
+  //  l_nTrajIndex=0
+  //判断文件是否存在
+  l_sFileName="Disk://Txt/"+toString("",x_nPartId)+".txt"
+
+  if !$fileExists(l_sFileName)
+    return
+  endIf
+
+  //关闭所有文件
+  call FileDir:CloseAllFile()
+
+  //文件是否可以打开
+  nFileID=$fileOpen(l_sFileName,"r")
+  if nFileID<0 or nFileID>9
+    return
+  endIf
+
+  $fileGet(nFileID,l_sBuff,1)
+  toNum(l_sBuff,l_nNum[0],x_bRes)
+  if !x_bRes or l_nNum[0]<1
+    return
+  endIf
+
+  //切割点
+
+
+  nPartTrajCount[x_nPartId]=l_nNum[0]
+  resize(pCut,1,l_nNum[0])
+  resize(pMoveC,1,l_nNum[0])
+  resize(bMoveC,1,l_nNum[0])
+  resize(trCut,1,l_nNum[0])
+
+  //    
+  //    
+  //    //切割点
+  l_nNum[0]=0
+  while $fileGet(nFileID,l_sBuff,1)==1 and find(l_sBuff,"DELAYOFF=")<0 and (find(l_sBuff,"MOVEL=")>=0 or find(l_sBuff,"MOVEC=")>=0)
+    if nPartTrajCount[x_nPartId]<=l_nNum[0]
+      x_bRes=false
+      return
+    endIf
+    bMoveC[l_nNum[0]]=find(l_sBuff,"MOVEC=")>=0
+    if bMoveC[l_nNum[0]]
+      call FileDir:SplitMoveC(l_sBuff,pMoveC[l_nNum[0]].trsf,pCut[l_nNum[0]].trsf,trCut[l_nNum[0]],x_bRes)
+      if !x_bRes
+        return
+      endIf
+    else
+      call FileDir:SplitMoveL(l_sBuff,pCut[l_nNum[0]].trsf,trCut[l_nNum[0]],true,x_bRes)
+      if !x_bRes
+        return
+      endIf
+    endIf
+
+    l_nNum[0]=l_nNum[0]+1
+  endWhile
+  x_bRes=true
+  call FileDir:CloseAllFile()
+end]]></Code>
+  </Program>
+</Programs>

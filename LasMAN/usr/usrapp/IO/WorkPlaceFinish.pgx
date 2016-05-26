@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="WorkPlaceFinish" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nIndex" type="num" xsi:type="element" />
+    </Parameters>
+    <Code><![CDATA[begin
+  //2014.05.28
+  //工位完成信号
+  //x_nIndex 工位1 工位2 工位3 工位4
+  //工位完成信号
+  //客户可以自己修改
+  //在teach库中的product函数中可以看到
+  
+  
+  //  
+  //  if !bWpFinishOut
+  //    return
+  //  endIf
+  //    
+  
+  
+  
+  //2015.04.20
+  //工位完成信号
+  if x_nIndex==0
+    dDio["O1_bFollowDone"]=true
+    call Digtal2Analog()
+    delay(1)
+    dDio["O1_bFollowDone"]=false
+    call Digtal2Analog()
+    return
+  endIf
+  
+  
+  
+  
+  
+  
+  
+  switch x_nIndex
+    case 1
+      dDio["O2_bSta1Stat"]=true
+    break
+    
+    case 2
+      dDio["O2_bSta2Stat"]=true
+    break
+    
+    
+    case 3
+      dDio["O2_bSta3Stat"]=true
+    break
+    
+    case 4
+      dDio["O2_bSta4Stat"]=true
+    break
+    
+  endSwitch
+  
+  //在低配版本中或者用户自定义中8入8出中可以使用
+  
+  switch x_nIndex
+    case 1
+      dDio["UsO_bNull2"]=true
+    break
+    
+    case 2
+      dDio["UsO_bNull3"]=true
+    break
+    
+    
+    case 3
+      dDio["UsO_bNull4"]=true
+    break
+    
+    case 4
+      dDio["UsO_bNull5"]=true
+    break
+    
+  endSwitch
+  
+  call Digtal2Analog()
+  delay(1)
+  
+  dDio["O2_bSta1Stat"]=dDio["O2_bSta2Stat"]=dDio["O2_bSta3Stat"]=dDio["O2_bSta4Stat"]=false
+  dDio["UsO_bNull2"]=dDio["UsO_bNull3"]=dDio["UsO_bNull4"]=dDio["UsO_bNull5"]=false
+  
+  
+  call Digtal2Analog()
+  
+  
+  
+  
+  
+  
+end
+  ]]></Code>
+  </Program>
+</Programs>

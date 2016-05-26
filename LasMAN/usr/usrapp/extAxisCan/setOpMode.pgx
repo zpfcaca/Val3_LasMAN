@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="setOpMode" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nAxisNum" type="num" xsi:type="element" />
+      <Parameter name="x_nOpMode" type="num" xsi:type="element" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nK" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+  //call checkDin(diSwitchedOn[x_nAxisNum],false,x_bError)
+
+  // Interpolated position mode
+  //  aioSet(aoMoop[x_nAxisNum],x_nOpMode)
+  aioSet(aoWorkMode[x_nAxisNum],x_nOpMode)
+  // Reset fault
+//  doFaultReset[x_nAxisNum]=false
+//  delay(0.1)
+//  doFaultReset[x_nAxisNum]=true
+//  delay(0.1)
+//  doFaultReset[x_nAxisNum]=false
+
+  // Copy current axis position into commanded position
+  // Probably not necessary need to be checked.
+  //  call setCmdPos(x_nAxisNum)
+
+  //  // Init watchdog
+  //  doEnableHold[x_nAxisNum]=true
+  //  doWatchDog[x_nAxisNum]=true
+  //  // Starting sequence
+  //  doEnableVoltage[x_nAxisNum]=true
+  //  doQuickStop[x_nAxisNum]=true
+
+  //call checkDin(diReady2SwOn[x_nAxisNum],true,x_bError)
+
+
+end]]></Code>
+  </Program>
+</Programs>

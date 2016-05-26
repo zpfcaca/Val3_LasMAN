@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="chkStatusWord">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nAxisNumber" type="num" xsi:type="element" />
+      <Parameter name="x_nValue" type="num" xsi:type="element" use="reference" />
+    </Parameters>
+    <Code><![CDATA[begin
+  //返回电机状态字的数值
+  //  x_nValue=aioGet(aiStatusWord[x_nAxisNumber])
+  x_nValue=dioGet(diReady2SwOn[x_nAxisNumber])*power(2,0)
+  x_nValue=dioGet(diSwitchedOn[x_nAxisNumber])*power(2,1)+x_nValue
+  x_nValue=dioGet(diOpeEnabled[x_nAxisNumber])*power(2,2)+x_nValue
+  x_nValue=dioGet(diFault[x_nAxisNumber])*power(2,3)+x_nValue
+  x_nValue=dioGet(diVoltEnabled[x_nAxisNumber])*power(2,4)+x_nValue
+  x_nValue=dioGet(diQuickStop[x_nAxisNumber])*power(2,5)+x_nValue
+  x_nValue=dioGet(diSwOnDis[x_nAxisNumber])*power(2,6)+x_nValue
+  x_nValue=dioGet(diWarning[x_nAxisNumber])*power(2,7)+x_nValue
+  x_nValue=dioGet(diRemote[x_nAxisNumber])*power(2,9)+x_nValue
+  x_nValue=dioGet(diTargetReach[x_nAxisNumber])*power(2,10)+x_nValue
+  x_nValue=dioGet(diIntLmtAct[x_nAxisNumber])*power(2,11)+x_nValue
+  x_nValue=dioGet(diHomingReached[x_nAxisNumber])*power(2,12)+x_nValue
+  x_nValue=dioGet(diHomingError[x_nAxisNumber])*power(2,13)+x_nValue
+end]]></Code>
+  </Program>
+</Programs>

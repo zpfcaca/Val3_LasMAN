@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="ProductReady" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nIndex" type="num" use="reference" xsi:type="element" dimensions="1" />
+      <Parameter name="x_bFirst" type="bool" use="value" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_sStr" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+
+
+  //2014.05.30
+  //工位选择信号
+  while true
+    //第一工位
+    for l_nNum=1 to 4
+      if x_bFirst
+        l_nNum=1
+      endIf
+      //测试
+      if l_nNum==1 or l_nNum==2
+        l_sStr="In1_bPrdSta"+toString("",l_nNum)
+      endIf
+
+
+      //第三工位或者第四工位用户可以进行自定义
+      //××××××××××××××××××××××××××××××××××××××××
+      if l_nNum==3
+        l_sStr="In2_bPrdSta3"
+      endIf
+
+      if l_nNum==4
+        l_sStr="In2_bPrdSta4"
+      endIf
+      //×××××××××××××××××××××××××××××××××××××××××
+      //信号
+      if dDio[l_sStr]==true
+        delay(0.1)
+        if watch(dDio[l_sStr]==true,0.1)
+          logMsg("工位"+toString("",l_nNum)+"信号被触发")
+          x_nIndex=l_nNum
+          return
+        endIf
+      endIf
+
+    endFor
+    delay(0)
+  endWhile
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

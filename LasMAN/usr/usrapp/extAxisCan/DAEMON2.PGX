@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="daemon2" access="public">
+    <Locals>
+      <Local name="l_jCurr" type="jointRx" xsi:type="array" size="1" />
+      <Local name="l_i" type="num" xsi:type="array" size="1" />
+      <Local name="l_bError" type="bool" xsi:type="array" size="1" />
+      <Local name="l_sMsg" type="string" xsi:type="array" size="1" />
+      <Local name="l_nError" type="num" xsi:type="array" size="1" />
+      <Local name="l_bDrivesOK" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+  // Verification du bit de vie bus can
+  call chkLifeBit()
+
+  // Gestion watchDog pour variateurs
+  //call updateWatchDog()
+  //
+  // Recupere etat des variateurs
+  l_bDrivesOK=true
+  for l_i=0 to nNUMOFAXES-1
+    bDrvFault[l_i]=(diFault[l_i]==true) or bAnd(aioGet(aiStatusRemote[l_i])/32,255)!=0
+    call chkDrvState(l_i)
+    l_bDrivesOK=l_bDrivesOK and nDrvState[l_i]==cst:nOperatEnabled
+    bDrivesOpEnable=l_bDrivesOK
+  endFor
+
+  if isPowered() and l_bDrivesOK
+    // Get system position
+    $XgetDrvCmdPos(nDrvPos)
+    l_sMsg=""
+    //$XgetJntCmdPos(l_nJntPos)
+    for l_i=0 to nNUMOFAXES-1
+      // Send it to the external axis
+      aioSet(aoPosCmd[l_i],nDrvPos[l_i]*nScaleFact)
+      //l_sMsg="0: "+toString(".3",l_nJntPos[0])+"   1: "+toString(".3",l_nJntPos[1])
+      l_sMsg=l_sMsg+toString("",l_i)+": "+toString(".3",nDrvPos[l_i])+"   "
+    endFor
+    //? l_sMsg
+  else
+    for l_i=0 to nNUMOFAXES-1
+      doEnableOp[l_i]=false
+      doSwitchOn[l_i]=false
+      // Get external axis position
+      nDrvPos[l_i]=aioGet(aiPosFbk[l_i])/nScaleFact
+    endFor
+    // Update it in the system
+    $XsetDrvFbkPos(nDrvPos)
+  endIf
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

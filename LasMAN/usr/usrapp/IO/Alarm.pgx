@@ -1,0 +1,157 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="Alarm" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nDelay" type="num" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_nInterface" type="num" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_bAlarm" type="bool" use="reference" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_bEstop" type="bool" xsi:type="array" size="1" />
+      <Local name="l_sS" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //外设报警信号触发
+
+  //外部綜合报警，七轴报警，八轴报警
+  //碰撞报警，气体报警，随动报警
+
+
+  x_bAlarm=false
+  call IOName(9,l_sS)
+  x_bAlarm=(x_bAlarm or dDio[l_sS]==true)
+  call IOName(25,l_sS)
+  x_bAlarm=(x_bAlarm or dDio[l_sS]==true)
+  call IOName(26,l_sS)
+  x_bAlarm=(x_bAlarm or dDio[l_sS]==true)
+  call IOName(27,l_sS)
+  x_bAlarm=(x_bAlarm or dDio[l_sS]==true)
+  call IOName(28,l_sS)
+  x_bAlarm=(x_bAlarm or dDio[l_sS]==true)
+
+  //外部七轴报警
+  if bExt7AxisEnable
+    call IOName(52,l_sS)
+    x_bAlarm=(x_bAlarm or dDio[l_sS]==true)
+  endIf
+
+  //外部八轴报警
+  if bExt8AxisEnable
+    call IOName(58,l_sS)
+    x_bAlarm=(x_bAlarm or dDio[l_sS]==true)
+  endIf
+
+  delay(0)
+  //急停按钮输入
+  l_bEstop=esStatus()==2
+  dDio["O1_bAlarm"]=l_bEstop
+  x_bAlarm=(l_bEstop or x_bAlarm)
+
+  //报警或者机器人没有上电，则会停止外部轴运动
+  if x_bAlarm or !isPowered()
+    if dDio["O4_b7StopMotor"]==false
+      dDio["O4_b7StopMotor"]=true
+    endIf
+    if dDio["O4_b8StopMotor"]==false
+      dDio["O4_b8StopMotor"]=true
+    endIf
+  endIf
+
+
+  //如果再次确认报警
+  if x_bAlarm
+
+    //如果机器人在上电状态，再次确认
+    if isPowered()
+      delay(min(max(0,x_nDelay),5))
+      //再次确认
+      x_bAlarm=false
+      call IOName(9,l_sS)
+      x_bAlarm=(dDio[l_sS]==true or x_bAlarm)
+      call IOName(25,l_sS)
+      x_bAlarm=(dDio[l_sS]==true or x_bAlarm)
+      call IOName(26,l_sS)
+      x_bAlarm=(dDio[l_sS]==true or x_bAlarm)
+      call IOName(27,l_sS)
+      x_bAlarm=(dDio[l_sS]==true or x_bAlarm)
+      call IOName(28,l_sS)
+      x_bAlarm=(dDio[l_sS]==true or x_bAlarm)
+
+      //外部七轴
+      if bExt7AxisEnable
+        call IOName(52,l_sS)
+        x_bAlarm=(dDio[l_sS]==true or x_bAlarm)
+      endIf
+
+      //外部八轴
+      if bExt8AxisEnable
+        call IOName(58,l_sS)
+        x_bAlarm=(dDio[l_sS]==true or x_bAlarm)
+      endIf
+
+    endIf
+
+    //查看机器人是否报警
+    if x_bAlarm
+      call Light(0)
+      if isPowered()
+        disablePower()
+        //        logMsg("Modbus IO输入报警触发")
+        call IOName(9,l_sS)
+        if dDio[l_sS]==true
+          popUpMsg("In1_bOutAlarm  外部综合报警触发")
+          logMsg("In1_bOutAlarm  外部综合报警触发")
+        endIf
+
+
+        call IOName(25,l_sS)
+        if dDio[l_sS]==true
+          popUpMsg("In2_bAirAlarm  气体报警触发")
+          logMsg("In2_bAirAlarm  气体报警触发")
+        endIf
+
+        call IOName(26,l_sS)
+        if dDio[l_sS]==true
+          popUpMsg("In2_bCollisonAlarm  碰撞报警触发")
+          logMsg("In2_bCollisonAlarm  碰撞报警触发")
+        endIf
+
+        call IOName(27,l_sS)
+        if dDio[l_sS]==true
+          popUpMsg("In2_bLaserAlarm  激光报警触发")
+          logMsg("In2_bLaserAlarm  激光报警触发")
+        endIf
+
+        call IOName(28,l_sS)
+        if dDio[l_sS]==true
+          popUpMsg("In2_bContactAlarm  触碰报警触发")
+          logMsg("In2_bContactAlarm  触碰报警触发")
+        endIf
+
+        call IOName(52,l_sS)
+        if dDio[l_sS]==true
+          popUpMsg("In4_b7MotorError 七轴报警触发")
+          logMsg("In4_b7MotorError 七轴报警触发")
+        endIf
+
+        call IOName(58,l_sS)
+        if dDio[l_sS]==true
+          popUpMsg("In4_b8MotorError  八轴报警触发")
+          logMsg("In4_b8MotorError  八轴报警触发")
+        endIf
+
+      endIf
+      call KeyDigtalIO(false,false,false,0,0)
+      //      call SafteyIO(false)
+      //      call SafteyIO(true)
+    endIf
+
+  else
+    if x_nInterface!=13
+      call Light(1)
+    endIf
+  endIf
+
+end]]></Code>
+  </Program>
+</Programs>

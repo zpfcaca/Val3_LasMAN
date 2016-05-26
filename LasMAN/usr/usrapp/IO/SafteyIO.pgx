@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="SafteyIO" access="public">
+    <Code><![CDATA[begin
+  //对IO做安全化处理
+  //报警和下电一般会安全化处理
+  
+  
+  
+  
+  //用户自定义IO强制设为0
+  //通过变量来设置
+  if  bUserIOReset
+    
+    if dDio["UsO_bNull5"]==true
+      dDio["UsO_bNull5"]=false
+      call Digtal2AnalogS(0)
+      delay(0.05)
+    endIf
+  endIf
+  
+  
+  
+  call KeyDigtalIO(false,false,false,0,0)
+  
+  aioSet(aAio["O1_aLasPwr"],0)
+  aioSet(aAio["O1_aAirPress"],0)
+  aioSet(aAio["O1_aFPWM"],0)
+  aioSet(aAio["O1_aPMW"],0)
+  aioSet(aAio["O2_aFollowSensitive"],0)
+  dDio["O2_bFollowHeigh1"]=dDio["O2_bFollowHeigh2"]=dDio["O2_bFollowHeigh3"]=false
+  
+  
+  
+  //如果是外部轴安全门，下电以后不做动作！
+  //2014.06.09
+  if bUserIOReset
+    //用户自定义IO强制设为0
+    if dDio["UsO_bNull4"]==true
+      dDio["UsO_bNull4"]=false
+      call Digtal2AnalogS(0)
+      delay(0.05)
+    endIf
+    if dDio["UsO_bNull1"]==true or dDio["UsO_bNull2"]==true or dDio["UsO_bNull3"]==true or dDio["UsO_bNull4"]==true or dDio["UsO_bNull5"]==true or dDio["UsO_bNull6"]==true or dDio["UsO_bNull7"]==true or dDio["UsO_bNull8"]==true
+      dDio["UsO_bNull1"]=dDio["UsO_bNull2"]=dDio["UsO_bNull3"]=dDio["UsO_bNull4"]=false
+      dDio["UsO_bNull5"]=dDio["UsO_bNull6"]=dDio["UsO_bNull7"]=dDio["UsO_bNull8"]=false
+      //  dDio["UsO_bNull5"]=dDio["UsO_bNull7"]=dDio["UsO_bNull8"]=false
+      call Digtal2AnalogS(0)
+      delay(0.05)
+      call Digtal2AnalogS(1)
+      
+    endIf
+  endIf
+  
+  
+end
+      ]]></Code>
+  </Program>
+</Programs>

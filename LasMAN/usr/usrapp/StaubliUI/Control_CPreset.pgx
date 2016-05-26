@@ -1,0 +1,243 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="Control_CPreset" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nPreset" type="num" xsi:type="array" use="reference" dimensions="2" />
+      <Parameter name="x_trCut" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_nMax" type="num" xsi:type="element" />
+      <Parameter name="x_nIndex" type="num" xsi:type="element" />
+      <Parameter name="x_trTrsfAxis" type="trsf" xsi:type="array" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_sItem" type="string" xsi:type="array" size="6" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_nData" type="num" xsi:type="array" size="5" />
+      <Local name="l_nIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_nBuff" type="num" xsi:type="array" size="1" />
+      <Local name="l_bFirst" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bEdit" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  //为LasMAN3.6进行定制
+  //修改工艺参数
+  
+  
+  //  //把传入参数临时存储
+  //  l_nIndex=x_trCut[x_nIndex].x
+  //  for l_nNum=0 to 4
+  //    l_nData[l_nNum]=x_nPreset[l_nIndex,l_nNum]
+  //  endFor
+  //  
+  //  //界面初始化
+  //      l_sItem[0]="工艺号  :"+toString("",l_nIndex)
+  //      l_sItem[1]="激光功率  :"+toString("",l_nData[0])
+  //      l_sItem[2]="气体压力  :"+toString("",l_nData[1])
+  //      l_sItem[3]="占空比频率:"+toString("",l_nData[2])
+  //      l_sItem[4]="激光占空比:"+toString("",l_nData[3])
+  //      l_sItem[5]="随动高度  :"+toString("",l_nData[4])
+  //      call Control_List(l_sItem,l_nBuff)
+  
+  
+  //2015.03.10
+  //天虹激光进行修改过
+  
+  
+  
+  
+  l_nIndex=x_trCut[x_nIndex].x
+  call Control_BottomS(",,,,,,退出,应用")
+  call Control_PanelXY(8,0,15,6)
+  call Control_Panel(toString("",x_nIndex)+":工艺值")
+  call Control_List(l_sItem,l_nBuff)
+  //按键响应
+  
+  
+  
+  //
+  if x_trCut[x_nIndex].x==0
+    
+    l_nData[0]=x_trTrsfAxis[x_nIndex].rx
+    l_nData[1]=x_trTrsfAxis[x_nIndex].ry
+    
+  endIf
+  
+  
+  while true
+    l_nKey=getKey()
+    
+    switch l_nKey
+      //上
+      case 261
+        if l_bEdit 
+          l_nData[0]=max(0,l_nData[0]-1)
+        else
+          l_nIndex=max(0,l_nIndex-1)
+        endIf
+        //l_nSelectIndex=max(0,l_nSelectIndex-1)
+      break 
+      
+      
+      //下
+      case 266
+        if l_bEdit
+          l_nData[0]=min(100,l_nData[0]+1)
+        else
+          l_nIndex=min(50,l_nIndex+1)
+        endIf
+        // l_nSelectIndex=min(l_nSelectIndex+1,5)
+      break
+      
+      
+      
+      //<-  向左修改点序号
+      case 264
+        
+        if l_bEdit 
+          l_nData[1]=max(0,l_nData[1]-1)
+        else
+          x_nIndex=max(0,x_nIndex-1)
+          l_nIndex=x_trCut[x_nIndex].x
+          if x_trCut[x_nIndex].x==0
+            
+            l_nData[0]=x_trTrsfAxis[x_nIndex].rx
+            l_nData[1]=x_trTrsfAxis[x_nIndex].ry
+            
+          endIf
+        endIf
+      break
+            
+      
+      //-> 改点序号
+      case 268
+        if l_bEdit 
+          l_nData[1]=min(100,l_nData[1]+1)
+        else
+          x_nIndex=min(x_nMax-1,x_nIndex+1)
+          l_nIndex=x_trCut[x_nIndex].x
+          if x_trCut[x_nIndex].x==0
+            
+            l_nData[0]=x_trTrsfAxis[x_nIndex].rx
+            l_nData[1]=x_trTrsfAxis[x_nIndex].ry
+            
+          endIf
+        endIf
+      break
+      
+      
+      
+      case 270
+        if l_nIndex==0
+          
+          l_bEdit=!l_bEdit
+          
+        endIf
+        
+      break
+      
+      
+      //应用
+      case 278
+        //        for l_nNum=0 to 4
+        //          x_nPreset[x_nIndex,l_nNum]=min(max(l_nData[l_nNum],0),100)
+        //      x.x=l_nIndex
+        x_trCut[x_nIndex].x=l_nIndex
+        //   return
+      //  l_nIndex=x_trCut[x_nIndex].x
+        if l_nIndex==0
+          x_trTrsfAxis[x_nIndex].rx=l_nData[0]
+          x_trTrsfAxis[x_nIndex].ry=l_nData[1] 
+          
+        endIf
+      break
+      
+      
+      
+      case 277
+        return
+      break
+      
+      //      case 270
+      //        call Float_Edit(l_nData[l_nSelectIndex],nPanelLTopX+12,l_nSelectIndex+nPanelLTopY+1)
+      //        l_nData[l_nSelectIndex]=min(max(l_nData[l_nSelectIndex],0),100)
+      //      break
+      
+    endSwitch
+    
+    if l_nIndex!=0
+      l_bEdit=false
+    endIf
+    
+    
+    if l_nKey!=-1 or !l_bFirst
+      l_bFirst=true
+      
+      call Control_PanTitl(toString("",x_nIndex+1)+"点:工艺值")
+      
+      if l_nIndex!=0
+        for l_nNum=0 to 4
+          l_nData[l_nNum]=x_nPreset[l_nIndex,l_nNum]
+        endFor
+        //      for l_nNum=0 to 4
+        //        l_nData[l_nNum]=x_nPreset[l_nIndex,l_nNum]
+        //      endFor
+        l_sItem[0]="工艺号    :"+toString("",l_nIndex)
+        l_sItem[1]="激光功率  :"+toString("",l_nData[0])
+        l_sItem[2]="气体压力  :"+toString("",l_nData[1])
+        l_sItem[3]="占空比频率:"+toString("",l_nData[2])
+        l_sItem[4]="激光占空比:"+toString("",l_nData[3])
+        l_sItem[5]="随动高度  :"+toString("",l_nData[4])
+        
+      else
+        
+        l_sItem[0]="工艺号    :"+toString("",l_nIndex)
+        l_sItem[1]="激光功率  :"+toString("",l_nData[0])
+        l_sItem[2]="激光占空比:"+toString("",l_nData[1])
+        if l_bEdit
+          l_sItem[4]="按上下修改功率 "
+          l_sItem[5]="按左右修改占空比"
+        else
+          l_sItem[4]="按Enter修改    "
+          l_sItem[5]="               "
+        endIf
+        
+        l_sItem[3]="               "
+        
+      endIf
+      
+      
+      
+      
+      
+      call Control_List(l_sItem,l_nBuff)
+      
+      
+      
+      
+      
+    endIf
+    
+
+    
+    
+    
+    
+    
+  endWhile
+  
+  
+  
+  
+  
+end
+
+  
+  
+  
+
+  
+      
+  ]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="ExtraAxis" access="public">
+    <Code><![CDATA[begin
+  
+  //如果七轴当前位置与所需位置不一致
+  //if
+  //bExtraAxis
+  waitEndMove()
+  
+  
+  //让七轴运动起来
+  
+  //wait 七轴位置到位
+  
+  //end
+  
+  
+  
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

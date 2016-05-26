@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="TeachHome" access="public">
+    <Locals>
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_nIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_jJ" type="jointRx" xsi:type="array" size="1" />
+      <Local name="l_jJFirst" type="joint" xsi:type="array" size="1" />
+      <Local name="l_trTrsf" type="trsf" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //安全点示教
+  
+  //2014.07.28
+  //同步七八轴
+  if TxtFile:bSync7Axis or TxtFile:bSync8Axis
+    if !ExtAxis:libExist("Disk://extAxisCan/extAxisCan.pjx")
+      if ExtAxis:libLoad("Disk://extAxisCan/extAxisCan.pjx")!=0
+        popUpMsg("加载外部轴出错")
+        disablePower()
+        return
+      endIf
+    endIf
+  endIf
+  
+  
+  
+  resize(sSItem,1,6)
+  l_jJ=TxtFile:jHome
+  l_jJFirst=TxtFile:jHome
+  sSItem[0]="J1:"+toString(".3",l_jJ.j1)
+  sSItem[1]="J2:"+toString(".3",l_jJ.j2)
+  sSItem[2]="J3:"+toString(".3",l_jJ.j3)
+  sSItem[3]="J4:"+toString(".3",l_jJ.j4)
+  sSItem[4]="J5:"+toString(".3",l_jJ.j5)
+  sSItem[5]="J6:"+toString(".3",l_jJ.j6)
+  
+  cls()
+  userPage()
+  call UI:Form_PanelList("LasMAN3.6->示教安全点","安全点",sSItem,l_nIndex,"记录,,,,,上传,保存,退出")
+  
+  while DataBase:nInterfaceType==15
+    l_nKey=getKey()
+    switch l_nKey
+      
+      case 261
+        l_nIndex=max(0,l_nIndex-1)
+      break
+      
+      case 266
+        l_nIndex=min(5,l_nIndex+1)
+      break
+      
+      
+      case  271
+        
+        call UI:Control_YesNO("确定要记录吗?",l_bRes)
+        if l_bRes
+          l_jJ=herej()
+          sSItem[0]="J1:"+toString(".3",l_jJ.j1)
+          sSItem[1]="J2:"+toString(".3",l_jJ.j2)
+          sSItem[2]="J3:"+toString(".3",l_jJ.j3)
+          sSItem[3]="J4:"+toString(".3",l_jJ.j4)
+          sSItem[4]="J5:"+toString(".3",l_jJ.j5)
+          sSItem[5]="J6:"+toString(".3",l_jJ.j6)
+          //2014.12.04
+          //记录七八轴的home位置
+          if (TxtFile:bSync7Axis or TxtFile:bSync8Axis)
+            call ExtAxis:RecordExtAxis(l_trTrsf,l_trTrsf,TxtFile:tCfg)
+            TxtFile:trSync7Axis.y=l_trTrsf.x
+            TxtFile:trSync8Axis.y=l_trTrsf.y
+          endIf
+        endIf
+      break
+      
+      
+      
+      case 272
+        
+      break
+      
+      //上传
+      case 276
+        call UI:Control_YesNO("确定上传吗?",l_bRes)
+        if l_bRes
+          call Kit:UpLoad()
+        endIf
+      break
+      
+      
+      //保存
+      case 277
+        if l_jJFirst==l_jJ
+          popUpMsg("没有记录")
+        else
+          call UI:Control_YesNO("确定保存吗?",l_bRes)
+          if l_bRes
+            TxtFile:jHome=l_jJ
+            
+            call TxtFile:SaveCfg(l_bRes)
+            if !l_bRes
+              popUpMsg("保存失败")
+            else
+              popUpMsg("保存成功")
+            endIf
+          endIf
+        endIf
+      break
+      
+      
+      //退出
+      case 278
+        call UI:Control_YesNO("确定退出吗?",l_bRes)
+        if l_bRes
+          return
+        endIf
+      break
+      
+      
+      
+      
+      
+      
+      
+      
+    endSwitch
+    if l_nKey!=-1 and l_nKey>260
+      call UI:Form_PanelList("LasMAN3.6->示教安全点","安全点",sSItem,l_nIndex,"记录,,,,,上传,保存,退出")
+      
+    endIf
+    
+    //2014.7.30
+    //同步七八轴
+    if (TxtFile:bSync7Axis or TxtFile:bSync8Axis)
+      call ExtAxis:RecordExtAxis(l_trTrsf,l_trTrsf,TxtFile:tCfg)
+      gotoxy(0,12)
+      put("七轴:"+toString(".3",l_trTrsf.x))
+      if TxtFile:bSync8Axis
+        gotoxy(20,12)
+        put("八轴:"+toString(".3",l_trTrsf.y))
+      endIf
+    endIf
+    
+  endWhile
+  
+end
+
+]]></Code>
+  </Program>
+</Programs>

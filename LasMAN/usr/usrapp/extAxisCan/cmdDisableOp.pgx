@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="cmdDisableOp" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nAxNum" type="num" xsi:type="element" />
+    </Parameters>
+    <Code><![CDATA[begin
+  //发送“终止操作”指令到所选驱动器
+  if bOpeEnabled[x_nAxNum]==true
+    doFaultReset[x_nAxNum]=false
+    doEnableOp[x_nAxNum]=false
+    delay(0.1)
+    doQuickStop[x_nAxNum]=true
+    doEnableVoltage[x_nAxNum]=true
+    doSwitchOn[x_nAxNum]=true
+  endIf
+end]]></Code>
+  </Program>
+</Programs>

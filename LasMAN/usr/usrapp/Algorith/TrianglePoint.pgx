@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="TrianglePoint" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_trSource" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_trDest" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_fFrame" type="frame" xsi:type="array" size="1" />
+      <Local name="l_trCenter" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_nDia" type="num" xsi:type="array" size="1" />
+      <Local name="l_p" type="point" xsi:type="array" size="1" />
+      <Local name="l_trBuff" type="trsf" xsi:type="array" size="3" />
+    </Locals>
+    <Code><![CDATA[begin
+  //三角形三点
+  call Inscribedcircle(x_trSource,l_trCenter,l_nDia,x_bRes)
+  if !x_bRes
+    return
+  endIf
+      //圆心点
+  x_trDest[20]=l_trCenter
+  
+  call SetFrame(x_trSource,l_fFrame,x_bRes)
+  if !x_bRes
+    return
+  endIf
+  
+  l_p.trsf=l_trCenter
+  link(l_p,world)
+  l_p.trsf=position(l_p,l_fFrame)
+  l_p.trsf.y=0
+  link(l_p,l_fFrame)
+  x_trDest[0]=position(l_p,world)
+  
+  x_trDest[1]=x_trSource[1]
+  x_trDest[2]=x_trSource[2]
+  x_trDest[3]=x_trSource[0]
+  x_trDest[4]=x_trDest[0]
+  
+  for l_nDia=0 to 4
+    x_trDest[l_nDia].rx= x_trDest[0].rx
+    x_trDest[l_nDia].ry = x_trDest[0].ry
+    x_trDest[l_nDia].rz= x_trDest[0].rz
+  endFor
+  
+
+  
+end]]></Code>
+  </Program>
+</Programs>

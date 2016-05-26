@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="SetTrajPara">
+    <Locals>
+      <Local name="l_bCut" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_trTrsf" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_trTSource" type="trsf" xsi:type="array" size="3" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nDia" type="num" xsi:type="array" size="1" />
+      <Local name="l_nLength" type="num" xsi:type="array" size="2" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  //设置路径参数
+  //主要是在appro,cut,leave界面中的 p按钮使用
+  //参数预设
+  
+  
+  
+  //三点规则图形
+  if TxtFile:nSingleType!=12 and TxtFile:nSingleType!=10 and  TxtFile:nSingleType!=2 and TxtFile:nSingleType!=20
+    
+    //算圆弧度
+    if TxtFile:trDownLead.rz<=0 and TxtFile:nSingleType==24
+      call Algorith:GetArcAngle(TxtFile:pCut[0].trsf,TxtFile:pCut[1].trsf,TxtFile:pCut[2].trsf,l_nNum,l_bRes)
+      TxtFile:trDownLead.rz=l_nNum/10
+    endIf
+    
+    
+    //算直径
+    l_trTSource[0]=TxtFile:pCut[0].trsf
+    l_trTSource[1]=TxtFile:pCut[1].trsf
+    l_trTSource[2]=TxtFile:pCut[2].trsf
+    
+    call Algorith:Circumcircle(l_trTSource,l_trTrsf,l_nDia,l_bRes)
+    if l_bRes
+      TxtFile:trDownLead.ry=l_nDia
+    endIf
+    
+    //算边长
+    l_nLength[0]=distance(l_trTSource[0],l_trTSource[1])
+    l_nLength[1]=distance(l_trTSource[2],l_trTSource[1])
+    
+    
+  else
+    if TxtFile:trDownLead.ry<=0 
+      TxtFile:trDownLead.ry=8
+    endIf
+    
+    
+  endIf
+  
+  
+  
+  
+  //设置内切与外切
+  //图形类型小于10的才有内切外切之说
+  l_bCut=TxtFile:nSingleType<10
+  
+  if TxtFile:bWeldEnable
+    //焊接中不用到异步八轴
+    l_bCut=TxtFile:trWorkplace.z==1
+  endIf
+  
+  
+  //参数设置
+  call UI:Control_Traj(TxtFile:fTraj.trsf,TxtFile:fToffset.trsf,TxtFile:trArray,TxtFile:trDownLead,TxtFile:trWorkplace,l_bCut,TxtFile:nTrajDelay,l_nLength,TxtFile:bWeldEnable)
+  
+  
+  if TxtFile:nSingleType!=10 and l_bCut!=(TxtFile:nSingleType<10) and TxtFile:nSingleType!=20
+      TxtFile:nSingleType=TxtFile:nSingleType+sel(l_bCut,-10,10)
+  endIf
+  
+    if TxtFile:bWeldEnable
+      TxtFile:trWorkplace.z=sel( l_bCut,1,0)
+    endIf
+    
+  
+  
+  //修改路径点的位置
+  //三点法根据直径修改位置
+  
+  if TxtFile:nSingleType!=12 and TxtFile:nSingleType!=10 and  TxtFile:nSingleType!=2 and TxtFile:nSingleType!=20
+    call Algorith:ChangeLength(TxtFile:pCut,l_nLength)
+    
+    TxtFile:trDownLead.ry=max(0.001,TxtFile:trDownLead.ry)
+    if l_nDia!=TxtFile:trDownLead.ry 
+      l_trTSource[0]=TxtFile:pCut[0].trsf
+      l_trTSource[1]=TxtFile:pCut[1].trsf
+      l_trTSource[2]=TxtFile:pCut[2].trsf
+      
+      call Algorith:Circumcircle(l_trTSource,l_trTrsf,l_nDia,l_bRes)
+      if !l_bRes
+        return
+      endIf
+      
+      for l_nNum=0 to 2
+        call Algorith:ChangeCirPoint(l_trTrsf,TxtFile:trDownLead.ry,TxtFile:pCut[l_nNum].trsf,TxtFile:pCut[sel(l_nNum==2,0,l_nNum+1)].trsf,l_bRes)
+        if !l_bRes
+          return
+        endIf
+        
+      endFor
+    endIf
+    
+    
+    
+    
+    
+  endIf
+  
+end]]></Code>
+  </Program>
+</Programs>

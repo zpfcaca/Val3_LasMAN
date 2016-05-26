@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="BeforeProduct" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nWorkPlaceIn" type="num" xsi:type="element" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //产品开始生产前所需要做的工作
+  //安全信号的确认之类
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  //路径过滤的话
+  //启动时把下面的话语注释掉
+  
+//  if TxtFile:bTrajFilter
+//    for l_nNum=0 to TxtFile:nTotalTraj-1
+//      
+//      TxtFile:bBypass[l_nNum]=false
+//      
+//    endFor
+//    
+//    call TrajByPass(1,TxtFile:nTotalTraj)
+//    
+//  endIf
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<TOPICSLIST>
+	<TOPIC Name="" Card="0" Channel="0" Equipment="0" RefreshPeriod="200" Actif="1">
+		<MODULE Tag_name_root="Bit" IDModule="BOOLEAN" InputSize="" OutputSize="0">
+			</MODULE>
+		<MODULE Tag_name_root="Word" IDModule="WORD" InputSize="" OutputSize="528">
+			<ITEM Name="MbAI_bPowerOn" Syntaxe="%QW0" Offset="0"/><ITEM Name="MbAI_bStartCycl" Syntaxe="%QW1" Offset="1"/><ITEM Name="MbAI_bStopCycl" Syntaxe="%QW2" Offset="2"/><ITEM Name="MbAI_bHome" Syntaxe="%QW3" Offset="3"/><ITEM Name="MbAI_bEndCycl" Syntaxe="%QW4" Offset="4"/><ITEM Name="MbAI_bQiDong" Syntaxe="%QW5" Offset="5"/><ITEM Name="MbAI_bPausCycl" Syntaxe="%QW6" Offset="6"/><ITEM Name="MbAI_bAxis7Reached" Syntaxe="%QW7" Offset="7"/><ITEM Name="MbAI_bStation1" Syntaxe="%QW8" Offset="8"/><ITEM Name="MbAI_bStation2" Syntaxe="%QW9" Offset="9"/><ITEM Name="MbAI_bAlarm" Syntaxe="%QW10" Offset="10"/><ITEM Name="MbAI_bLaserSwitch" Syntaxe="%QW11" Offset="11"/><ITEM Name="MbAI_bUnused" Syntaxe="%QW12:2" Offset="12"/><ITEM Name="MbAO_bStation1" Syntaxe="%IW14" Offset="14"/><ITEM Name="MbAO_bStation2" Syntaxe="%IW15" Offset="15"/><ITEM Name="MbAO_bLaserOn" Syntaxe="%IW16" Offset="16"/><ITEM Name="MbAO_bFollowOn" Syntaxe="%IW17" Offset="17"/><ITEM Name="MbAO_bAirOn" Syntaxe="%IW18" Offset="18"/><ITEM Name="MbAO_bGreenLamp" Syntaxe="%IW19" Offset="19"/><ITEM Name="MbAO_bAlarm" Syntaxe="%IW20" Offset="20"/><ITEM Name="MbAO_bTablePos0" Syntaxe="%IW21" Offset="21"/><ITEM Name="MbAO_bTablePos1" Syntaxe="%IW22" Offset="22"/><ITEM Name="MbAO_bTablePos2" Syntaxe="%IW23" Offset="23"/><ITEM Name="MbAO_aLasPwr" Syntaxe="%IW24" Offset="24"/><ITEM Name="MbAO_aAirPress" Syntaxe="%IW25" Offset="25"/><ITEM Name="MbAO_aPMW" Syntaxe="%IW26" Offset="26"/><ITEM Name="MbAO_bFrequence" Syntaxe="%IW27" Offset="27"/><ITEM Name="MbAO_bUnused_soft" Syntaxe="%IW28:5" Offset="28"/></MODULE>
+	</TOPIC>
+	<GENERAL_PARAMETERS TopicName="" TCP_Port="502" ConnectionNumber="2"/>
+</TOPICSLIST>

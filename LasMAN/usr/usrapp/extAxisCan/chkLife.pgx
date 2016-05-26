@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="chkLife" access="public">
+    <Locals>
+      <Local name="l_i" type="num" xsi:type="array" size="1" />
+      <Local name="l_sMsg" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //检查IO连接是否正常
+  blifebit_all_ok=true
+  for l_i=0 to nAxesSum-1
+    if ioStatus(diReady2SwOn[l_i])<0
+      blifebit[l_i]=false
+      l_sMsg="第"+toString("",l_i+1)+"轴通讯异常"
+      popUpMsg(l_sMsg)
+      logMsg(l_sMsg)
+      blifebit_all_ok=blifebit_all_ok and blifebit[l_i]
+      return
+    else
+      blifebit[l_i]=true
+      blifebit_all_ok=blifebit_all_ok and blifebit[l_i]
+    endIf
+  endFor
+  
+end]]></Code>
+  </Program>
+</Programs>

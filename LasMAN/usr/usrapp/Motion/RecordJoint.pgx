@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="RecordJoint" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_jJDest" type="jointRx" xsi:type="element" use="reference" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_pPoint" type="point" xsi:type="array" size="1" />
+      <Local name="l_fFrame" type="frame" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  link(l_fFrame,world)
+  l_fFrame.trsf=TxtFile:fProduct.trsf*TxtFile:fTraj.trsf
+  
+  l_pPoint=here(TxtFile:tCfg,world)
+  l_pPoint.trsf=l_pPoint.trsf*!TxtFile:fProduct.trsf*TxtFile:fPofffset.trsf*!TxtFile:fTraj.trsf
+  l_pPoint.trsf=l_pPoint.trsf*!TxtFile:fToffset.trsf*!TxtFile:fArray.trsf
+  link(l_pPoint,l_fFrame)
+  x_jJDest=herej()
+  x_bRes=pointToJoint(TxtFile:tCfg,x_jJDest,l_pPoint,x_jJDest)
+
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

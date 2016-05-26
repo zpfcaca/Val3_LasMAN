@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="start">
+    <Locals>
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+     call TxtFile:ReadAction(l_bRes)
+  if !l_bRes
+    popUpMsg("读取动作文件出错")
+    return
+  endIf
+    call TxtFile:ReadPreset(l_bRes)
+  if !l_bRes
+    popUpMsg("读取工艺文件出错")
+    return
+  endIf
+  call TxtFile:ReadProductName("Disk://Txt/Recipe.txt",l_bRes)
+   if !l_bRes
+    popUpMsg("读取生产文件出错")
+    return
+  endIf 
+call TxtFile:ReadProduct("Disk://Txt/Recipe.txt",TxtFile:sProductName,true,l_bRes)
+   if !l_bRes
+    popUpMsg("读取生产文件出错")
+    return
+  endIf 
+  
+  
+ nStartTraj=1
+ nEndTraj=TxtFile:nTotalTraj
+ taskCreate "ReadFile",50,ReadTraj()
+ taskCreate "Preset",100,Preset()
+
+ call Move()
+  
+end]]></Code>
+  </Program>
+</Programs>

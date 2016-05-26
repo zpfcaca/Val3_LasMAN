@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="CheckAxis" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_b7Axis" type="bool" xsi:type="element" use="reference" />
+      <Parameter name="x_b8Axis" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Code><![CDATA[begin
+  
+ x_b7Axis=$XgetNbAxes()>=1
+ x_b8Axis=$XgetNbAxes()>=2
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

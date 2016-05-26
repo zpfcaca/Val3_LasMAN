@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="GetActionData" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nSource" type="num" xsi:type="array" use="reference" dimensions="3" />
+      <Parameter name="x_nDest" type="num" xsi:type="array" use="reference" dimensions="2" />
+      <Parameter name="x_nIndex" type="num" xsi:type="element" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nX" type="num" xsi:type="array" size="1" />
+      <Local name="l_nY" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  //  x_nIndex=TxtFile:trCut[min(x_nIndex,size(TxtFile:pCut)-1)].y
+  x_nIndex=roundDown(x_nIndex)
+  if x_nIndex<=0 or x_nIndex>51
+    //2014.4.10来实现
+    //    for l_nX=0 to 11
+    //      for l_nY=0 to 1
+    //        x_nDest[l_nX,l_nY]=0
+    //      endFor
+    //    endFor
+    x_nDest[0,0]=x_nDest[0,1]=x_nDest[1,0]=x_nDest[1,1]=x_nDest[2,0]=x_nDest[2,1]=x_nDest[3,0]=x_nDest[3,1]=0
+    x_nDest[4,0]=x_nDest[4,1]=x_nDest[5,0]=x_nDest[5,1]=x_nDest[6,0]=x_nDest[6,1]=x_nDest[7,0]=x_nDest[7,1]=0
+    x_nDest[8,0]=x_nDest[8,1]=x_nDest[9,0]=x_nDest[9,1]=x_nDest[10,0]=x_nDest[10,1]=x_nDest[11,0]=x_nDest[11,1]=0
+    return
+  endIf
+  
+  for l_nX=0 to 11
+    for l_nY=0 to 1
+      x_nDest[l_nX,l_nY]=x_nSource[x_nIndex,l_nX,l_nY]
+      
+    endFor
+  endFor
+  
+end
+      
+  ]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="GetWeldReturn" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_pCut" type="point" xsi:type="array" use="reference" />
+      <Parameter name="x_pMC" type="point" xsi:type="array" use="reference" />
+      <Parameter name="x_bMC" type="bool" xsi:type="array" use="reference" />
+      <Parameter name="x_nId" type="num" xsi:type="element" />
+      <Parameter name="x_nReturnId" type="num" xsi:type="element" use="reference" />
+      <Parameter name="x_nLength" type="num" xsi:type="element" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_trBuff" type="trsf" xsi:type="array" size="3" />
+      <Local name="l_trTe" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_nArc" type="num" xsi:type="array" size="1" />
+      <Local name="l_nLength" type="num" xsi:type="array" size="1" />
+      <Local name="l_nWeld" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //获得回退点的MOVEID
+  
+  
+  
+  x_bRes=false
+  x_nReturnId=-1
+  if size(x_pCut)!=size(x_pMC) or size(x_pCut)!=size(x_bMC) or size(x_bMC)<(x_nId-1) or x_nLength<=0
+    return
+  endIf
+  
+  //如果只有一个点，则退出
+   if size(x_bMC)==1
+    x_bRes=true
+    return
+  endIf
+  
+  if roundDown(x_nId)==roundUp(x_nId)
+      x_nId=x_nId+0.00001
+  endIf
+  
+  
+  //多于一个点进行计算
+  l_nLength=0
+  for l_nNum=1 to roundDown(x_nId)
+
+ 
+    if !x_bMC[l_nNum]
+      l_nArc=distance(x_pCut[l_nNum-1].trsf,x_pCut[l_nNum].trsf)
+      
+    else
+      l_trBuff[0]=x_pCut[l_nNum-1].trsf
+      l_trBuff[1]=x_pMC[l_nNum].trsf
+      l_trBuff[2]=x_pCut[l_nNum].trsf
+      //获取圆弧长度
+      call GetArcLength(l_trBuff,l_nArc,x_bRes)
+      if !x_bRes
+        return
+      endIf
+    endIf
+    
+    //取余
+    if l_nNum==roundDown(x_nId)
+      l_nLength=(x_nId-l_nNum)*l_nArc+l_nLength
+    else
+      l_nLength=l_nLength+l_nArc
+    endIf
+  endFor
+  
+ // popUpMsg(toString(".3",l_nLength))
+  //需要达到点的号码
+  if l_nLength<=x_nLength
+    x_nReturnId=1
+      x_bRes=true
+    return
+  else
+    l_nWeld=l_nLength-x_nLength
+  endIf
+  
+  
+
+  l_nLength=0
+  for l_nNum=1 to roundUp(x_nId)
+
+ 
+    if !x_bMC[l_nNum]
+      l_nArc=distance(x_pCut[l_nNum-1].trsf,x_pCut[l_nNum].trsf)
+      
+    else
+      l_trBuff[0]=x_pCut[l_nNum-1].trsf
+      l_trBuff[1]=x_pMC[l_nNum].trsf
+      l_trBuff[2]=x_pCut[l_nNum].trsf
+      //获取圆弧长度
+      call GetArcLength(l_trBuff,l_nArc,x_bRes)
+      if !x_bRes
+        return
+      endIf
+    endIf
+    
+    
+    
+    if l_nNum==roundUp(x_nId)-1
+      l_nLength=(x_nId-roundDown(x_nId))*l_nArc+l_nLength
+    else
+      l_nLength=l_nLength+l_nArc
+    endIf
+    
+    if l_nLength>=l_nWeld
+      x_nReturnId=l_nNum-1-(l_nLength-l_nWeld)/l_nArc
+      
+        x_bRes=true
+      return
+    endIf
+  endFor
+  
+  x_bRes=false
+  
+end]]></Code>
+  </Program>
+</Programs>

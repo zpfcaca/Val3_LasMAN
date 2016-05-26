@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="WeldEnd" access="public">
+    <Locals>
+      <Local name="l_bWeldAction" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bConfig" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nBuffID" type="num" xsi:type="array" size="1" />
+      <Local name="l_nLength" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //bWeldEnd=false
+  bWeldAction=false
+  DataBase:nWeldActionId=0
+  wait(DataBase:bMoveTask)
+  
+  //开始计算
+  while DataBase:bMoveTask 
+//    if DataBase:nPointType==1
+//       l_nBuffID=TxtFile:nWeldActionId
+//      
+//    endIf
+    if (TxtFile:trWorkplace.z==0) and DataBase:nPointType==2 and DataBase:nID>1 and TxtFile:bWeldEnable
+      DataBase:nWeldActionId= TxtFile:nWeldActionId
+      //        //$setVelCmd(l_nVelCmd)
+      //        //焊接收弧点
+      if !bWeldAction  
+        //焊接收弧点
+        //        if TxtFile:nWeldActionId==0 and size(TxtFile:pCut)>1
+        //       
+        //          TxtFile:nWeldActionId=size(TxtFile:pCut)-10/distance(TxtFile:pCut[size(TxtFile:pCut)-1],TxtFile:pCut[size(TxtFile:pCut)-2])
+        //        endIf
+        if  getMoveId()>=TxtFile:nWeldActionId
+          
+          //为了速度进行匹配而设
+          if !l_bConfig and DataBase:nArrayX<=1 and DataBase:nArrayY<=1
+            l_bConfig=true
+           
+            l_nLength=DataBase:nWeldEndOffset*(getSpeed(TxtFile:tCfg)/100)
+            call Algorith:GetWeldId(TxtFile:pCut,TxtFile:pMoveC,TxtFile:bMoveC,TxtFile:trWorkplace.ry,TxtFile:nWeldActionId,l_bRes,l_nLength)
+            
+            if !l_bRes or TxtFile:nWeldActionId<=0
+            //  popUpMsg("error")
+              TxtFile:nWeldActionId=l_nBuffID
+            endIf
+            
+          else
+            bWeldAction=true
+            call IO:WeldAction()
+            // bWeldEnd=true
+            DataBase:nWeldEndStart=clock()
+          endIf
+          
+        endIf
+      endIf
+      
+      
+      
+      
+      
+      
+      //焊接参数
+      //        if TxtFile:bWeldEnable 
+      //          if DataBase:nInterfaceType==6 or DataBase:nInterfaceType==13  
+      //            call IO:PerforatiAction(TxtFile:trIODelay.x,0)
+      //          else
+      //            //                        if !TxtFile:bWeldEnable
+      //            //                          wait(DataBase:bSimuIO)
+      //            //                          DataBase:bSimuIO=false
+      //            //                        else
+      //            if !DataBase:bIOStart
+      //              call IO:KeyDigtalIO(DataBase:bKeyIO[2],DataBase:bKeyIO[1],DataBase:bKeyIO[0],0,0)
+      //              DataBase:bIOStart=true
+      //            endIf
+      //            
+      //          endIf
+      //        endIf
+      //                      DataBase:nWeldStartTime=max(0,min(2,DataBase:nWeldStartTime))
+      //                      delay(DataBase:nWeldStartTime)
+      //  endIf      
+      
+      
+      
+      
+    else
+      bWeldAction=false
+      l_bConfig=false
+    endIf
+    delay(0)
+  endWhile
+  
+end
+  
+        
+
+]]></Code>
+  </Program>
+</Programs>

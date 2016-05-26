@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="SaveNewProduct" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_bRes" type="bool" use="reference" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nTrajIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_sFileName" type="string" xsi:type="array" size="1" />
+      <Local name="l_sSBuff" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+  //建立生产文件头的文件头
+
+
+  //参数初始化
+  x_bRes=false
+  l_sFileName="Disk://Txt/Recipe.txt"
+
+  //××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××
+  //开始部分
+  //关闭所有文件
+  call FileDir:CloseAllFile()
+
+  //文件是否可以打开
+  nFileID=$fileOpen(l_sFileName,"w")
+  if nFileID<0 or nFileID>9
+    return
+  endIf
+
+  //工具
+  l_sSBuff="PRODUCT=TEST"
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+
+  //工具
+  l_sSBuff="TOOL="
+  l_sSBuff=l_sSBuff+toString(".3",tCfg.trsf.x)+","+toString(".3",tCfg.trsf.y)+","+toString(".3",tCfg.trsf.z)+","
+  l_sSBuff=l_sSBuff+toString(".3",tCfg.trsf.rx)+","+toString(".3",tCfg.trsf.ry)+","+toString(".3",tCfg.trsf.rz)
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+  l_sSBuff="TOTALELEMENTS=0"
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+  l_sSBuff="FRAME=0,0,0,0,0,0"
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+  l_sSBuff="OFFSET=0,0,0,0,0,0"
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+  l_sSBuff="PRESET=StaubliPreset"
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+  l_sSBuff=""
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+  l_sSBuff=""
+  if $fileSet(nFileID,l_sSBuff,1)!=1
+    return
+  endIf
+
+  //××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××
+  //重命名
+  //关闭所有文件
+  call FileDir:CloseAllFile()
+
+  x_bRes=true
+
+end]]></Code>
+  </Program>
+</Programs>

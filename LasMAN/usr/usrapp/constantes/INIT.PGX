@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="init" access="public">
+    <Code><![CDATA[begin
+  //该库相当于一纯数据变量库,用于Sample,extAxisCan数据交换
+  // **************************************
+  // *****        DRIVE STATES        *****
+  // **************************************
+  // refer to CiA draft proposal 402 page 51 (协议402,51页)
+  //根6041，驱动器正常激活时，0-3, 5 and 6 位1，换成十进制为111dec=1101111bin
+  // -- Value for binary masking bits 0-3, 5 and 6 
+  
+  nDRV_ACTIV=111
+  //
+  // -- Value for binary masking bits 0-3 and 6
+  //100 1111
+  nDRV_FAULT=79
+  
+  //以下位外部驱动器状态（6041）
+  // --not Ready to switch on
+  nNotRdySwiON=0
+  
+  // -- Switch on disabled 100 0000
+  nSwitchONDis=64
+  
+  // -- ready to switch ON
+  //10 0001
+  nRdy2SwitchON=33
+  
+  // -- Switched ON 10 0011
+  
+  nSwitchedON=35
+  
+  //-- Operation enabled 10 0111
+  nOperatEnabled=39
+  // -- Quick stop active  0111
+  nQuickStopActiv=7
+  
+  // Fault reaction active 1111
+  nFaultReacActiv=15
+  
+  // -- Fault state 1000
+  nFaultState=8
+  
+  // *******************************************
+  // *****    HARDWARE DRIVE ALARMS        *****
+  // *******************************************
+  // -- System test failed (RAM or ADC or internal device malfunction
+  nHWALM_TESTHW= 1
+  // -- Power failure
+  nHWALM_FEEDPW= 2
+  // -- Bus under-voltage. The lower threshold (80VDC) has been underpassed
+  nHWALM_UDRVOLT=4
+  // -- Bus over-voltage. The highest Treshold (630VDC) has been overpassed
+  nHWALM_OVRVOLT=8
+  // -- Over current
+  nHWALM_OVRCUR=16
+  // -- Heat sink temperature failed (Tc>80°C)
+  nHWALM_TEMPDIS=32
+  // -- Clamp circuit failure. 
+  nHWALM_FRENO=64
+  // -- EEPROM checksulm failure
+  nHWALM_EEPROM=128
+  // -- FUSE 5 VOLT failure on transducer line
+  nHWALM_FUSE5VLT=256
+  // -- Motor thermal protection failure
+  nHWALM_THERMMOT=512
+  // -- Hall effects wrong configuration detected
+  nHWALM_HALL=1024
+  // -- Transducer hardware failure
+  nHWALM_TRANSDUC=2048
+  // -- Phase motor current unbalanced
+  nHWALM_CONNMOT=4096
+  
+  // *******************************************
+  // *****    SOFTWARE DRIVE ALARMS        *****
+  // *******************************************
+  // -- customized FAIL (not used)
+  nSWALM_FUNGO = 1
+  // -- drive size is not coherent
+  nSWALM_TAGLIA=2
+  // -- EEPROM checksum failure
+  nSWALM_CSDATI=4
+  // -- Canbus communication failure
+  nSWALM_CANBUS=8
+  // -- Position loop failure (following error,overtravel....)
+  nSWALM_POSITION=16
+  // -- I2T protection
+  nSWALM_I2T=32
+  // -- Maximum speed exceeded (parameter velMax)
+  nSWALM_OVRSPEED=64
+  // -- Hall efect and encoder checksum failure
+  nSWALM_HALLENC=128
+  // -- encoder zero tag out of position or missing.
+  nSWALM_ENCODER=256
+  // -- Transducer failure (resolver oder enDat)
+  nSWALM_TRANSDUC=512
+  // -- Master encoder zero tag out
+  nSWALM_ENCMASTR=1024
+  // -- Bus under-voltage
+   nSWALM_UDRVOLT=2048
+  // -- Sensorless rotor phasing procedure failure
+  nSWALM_POSROTOR=4096
+  // -- Speed reference automatic offset compensation failure
+  nSWALM_OFFSREF=8192
+  // -- I2T protection for clamp resistor failure
+  nSWALM_I2TREGEN=16384
+  
+  //
+  // value for not existing val3 task
+  nNOTEXIST=-1
+  nDEBUGDRIVE=1
+  // 电机remote状态位
+  nSTATUS_REMOTE=0
+  
+  // 使电机使能的时间
+  nTO_DRVENABLE=2
+  // 电机去使能的时间
+  nTO_DRVDISABLE=2
+  
+  //驱动器模式
+  nHOMINGMODE = 6
+  nINTERPMODE=7
+  nPPMODE=1
+end]]></Code>
+  </Program>
+</Programs>

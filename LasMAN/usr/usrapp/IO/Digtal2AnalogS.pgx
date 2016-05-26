@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="Digtal2AnalogS" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nId" type="num" use="value" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nIndexX" type="num" xsi:type="array" size="1" />
+      <Local name="l_nIndexY" type="num" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_sIOName" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+  //数字量转换为模拟量
+
+  //0 67到82
+  //1 83到98
+  //2 99到114
+  //3 115到130
+  //4 131到146
+
+
+  x_nId=min(4,max(0,x_nId))
+  for l_nIndexY=x_nId to x_nId
+    l_nNum=0
+    for l_nIndexX=0 to 15
+      call IOName(67+l_nIndexX+l_nIndexY*16,l_sIOName)
+      if (67+l_nIndexX+l_nIndexY*16)<135
+        l_nNum=l_nNum+sel(dDio[l_sIOName]==true,1,0)*power(2,l_nIndexX)
+      endIf
+    endFor
+    call IOName(159+l_nIndexY,l_sIOName)
+    aioSet(aAio[l_sIOName],l_nNum)
+    delay(0)
+  endFor
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

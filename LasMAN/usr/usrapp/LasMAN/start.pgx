@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="start" access="private" >
+    <Locals>
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+  //-----------------------------------------------------------------------
+  //Header begin
+  //Description of program
+  //  LasMAN启动程序
+  //Input parameters
+  //
+  //Output paramaters
+  //
+  //Creation : 2013.10.22 Ye yanjie  y.ye@staubli.com
+  //Header end
+  //-----------------------------------------------------------------------
+  logMsg("运行lasman")
+  DataBase:sSoftWareTime="2015_02_03"
+  setTextMode(0)
+  $jogPage(false)
+  bWelcome=false
+  taskCreate "Welcom",100,Welcome()
+
+
+
+  //获取机器版本
+  DataBase:sVersion[0]=getVersion("System")
+  DataBase:sVersion[1]=getVersion("ArmType")
+  DataBase:sVersion[2]=getVersion("Mounting")
+  DataBase:sVersion[3]=getVersion("ControllerSN")
+  DataBase:nRemoteProduct=0
+
+
+
+  //删除备份
+  $delete("Disk://BackUp")
+  $delete("Disk://OffTxt")
+
+  //参数初始化
+  disablePower()
+  bExit=false
+  DataBase:nProductCount=0
+  DataBase:bSaveTrajPoint=false
+  TxtFile:tCfg.trsf=TxtFile:tFileTool.trsf={0,0,0,0,0,0}
+  TxtFile:trPointCount={0,0,0,0,0,0}
+  resetMotion()
+  //设置默认的boxcar为0，10
+  $setBoxcarFreq(0,10)
+
+
+  //检查相应的文件是否正确
+  call TxtFile:IsFileOK(l_bRes)
+  if !l_bRes
+    bWelcome=true
+    delay(0)
+    // popUpMsg("文本文件不正确!")
+    call stop()
+    return
+  endIf
+
+  //IO初始化
+  call IO:Init()
+  DataBase:nInterfaceType=9
+
+
+  //外部轴初始化
+  call Kit:ExtraSysAxisIni(l_bRes)
+  if !l_bRes
+    return
+  endIf
+
+
+
+
+  //建立新的进程
+  taskCreate "LasMan",100,Main()
+  taskCreate "Poll",100,Kit:Poll()
+  bWelcome=true
+
+end]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="ReadMe" access="private" >
+    <Code><![CDATA[begin
+  //与激光相关的内容
+  // KeyDigtallO
+  //WeldEnd
+  //GetKeyIO
+
+
+
+  //全局变量说明
+  //aAio            全局模拟输出输入变量
+  //bAxisDoorEnable 异步轴 安全门打开与关闭
+  //bWaitActionOff  在切割点等待输入，如果不满足条件，则关光
+  //bWaitFollowDown 等待随动到位信号
+  //bWpFinishOut    工位完成，机械手臂到达home点后会发出信号
+  //dDio            全局数字输入输出变量
+  //sIOName         输入输出名称
+
+
+
+  //函数说明
+  //
+
+
+
+
+
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

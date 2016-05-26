@@ -1,0 +1,470 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="TeachAxis" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nPosition" type="num" xsi:type="element" use="reference" />
+      <Parameter name="x_nSpeed" type="num" xsi:type="element" use="reference" />
+      <Parameter name="x_nPrecent" type="num" xsi:type="element" use="reference" />
+      <Parameter name="x_nJogSpeed" type="num" xsi:type="element" use="reference" />
+      <Parameter name="x_b8Axis" type="bool" xsi:type="element" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_nSpeed" type="num" xsi:type="array" size="1" />
+      <Local name="l_nPosition" type="num" xsi:type="array" size="1" />
+      <Local name="l_bFirst" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bPowerOn" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bAlarm" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nPrecent" type="num" xsi:type="array" size="1" />
+      <Local name="l_nJogSpeed" type="num" xsi:type="array" size="1" />
+      <Local name="l_bBHome" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nBuff" type="num" xsi:type="array" size="1" />
+      <Local name="l_sBottom" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //七轴示教
+  resetMotion()
+  
+  wait(isKeyPressed(272)==false)
+  
+  
+  resize(sSItem,1,7)
+  //  sSItem[0]="参数"
+  //  sSItem[1]="复位"
+  
+  l_nPosition=x_nPosition
+  l_nSpeed=x_nSpeed
+  l_nPrecent=x_nPrecent
+  l_nJogSpeed=x_nJogSpeed
+  cls()
+  //  call UI:Form_PanelList("LasMAN3.6->示教异步七轴","第七轴",sSItem,l_nIndex,"+,-,记录,回零,运动,停止,保存,退出")
+  //  call UI:Control_Mess("马达正常,未上电","")
+  
+  if DataBase:nInterfaceType==12 or DataBase:nInterfaceType==16
+    bCheckAxisSafte=false
+    
+  endIf
+  call UI:Control_PanelMd("等待外部轴安全门打开")
+  call IO:AxisJogSpeed(l_nJogSpeed,x_b8Axis)
+  
+  call IO:AxisDoor(true,x_b8Axis)
+  cls()
+  while  DataBase:nInterfaceType==12 or DataBase:nInterfaceType==5 or DataBase:nInterfaceType==16
+    //
+    if !x_b8Axis
+      call IO:Axis7Status(l_bPowerOn,l_bAlarm,l_bBHome)
+    else
+      call IO:Axis8Status(l_bPowerOn,l_bAlarm,l_bBHome)
+    endIf
+    
+    //判断按键是否一直按着
+    l_nKey=getKey()
+    if isKeyPressed(271)
+      l_nKey=271
+    endIf
+    
+    if isKeyPressed(272)
+      l_nKey=272
+    endIf
+    
+    
+    switch l_nKey
+      //回零测试
+      
+      case 97
+        call IO:AxisTest()
+      break
+      
+      
+      //复位
+      //      case 113
+      //        call UI:Control_YesNO("确定需要复位吗？",l_bRes)
+      //        if l_bRes
+      //          if x_b8Axis
+      //            call IO:Axis8Action(10)
+      //          else
+      //            call IO:Axis7Action(10)
+      //          endIf
+      //        endIf
+      //      break
+      
+      //向上
+      case 261
+        l_nIndex=max(0,l_nIndex-1)
+        
+      break
+      
+      //向下
+      case 266
+        l_nIndex=min(6,l_nIndex+1)
+      break
+      
+      
+      //+
+      case 271
+        if l_bAlarm
+          popUpMsg("马达报警，请先复位")
+          
+        else
+          if !isPowered()
+            popUpMsg("请先上电")
+          else
+            if x_b8Axis
+              call IO:Axis8Action(1)
+            else
+              call IO:Axis7Action(1)
+            endIf
+          endIf
+        endIf
+      break
+      
+      
+      //-
+      case 272
+        if l_bAlarm
+          popUpMsg("马达报警，请先复位")
+          
+        else
+          if !isPowered()
+            popUpMsg("请先上电")
+          else
+            if x_b8Axis
+              call IO:Axis8Action(2)
+            else
+              call IO:Axis7Action(2)
+            endIf
+          endIf
+        endIf
+      break
+      
+      
+      
+      
+      
+      //记录
+      case 273
+        if !l_bBHome 
+          popUpMsg("请先回零")
+          
+        else
+          call IO:AxisIsNeg(x_b8Axis,l_bRes)
+          if l_bRes
+            popUpMsg("数值过大或为负,请点动+到正值")
+          else
+            if !bCheckAxisSafte
+              call UI:Control_YesNO("确定需要记录吗？",l_bRes)
+              if l_bRes
+                if !x_b8Axis
+                  call IO:GetAxis7Pos(l_nPosition,l_nPrecent)
+                  //TxtFile:trAxisData.y=l_nSpeed
+                else
+                  call IO:GetAxis8Pos(l_nPosition,l_nPrecent)
+                  // TxtFile:trAxis8Data.y=l_nSpeed
+                endIf
+              endIf
+            endIf
+          endIf
+        endIf
+      break
+      
+      
+      //回零
+      case 274
+        if isPowered()
+          if l_bAlarm
+            popUpMsg("马达报警，请先复位")
+          else
+            call UI:Control_YesNO("确定需要回机械原点吗？",l_bRes)
+            if l_bRes
+              call UI:Control_PanelMd("异步外部轴马达正在回机械零位")
+              if !x_b8Axis
+                call IO:Axis7Action(4)
+              else
+                call IO:Axis8Action(4)
+              endIf
+              cls()
+            endIf
+          endIf
+        else
+          popUpMsg("机械手臂先上电")
+        endIf
+      break
+      
+      
+      
+      
+      //运动
+      case 275
+        if isPowered()
+          if l_bAlarm
+            popUpMsg("马达报警，请先复位")
+            
+          else
+            if !l_bBHome
+              popUpMsg("请先回到机械零位哦")
+            else
+              call UI:Control_YesNO("确定需要运动吗？",l_bRes)
+              if l_bRes
+                call UI:Control_PanelMd("异步外部轴马达正在运动")
+                if !x_b8Axis
+                  call IO:Axis7OnReady(l_nPosition,l_nSpeed,l_nPrecent,l_bRes)
+                else
+                  call IO:Axis8OnReady(l_nPosition,l_nSpeed,l_nPrecent,l_bRes)
+                endIf
+                cls()
+                if l_bRes
+                  popUpMsg("运动到位")
+                else
+                  popUpMsg("运动出错")
+                endIf
+                
+              endIf
+            endIf
+          endIf
+        else
+          
+          popUpMsg("机械手臂先上电")
+        endIf
+        
+      break
+      
+      
+      
+      
+      
+      
+      //停止
+      case 276
+        if DataBase:nInterfaceType!=5
+          call UI:Control_YesNO("确定需要上传吗？",l_bRes)
+          if l_bRes
+            //            if x_b8Axis
+            //              call IO:Axis8Action(6)
+            //            else
+            //              call IO:Axis7Action(6)
+            //            endIf
+            //          endIf
+            call Kit:UpLoad()
+          endIf
+        endIf
+        
+      break
+      
+      
+      //保存
+      case 277
+        if !bCheckAxisSafte
+          call UI:Control_YesNO("确定需要保存吗？",l_bRes)
+          if l_bRes
+            x_nPosition=l_nPosition
+            x_nSpeed=l_nSpeed
+            x_nPrecent=l_nPrecent
+            x_nJogSpeed=l_nJogSpeed
+            nAxisSpeed=l_nSpeed
+            //生产配置文件
+            if DataBase:nInterfaceType!=5
+              call TxtFile:SaveCfg(l_bRes)
+            endIf
+            
+            
+            if l_bRes
+              popUpMsg("保存成功")
+            else
+              popUpMsg("保存失败")
+            endIf
+            
+          endIf
+        endIf
+      break
+      
+      //
+      case 278,255
+        if x_nPosition!=l_nPosition or  x_nSpeed != l_nSpeed or x_nPrecent!=l_nPrecent
+          call UI:Control_YesNO("参数未保存,确定需要退出吗？",l_bRes)
+          if l_bRes
+            cls()
+            return
+          endIf
+        else
+          cls()
+          return
+        endIf
+        
+      break
+      
+      
+      case 270
+        
+        switch l_nIndex
+          
+          case 0,1,2,3
+            if !bCheckAxisSafte
+              call UI:Control_AxisPar(l_nPosition,l_nSpeed,l_nPrecent,l_nJogSpeed,DataBase:nInterfaceType==5)
+              call IO:AxisJogSpeed(l_nJogSpeed,x_b8Axis)
+            endIf
+          break
+          
+          case 4
+            call UI:Control_YesNO("确定需要复位吗？",l_bRes)
+            if l_bRes
+              if x_b8Axis
+                call IO:Axis8Action(10)
+              else
+                call IO:Axis7Action(10)
+              endIf
+            endIf
+          break
+          
+          case 5
+            call UI:Control_YesNO("确定需要开门吗？",l_bRes)
+            if l_bRes
+              call UI:Control_PanelMd("正在打开门....")
+              if x_b8Axis
+                call IO:AxisDoor(true,true)
+              else
+                call IO:AxisDoor(true,false)
+              endIf
+              cls()
+            endIf
+          break
+          
+          
+          case 6
+            call UI:Control_YesNO("确定需要关门吗？",l_bRes)
+            if l_bRes
+              call UI:Control_PanelMd("正在关闭门....")
+              if x_b8Axis
+                call IO:AxisDoor(false,true)
+              else
+                call IO:AxisDoor(false,false)
+              endIf
+            endIf
+            cls()
+          break
+          
+          //刷新当前轴值
+          case 7
+            
+            
+          break
+          
+          
+        endSwitch
+        
+        
+      break
+      
+      case -1
+        
+        if x_b8Axis
+          call IO:Axis8Action(9)
+        else
+          call IO:Axis7Action(9)
+        endIf
+        
+      break
+      
+    endSwitch
+    
+    
+    
+    //当前七轴位置
+    if l_nKey!=-1 or !l_bFirst
+      
+      
+      //
+      
+      
+      l_bFirst=true
+      gotoxy(0,0)
+      put("运动机械手臂须上电     ")
+      
+      //××××××××××××××××××××××××××××
+      
+      
+      sSItem[0]="位置mm   :"+toString(".3",l_nPosition)
+      sSItem[1]="速度m/min:"+toString(".3",l_nSpeed)
+      sSItem[2]="比例分度 :"+toString("",l_nPrecent)
+      sSItem[3]="点动速度 :"+toString("",l_nJogSpeed)+"%"
+      sSItem[4]="报警复位"
+      sSItem[5]="门打开"
+      sSItem[6]="门关闭"
+      //sSItem[7]="当前马达值"
+      if bCheckAxisSafte
+        l_sBottom="+,-,,回零,运动,,,退出"
+      else
+        l_sBottom="+,-,记录,回零,运动,上传,保存,退出"
+      endIf
+      if !x_b8Axis
+        
+        call UI:Form_PanelList("LasMAN3.6->示教异步七轴","第七轴",sSItem,l_nIndex,l_sBottom)
+        
+      else
+        call UI:Form_PanelList("LasMAN3.6->示教异步八轴","第八轴",sSItem,l_nIndex,l_sBottom)
+        
+      endIf
+      
+      
+    endIf
+    
+    
+    //报警处理
+    if l_bAlarm  
+      call UI:Control_Mess("马达报警            ","")
+    else
+      if !l_bPowerOn
+        if l_bBHome
+          call UI:Control_Mess("马达已回零,未上电","")
+        else
+          call UI:Control_Mess("马达未回零,未上电","")
+        endIf
+      else
+        if l_bBHome
+          setTextMode(0)
+          call UI:Control_Mess("马达已回零,已上电","")
+        else
+          call UI:Control_Mess("马达未回零,已上电","")
+        endIf
+      endIf
+      
+    endIf
+    
+    
+    
+    
+    //2014.08.04
+    //实时显示异步七轴八轴位置
+    
+    if l_bAlarm==false and l_bPowerOn==true
+      if x_b8Axis
+        call IO:GetAxis8Pos(l_nBuff,l_nPrecent)
+      else
+        call IO:GetAxis7Pos(l_nBuff,l_nPrecent)
+      endIf
+      gotoxy(0,2)
+      put("轴当前位置:"+toString(".3",l_nBuff)+"     ")
+    endIf
+    delay(0)
+    
+  endWhile
+  
+  
+end
+  
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Code>
+  </Program>
+</Programs>

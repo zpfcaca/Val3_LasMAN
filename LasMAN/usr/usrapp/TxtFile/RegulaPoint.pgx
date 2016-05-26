@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="RegulaPoint" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_backUp" type="bool" use="value" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+  //规则图形则保存在特定的trRegular
+  //规则图形的相互转换
+
+
+  if nSingleType!=10 and nSingleType!=20 and nSingleType!=9
+    if x_backUp
+
+      resize(trReguPara,1,size(pCut))
+      resize(trRegular,1,size(pCut))
+      for l_nNum=0 to size(pCut)-1
+        trRegular[l_nNum]=pCut[l_nNum].trsf
+        trReguPara[l_nNum]=trCut[l_nNum]
+      endFor
+    else
+
+      resize(pCut,1,size(trRegular))
+      resize(pMoveC,1,size(trRegular))
+      resize(bMoveC,1,size(trRegular))
+      resize(trCut,1,size(trRegular))
+
+      for l_nNum=0 to size(trRegular)-1
+        pCut[l_nNum].trsf=trRegular[l_nNum]
+        trCut[l_nNum]=trReguPara[l_nNum]
+        bMoveC[l_nNum]=false
+        trPointCount.y=size(trRegular)-1
+      endFor
+    endIf
+  endIf
+
+
+
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

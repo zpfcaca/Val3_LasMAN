@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="PartMove" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nStart" type="num" xsi:type="element" />
+      <Parameter name="x_nEnd" type="num" xsi:type="element" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="4" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nStartCutTime" type="num" xsi:type="array" size="1" />
+      <Local name="l_nBuffCutCount" type="num" xsi:type="array" size="1" />
+      <Local name="l_jBuff" type="jointRx" xsi:type="array" size="1" />
+      <Local name="l_trTrsf" type="trsf" xsi:type="array" size="3" />
+      <Local name="l_cSame" type="config" xsi:type="array" size="1" />
+      <Local name="l_nBuffCircle" type="num" xsi:type="array" size="1" />
+      <Local name="l_nToolMode" type="num" xsi:type="array" size="1" />
+      <Local name="l_p" type="point" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //通过文件来实现多个路径的运动
+  //大路径的部分模拟
+  
+  
+  resetMotion()
+  DataBase:bIOStart=false
+  l_cSame.shoulder=ssame
+  l_cSame.elbow=esame
+  l_cSame.wrist=wsame
+  DataBase:nPointType=0
+  DataBase:bMoveTask=true
+  wait(TxtFile:bStartRead==false)
+  TxtFile:bStartRead=true
+  //数据初始化
+  TxtFile:fArray.trsf={0,0,0,0,0,0}
+  
+  //如果不是远程模式，则等待按下
+  //安全机制
+  DataBase:nToolMode=workingMode()
+  l_nToolMode=-1
+  if DataBase:nToolMode!=4
+    while l_nToolMode!=0
+      DataBase:nToolMode=workingMode(l_nToolMode)
+      delay(0)
+    endWhile
+  endIf
+  
+  //2014.07.28
+  //同步七八轴
+  if TxtFile:bSync7Axis or TxtFile:bSync8Axis
+    if !ExtAxis:libExist("Disk://extAxisCan/extAxisCan.pjx")
+      if ExtAxis:libLoad("Disk://extAxisCan/extAxisCan.pjx")!=0
+        popUpMsg("加载外部轴出错")
+        disablePower()
+        DataBase:nPointType=5
+        return
+      endIf
+    endIf
+  endIf
+  
+  
+  
+  //客户自定义函数
+  call Custom:BeforeAppro()
+  //走趋近点
+  DataBase:nPointType=1
+  setMoveId(0)
+  
+  
+  
+  //切割点
+  TxtFile:fArray.trsf={0,0,0,0,0,0}
+  
+  
+  
+  call SpeedFilter(TxtFile:trCut[x_nStart-1],mRun)
+  movel(TxtFile:pCut[x_nStart-1],TxtFile:tCfg,mRun)
+  waitEndMove()
+  setMoveId(x_nStart)
+  DataBase:nPointType=2
+  l_nBuffCutCount=0
+  
+  //客户自定义函数
+ call Custom:BeforeOpenLaser()
+  
+  
+  
+  //穿孔的IO处理
+  
+  if !DataBase:bIOStart 
+    call IO:KeyDigtalIO(DataBase:bKeyIO[2],DataBase:bKeyIO[1],DataBase:bKeyIO[0],TxtFile:trIODelay.x,TxtFile:trIODelay.y)
+    DataBase:bIOStart=true
+  endIf
+  
+  
+  
+  //穿孔延时
+  delay(max(TxtFile:nTrajDelay[0],0))
+  
+  
+  
+  //第一点的动作
+  call GetActionData(TxtFile:nAction,nAction,TxtFile:trCut[0].y)
+  call IO:Action(nAction,false,0)
+   call IO:Action(nAction,true,0)
+  
+  
+  for l_nNum=x_nStart to x_nEnd-1
+    
+    
+    //生产参数
+    TxtFile:pCut[l_nNum].config=l_cSame
+    TxtFile:pMoveC[l_nNum].config=l_cSame
+    call SpeedFilter(TxtFile:trCut[l_nNum],mRun)
+    //运动函数
+//    if TxtFile:bMoveC[l_nNum]
+//      movec(TxtFile:pMoveC[l_nNum],TxtFile:pCut[l_nNum],TxtFile:tCfg,mRun)
+//    else
+//      movel(TxtFile:pCut[l_nNum],TxtFile:tCfg,mRun)
+//    endIf          //运动函数
+         // TxtFile:pCut[l_nNum].config=TxtFile:pMoveC[l_nNum].config=TxtFile:cCfg
+          if TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+            if TxtFile:bMoveC[l_nNum]
+              movec(TxtFile:pMoveC[l_nNum],TxtFile:pCut[l_nNum],TxtFile:tCfg,mRun)
+            else
+              movel(TxtFile:pCut[l_nNum],TxtFile:tCfg,mRun)
+            endIf
+          else
+            if TxtFile:bMoveC[l_nNum]
+              call ExtAxis:SingleMove(3,l_jBuff,TxtFile:pMoveC[l_nNum],TxtFile:pCut[l_nNum],TxtFile:tCfg,mRun,TxtFile:trCutAxis[l_nNum])
+            else
+              call ExtAxis:SingleMove(2,l_jBuff,l_p,TxtFile:pCut[l_nNum],TxtFile:tCfg,mRun,TxtFile:trCutAxis[l_nNum])
+              
+            endIf
+            
+            
+          endIf
+
+
+
+
+    //动作
+    call GetActionData(TxtFile:nAction,nAction,TxtFile:trCut[l_nNum].y)
+    call IO:Action(nAction,true,l_nNum)
+    call IO:Action(nAction,false,l_nNum)
+    
+  endFor
+  
+  waitEndMove() 
+  //主要为是模拟而设
+  
+  
+  
+  
+  
+  
+  setMoveId(0)
+  DataBase:nPointType=3
+  
+  call IO:SafteyIO()
+  delay(max(TxtFile:nTrajDelay[1],0))
+  
+  call Custom:AfterCloseLaser()
+  
+  
+  //离开点  
+  
+  
+  
+  if taskStatus("ReadFile")==-1
+    l_nNum[3]=nEndTraj
+  endIf
+  
+  
+  
+  
+  
+  waitEndMove()
+  DataBase:nPointType=0
+  DataBase:bMoveTask=false
+
+  
+  
+  
+end
+
+
+
+
+
+]]></Code>
+  </Program>
+</Programs>

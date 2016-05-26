@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://www.staubli.com/robotics/VAL3/Project/3">
+  <Parameters version="s7.7" stackSize="5000" millimeterUnit="true" />
+  <Programs>
+    <Program file="BackupProduct.pgx" />
+    <Program file="CloseFile.pgx" />
+    <Program file="DeleteAlarmFile.pgx" />
+    <Program file="DeleteBuffTraj.pgx" />
+    <Program file="EditRecipe.pgx" />
+    <Program file="GetAsyncAxis.pgx" />
+    <Program file="IsAdjustTraj.pgx" />
+    <Program file="IsFileOK.pgx" />
+    <Program file="ReadAction.pgx" />
+    <Program file="ReadCfg.pgx" />
+    <Program file="ReadMatchPreset.pgx" />
+    <Program file="ReadMe.pgx" />
+    <Program file="ReadPartTraj.pgx" />
+    <Program file="ReadPoint.pgx" />
+    <Program file="ReadPreset.pgx" />
+    <Program file="ReadProduct.pgx" />
+    <Program file="ReadProductName.pgx" />
+    <Program file="ReadSingTraj.pgx" />
+    <Program file="ReadTraj.pgx" />
+    <Program file="RegulaPoint.pgx" />
+    <Program file="SaveAction.pgx" />
+    <Program file="SaveAutoTraj.pgx" />
+    <Program file="SaveCfg.pgx" />
+    <Program file="SaveNewProduct.pgx" />
+    <Program file="SavePartTraj.pgx" />
+    <Program file="SavePreset.pgx" />
+    <Program file="SaveTraj.pgx" />
+    <Program file="start.pgx" />
+    <Program file="stop.pgx" />
+  </Programs>
+  <Database>
+    <Data file="TxtFile.dtx" />
+  </Database>
+  <Libraries>
+    <Library alias="FileDir" path="Disk://FileDir/FileDir.pjx" />
+  </Libraries>
+</Project>

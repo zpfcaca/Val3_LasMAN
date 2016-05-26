@@ -1,0 +1,159 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="EditRecipe" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nTrajIndex" type="num" xsi:type="element" />
+      <Parameter name="x_bDelete" type="bool" xsi:type="element" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nTrajIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_sBuff" type="string" xsi:type="array" size="1" />
+      <Local name="l_sFileName" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+  //对路径进行操作
+  //删除路径
+  //添加路径
+  //修改路径
+
+
+  //参数初始化
+  x_bRes=false
+  l_sFileName="Disk://Txt/Recipe.txt"
+  if x_nTrajIndex<1
+    return
+  endIf
+  if x_bDelete and x_nTrajIndex>nTotalTraj
+    return
+  endIf
+
+  //判断文件是否存在
+  if !$fileExists(l_sFileName)
+    return
+  endIf
+  //××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××
+  //开始部分
+  //关闭所有文件
+  call FileDir:CloseAllFile()
+
+  //文件是否可以打开
+  nFileID=$fileOpen(l_sFileName,"r")
+  if nFileID<0 or nFileID>9
+    return
+  endIf
+
+  //文件是否可以打开
+  nFileBuffID=$fileOpen("Disk://Txt/Buff.txt","w")
+  if nFileBuffID<0 or nFileBuffID>9
+    return
+  endIf
+  l_nTrajIndex=0
+  while $fileGet(nFileID,l_sBuff,1)==1
+    if find(l_sBuff,"BEGIN=")>=0
+      l_nTrajIndex=l_nTrajIndex+1
+    endIf
+    if l_nTrajIndex>=x_nTrajIndex
+    else
+      if find(l_sBuff,"TOTALELEMENTS=")>=0
+        if x_nTrajIndex==nTotalTraj+1
+          l_sBuff="TOTALELEMENTS="+toString("",x_nTrajIndex)
+        else
+          if x_bDelete
+            l_sBuff="TOTALELEMENTS="+toString("",nTotalTraj-1)
+          endIf
+        endIf
+
+      endIf
+      if $fileSet(nFileBuffID,l_sBuff,1)!=1
+        return
+      endIf
+    endIf
+  endWhile
+  //***********************************************************************************
+  //添加中间
+  //关闭所有文件
+  call FileDir:CloseAllFile()
+
+  //添加文件
+  if !x_bDelete
+    //文件是否可以打开
+    nFileID=$fileOpen("Disk://Txt/Traj.txt","r")
+    if nFileID<0 or nFileID>9
+      return
+    endIf
+    
+    //文件是否可以打开
+    nFileBuffID=$fileOpen("Disk://Txt/Buff.txt","a")
+    if nFileBuffID<0 or nFileBuffID>9
+      return
+    endIf
+    
+    l_sBuff=""
+    $fileSet(nFileBuffID,l_sBuff,1)
+    
+    while $fileGet(nFileID,l_sBuff,1)==1
+      
+      //2015.03.20
+      if find(l_sBuff,"=")>=0
+        if $fileSet(nFileBuffID,l_sBuff,1)!=1
+          return
+        endIf
+      endIf
+    endWhile
+    
+    
+    l_sBuff=""
+    $fileSet(nFileBuffID,l_sBuff,1)
+    
+  endIf
+  
+      
+
+  //**********************************************************************
+  //添加结尾
+  //关闭所有文件
+  call FileDir:CloseAllFile()
+
+  //文件是否可以打开
+  nFileID=$fileOpen(l_sFileName,"r")
+  if nFileID<0 or nFileID>9
+    return
+  endIf
+
+  //文件是否可以打开
+  nFileBuffID=$fileOpen("Disk://Txt/Buff.txt","a")
+  if nFileBuffID<0 or nFileBuffID>9
+    return
+  endIf
+
+
+  l_nTrajIndex=0
+  while $fileGet(nFileID,l_sBuff,1)==1
+    if find(l_sBuff,"BEGIN=")>=0
+
+      l_nTrajIndex=l_nTrajIndex+1
+    endIf
+    if l_nTrajIndex<=x_nTrajIndex
+    else
+      if $fileSet(nFileBuffID,l_sBuff,1)!=1
+        return
+      endIf
+    endIf
+  endWhile
+
+
+
+  //××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××
+  //重命名
+  //关闭所有文件
+  call FileDir:CloseAllFile()
+  $delete("Disk://Txt/Recipe.txt")
+  $rename("Disk://Txt/Buff.txt","Disk://Txt/Recipe.txt")
+
+  x_bRes=true
+
+end]]></Code>
+  </Program>
+</Programs>

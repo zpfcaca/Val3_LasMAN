@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="ReadPreset" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_bRes" type="bool" use="reference" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="3" />
+      <Local name="l_sBuff" type="string" xsi:type="array" size="1" />
+      <Local name="l_sFileName" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+  //读取动作文本
+  //动作一共是200项，每项12个动作，每个动作一共是一个值
+  //
+
+
+  //参数初始化
+  x_bRes=false
+  l_sFileName="Disk://Txt/Preset.txt"
+
+  //判断文件是否存在
+  if !$fileExists(l_sFileName)
+    return
+  endIf
+
+  //关闭所有文件
+  call FileDir:CloseAllFile()
+
+  //文件是否可以打开
+  nFileID=$fileOpen(l_sFileName,"r")
+  if nFileID<0 or nFileID>9
+    return
+  endIf
+
+  //对于原有值进行初始化
+  for l_nNum[0]=0 to 50
+    for l_nNum[1]=0 to 4
+      nPreset[l_nNum[0],l_nNum[1]]=0
+    endFor
+  endFor
+
+
+  l_nNum[0]=l_nNum[1]=l_nNum[2]=0
+
+
+  //读取每行并解析
+  if $fileGet(nFileID,l_sBuff,1)!=1 or find(l_sBuff,"PRESET=StaubliPreset")<0
+    return
+  endIf
+
+  while $fileGet(nFileID,l_sBuff,1)==1 and l_sBuff!="" and l_nNum[0]<50
+    call FileDir:SplitPresetLine(l_sBuff,nPreset,l_nNum[0]+1,x_bRes)
+    if !x_bRes
+      return
+    endIf
+    l_nNum[0]=l_nNum[0]+1
+  endWhile
+
+  x_bRes=true
+
+
+
+
+
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

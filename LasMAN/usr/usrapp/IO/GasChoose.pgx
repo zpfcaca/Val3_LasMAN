@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="GasChoose" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nGasIndex" type="num" xsi:type="element" />
+    </Parameters>
+    <Code><![CDATA[begin
+  //2015.05.28
+  //气体选择，为特定的气体做选择
+  
+  
+  if roundDown(x_nGasIndex)!=roundUp(x_nGasIndex)
+      x_nGasIndex=0
+  endIf
+  
+  
+  switch  x_nGasIndex
+    case 0
+      dDio["UsO_bNull5"]=false
+      dDio["UsO_bNull6"]=false
+      dDio["UsO_bNull8"]=false
+      
+    break
+    
+    case 1
+      dDio["UsO_bNull5"]=true
+      dDio["UsO_bNull6"]=false
+      dDio["UsO_bNull8"]=false
+    break
+    
+    
+    case 2
+      dDio["UsO_bNull5"]=false
+      dDio["UsO_bNull6"]=true
+      dDio["UsO_bNull8"]=false
+    break
+    
+    
+    case 3
+      dDio["UsO_bNull5"]=false
+      dDio["UsO_bNull6"]=false
+      dDio["UsO_bNull8"]=true
+      
+    break
+    
+    
+    
+    
+    
+  endSwitch
+  
+  call Digtal2Analog()
+  
+  
+  
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

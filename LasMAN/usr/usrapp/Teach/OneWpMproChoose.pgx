@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="OneWpMproChoose" access="public">
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_nProductIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_sSFileName" type="string" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //同工位多产品选择
+  //TxtFile:bMoreProd1Wp
+  
+  //bMultiNormal  多产品合并为一个工位
+  
+  
+  //参数初始化
+  for l_nNum=0 to size(DataBase:sProductName)-1
+    DataBase:sProductName[l_nNum]=""
+  endFor
+  
+  //选择产品
+  //    for l_nNum=1 to DataBase:nWorkPlaceCount
+  //      
+  l_nNum=DataBase:nWorkPlaceIndex
+  if !DataBase:bMultiNormal
+    //为法利莱
+    call IO:ChooseMultPro(l_nNum,l_nProductIndex)
+  else
+    //为大族
+    call IO:ChoosehansPro(l_nNum,DataBase:nProductIndex,DataBase:nWpMutiCount)
+    l_nProductIndex=DataBase:nProductIndex
+  endIf
+  
+  
+  
+  
+  //选择不正确则退出
+  l_sSFileName="Disk://Txt/"+toString("",l_nNum)+"Product"+toString("",l_nProductIndex)+".txt"
+  if l_nProductIndex<1 
+    DataBase:nInterfaceType=9
+    return
+  endIf
+  
+  if  $fileExists(l_sSFileName)==false
+    DataBase:nInterfaceType=9
+    popUpMsg(l_sSFileName+"文件不存在")
+    logMsg(l_sSFileName+"文件不存在")
+    return
+  endIf
+  
+  //读取文件名
+  DataBase:bStopPoll=true
+  call TxtFile:ReadProductName(l_sSFileName,l_bRes)
+  DataBase:bStopPoll=false
+  if l_bRes
+    DataBase:sProductName[l_nNum]=TxtFile:sProductName
+  else
+    DataBase:nInterfaceType=9
+    popUpMsg("读取产品名出错")
+    logMsg(l_sSFileName+"产品名出错")
+    disablePower()
+    return
+  endIf
+  
+  //拷贝
+  call TxtFile:CloseFile()
+  if $fileExists("Disk://Txt/Product"+toString("",l_nNum)+".txt")
+    $delete("Disk://Txt/Product"+toString("",l_nNum)+".txt")
+  endIf
+  if !$copy(l_sSFileName,"Disk://Txt/Product"+toString("",l_nNum)+".txt")
+    DataBase:nInterfaceType=9
+    popUpMsg("拷贝文件出错")
+    logMsg("拷贝产品名出错")
+    return
+  endIf
+  //      
+  //    endFor
+  //    
+  
+  //把工位值赋给
+  DataBase:nWorkPlaceIndex=l_nNum
+  
+  
+end
+
+]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="chkDrivesFault">
+    <Locals>
+      <Local name="l_i" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //检查电机是否有错误
+  //以下情况表明电机出现错误:
+  //错误标志位；
+  bNoDrivesFault=true
+  for l_i=0 to nAxesSum-1
+    if bDrvFault[l_i]!=(diFault[l_i]==true) and (!bDrvFault[l_i])
+      sMsg="第"+toString("",l_i+1)+"轴控制器报错"
+      popUpMsg(sMsg)
+      logMsg(sMsg)
+    endIf 
+    bDrvFault[l_i]=(diFault[l_i]==true)
+    bNoDrivesFault=bNoDrivesFault and !bDrvFault[l_i]
+  endFor
+end]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="CloseFile" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nFileID" type="num" use="value" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Code><![CDATA[begin
+
+  //文件标志符
+
+
+  if x_nFileID<0 or x_nFileID>9
+    return
+  endIf
+
+  //
+  switch x_nFileID
+    case 0
+      $fileClose(0)
+    break
+
+    case 1
+      $fileClose(1)
+    break
+
+    case 2
+      $fileClose(2)
+    break
+
+    case 3
+      $fileClose(3)
+    break
+
+    case 4
+      $fileClose(4)
+    break
+
+    case 5
+      $fileClose(5)
+    break
+    case 6
+      $fileClose(6)
+    break
+
+    case 7
+      $fileClose(7)
+    break
+    case 8
+      $fileClose(8)
+    break
+
+    case 9
+      $fileClose(9)
+    break
+
+
+  endSwitch
+
+
+end]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="ChangeLength" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_trSource" type="pointRx" xsi:type="array" use="reference" />
+      <Parameter name="x_nLength" type="num" xsi:type="array" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nBuff" type="num" xsi:type="array" size="2" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  
+  //参数合法化处理
+  if size(x_trSource)<3
+    return
+  endIf
+  
+  l_nBuff[0]=distance(x_trSource[0].trsf,x_trSource[1].trsf)
+  l_nBuff[1]=distance(x_trSource[2].trsf,x_trSource[1].trsf) 
+  
+  
+  if x_nLength[1]<=0 or x_nLength[0]<=0 or l_nBuff[0]<=0 or l_nBuff[1]<=0
+    return
+  endIf
+  
+  
+  
+  x_trSource[0].trsf.x=(x_trSource[0].trsf.x-x_trSource[1].trsf.x)/l_nBuff[0]*x_nLength[0]+x_trSource[1].trsf.x
+  x_trSource[0].trsf.y=(x_trSource[0].trsf.y-x_trSource[1].trsf.y)/l_nBuff[0]*x_nLength[0]+x_trSource[1].trsf.y
+  x_trSource[0].trsf.z=(x_trSource[0].trsf.z-x_trSource[1].trsf.z)/l_nBuff[0]*x_nLength[0]+x_trSource[1].trsf.z
+  
+  x_trSource[2].trsf.x=(x_trSource[2].trsf.x-x_trSource[1].trsf.x)/l_nBuff[1]*x_nLength[1]+x_trSource[1].trsf.x
+  x_trSource[2].trsf.y=(x_trSource[2].trsf.y-x_trSource[1].trsf.y)/l_nBuff[1]*x_nLength[1]+x_trSource[1].trsf.y
+  x_trSource[2].trsf.z=(x_trSource[2].trsf.z-x_trSource[1].trsf.z)/l_nBuff[1]*x_nLength[1]+x_trSource[1].trsf.z     
+  
+  
+  
+  
+  
+  
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

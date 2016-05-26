@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="UpLoad" access="public">
+    <Locals>
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nTime" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //不推荐客户自己改动此函数代码
+  //-----------------------------------------------------------------------
+  //把CS8C的信息上传到上位机中
+  cls()
+  call UI:Control_PanelMd("正在上传，请等待")
+  call UI:Control_BottomS(",,,,,,,终止")
+  call TxtFile:CloseFile()
+  DataBase:bUpload=true
+  l_nTime=clock()
+  
+  
+  //开始上传
+  while DataBase:bUpload==true and 120-clock()+l_nTime>0
+    l_nKey=getKey()
+    
+    if l_nKey==278
+      call UI:Control_YesNO("确定要终止上传吗",l_bRes)
+      if l_bRes
+        DataBase:bUpload=false
+        return
+      else
+        call UI:Control_PanelMd("正在上传，请等待")
+        call UI:Control_BottomS(",,,,,,,终止")
+      endIf
+    endIf
+    
+    
+    gotoxy(0,12)
+    put("剩余:"+toString("",120-clock()+l_nTime)+"秒     ")
+    delay(0)
+    
+  endWhile
+  
+  //对上传结果进行判断
+  DataBase:bUpload=false
+  if clock()>l_nTime+60
+    popUpMsg("上传失败!")
+  else
+    popUpMsg("上传成功")
+  endIf
+  cls()
+  
+end
+]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="IsInput" access="private" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nIOid" type="num" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_bRes" type="bool" use="reference" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Code><![CDATA[begin
+
+  x_bRes=false
+  switch true
+
+    //序号为0
+    //    case x_nIOid==0
+    //      x_bRes=true
+    //    break
+
+    //数字量输入
+    case x_nIOid>0 and x_nIOid<67
+      x_bRes=true
+    break
+
+
+    //数字量输出
+    case x_nIOid>134 and x_nIOid<=140
+      x_bRes=false
+    break
+
+    //数字量输入
+    case x_nIOid>140 and x_nIOid<=144
+      x_bRes=true
+    break
+
+    //数字量输出
+    case x_nIOid>144 and x_nIOid<=164
+      x_bRes=false
+    break
+
+    //延时等待
+    case x_nIOid==165
+      x_bRes=true
+    break
+
+
+    //收弧时间
+    case x_nIOid==166
+      x_bRes=true
+    break
+
+
+    //收弧长度
+    case x_nIOid==167
+      x_bRes=false
+    break
+
+
+    default
+    break
+  endSwitch
+
+end]]></Code>
+  </Program>
+</Programs>

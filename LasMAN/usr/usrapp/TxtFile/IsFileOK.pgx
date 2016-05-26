@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="IsFileOK" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_bRes" type="bool" use="reference" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Code><![CDATA[begin
+
+
+  x_bRes=false
+
+  //删除急停文件
+  call DeleteAlarmFile()
+
+
+  //读取动作文件是否正确
+  call ReadAction(x_bRes)
+  if !x_bRes
+    popUpMsg("action.txt动作文件不正确")
+    logMsg("action.txt动作文件不正确")
+    return
+  endIf
+
+  //读取配置文件是否正确
+  call ReadCfg(x_bRes)
+  if !x_bRes
+    popUpMsg("configure.txt配置文件不正确")
+    logMsg("configure.txt配置文件不正确")
+    return
+  endIf
+
+
+  //读取工艺文件是否正确
+  call ReadPreset(x_bRes)
+  if !x_bRes
+    popUpMsg("preset.txt工艺文件不正确")
+    logMsg("preset.txt工艺文件不正确")
+    return
+  endIf
+
+
+end]]></Code>
+  </Program>
+</Programs>

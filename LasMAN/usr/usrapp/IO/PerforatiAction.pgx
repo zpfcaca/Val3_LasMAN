@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="PerforatiAction" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nGasDelay" type="num" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_nFollowDelay" type="num" use="value" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Code><![CDATA[begin
+
+  //穿孔动作
+  call KeyDigtalIO(true,true,true,x_nGasDelay,x_nFollowDelay)
+
+end]]></Code>
+  </Program>
+</Programs>

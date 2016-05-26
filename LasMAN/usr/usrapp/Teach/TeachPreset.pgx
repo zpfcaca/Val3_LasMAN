@@ -1,0 +1,231 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="TeachPreset" access="public">
+    <Locals>
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_nPointType" type="num" xsi:type="array" size="1" />
+      <Local name="l_nPointIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_sItemTitle" type="string" xsi:type="array" size="1" />
+      <Local name="l_bKeyIO" type="bool" xsi:type="array" size="3" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_bPower" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bFirst" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bLaserNoGas" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bGunUp" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //工艺示教
+  //参数初始化
+  DataBase:bStopPoll=true
+  
+  
+  call TxtFile:ReadCfg(l_bRes)
+   IO:bWeldEnable=TxtFile:bWeldEnable
+   IO:bExt7AxisEnable=TxtFile:b7Axis
+   IO:bExt8AxisEnable=TxtFile:b8Axis
+  if !l_bRes
+    popUpMsg("读取配置文件不正确")
+    return
+  endIf
+  
+  call TxtFile:ReadPreset(l_bRes)
+  if !l_bRes
+    popUpMsg("读取工艺文件不正确")
+    return
+  endIf
+  
+  if TxtFile:trPresetData.z<=0
+    popUpMsg("配置中模拟量系数不能小于等于0")
+    return
+  endIf
+  
+  if TxtFile:trPresetData.x<=TxtFile:trPresetData.y
+    popUpMsg("配置中PWM频率高不能小于等于PWM频率低")
+    return
+  endIf
+  
+  
+  //轮询
+  resize(sSItem,1,50)
+  for l_nNum=0 to 49
+    sSItem[l_nNum]="序号:"+toString("",l_nNum+1)
+  endFor
+  cls()
+  DataBase:bStopPoll=false
+  
+  
+  
+  l_bGunUp=IO:bGunUp
+  while true
+    
+    l_nKey=getKey()
+    switch l_nKey
+      
+      //激光
+      case 271
+        
+        
+        if !isPowered() and !l_bKeyIO[0]
+          popUpMsg("请先上电!")
+        else
+          l_bKeyIO[0]=!l_bKeyIO[0]
+          if l_bKeyIO[0]
+            if !l_bLaserNoGas
+              l_bKeyIO[2]=true
+            endIf
+          endIf
+          call IO:KeyDigtalIO(l_bKeyIO[2],l_bKeyIO[1],l_bKeyIO[0],0,0)
+        endIf
+        
+      break
+      
+      
+      
+      
+      
+      
+      //随动
+      case 272
+        IO:bGunUp=false
+        if !isPowered() and !l_bKeyIO[1]
+          popUpMsg("请先上电!")
+        else
+          l_bKeyIO[1]=!l_bKeyIO[1]
+          call IO:KeyDigtalIO(l_bKeyIO[2],l_bKeyIO[1],l_bKeyIO[0],0,0)
+        endIf
+      break
+      
+      //气体
+      case 273
+        
+        if !isPowered() and !l_bKeyIO[2]
+          popUpMsg("请先上电!")
+        else
+          if !l_bKeyIO[0]
+            l_bKeyIO[2]=!l_bKeyIO[2]
+          endIf
+          call IO:KeyDigtalIO(l_bKeyIO[2],l_bKeyIO[1],l_bKeyIO[0],0,0)
+        endIf
+      break
+      
+      
+      //上传
+      case 275
+        call UI:Control_YesNO("确定要上传吗?",l_bRes)
+        if l_bRes
+          call Kit:UpLoad()
+        endIf
+      break
+      
+      
+      //退出
+      case 278
+        IO:bGunUp=l_bGunUp
+        call UI:Control_YesNO("确定要退出吗?",l_bRes)
+        if l_bRes
+          return
+        endIf
+      break
+      
+      
+      //修改
+      case 276,270
+        call UI:Control_Preset(TxtFile:nPreset,l_nPointIndex+1)
+        cls()
+      break
+      
+      
+      
+      
+      case 277
+        call UI:Control_YesNO("确定要保存吗?",l_bRes)
+        if l_bRes
+          call TxtFile:SavePreset(l_bRes)
+          if !l_bRes
+            popUpMsg("保存出错")
+          else
+            popUpMsg("保存成功")
+          endIf
+          cls()
+        endIf
+      break
+      
+      
+      
+      case 261
+        l_nPointIndex=max(0,l_nPointIndex-1)
+      break
+      
+      
+      case 266
+        l_nPointIndex=min(size(sSItem)-1,l_nPointIndex+1)
+      break
+      
+      //q
+      //开光时不强制开气
+      case 113
+        call UI:Control_YesNO("确定需要开光时不强制开气",l_bRes)
+        l_bLaserNoGas=l_bRes
+        
+      break
+      
+      
+      //97
+      case 97
+        call UI:Control_YesNO("确定需要开随动不抬枪",l_bRes)
+        IO:bGunUp=!l_bRes
+      break
+      
+    endSwitch
+    
+    
+    if (l_nKey<279  and l_nKey>=260) or isPowered()!=l_bPower or !l_bFirst or l_nKey==113 or l_nKey==97
+      l_bPower=isPowered()
+      if !l_bPower
+        l_bKeyIO[0]=l_bKeyIO[1]=l_bKeyIO[2]=false
+      endIf
+      l_bFirst=true
+      
+      
+      
+      
+      //IO配置
+      call IO:Preset(TxtFile:nPreset,l_nPointIndex+1,TxtFile:trPresetData.z,TxtFile:trPresetData.x,TxtFile:trPresetData.y)
+      call IO:GetPreset(DataBase:nPresetData,TxtFile:trPresetData.z,TxtFile:trPresetData.x,TxtFile:trPresetData.y)
+      call UI:Form_Simulation("LasMAN3.6->示教工艺","工艺表",sSItem,l_nPointIndex,DataBase:nPresetData,l_bKeyIO)
+      
+      
+      gotoxy(0,0)
+      put("测试请上电!")
+      
+      //2014.06.06
+      if l_bGunUp
+        gotoxy(0,1)
+        put("q->开光不开气")
+        gotoxy(0,2)
+        put("a->随动不抬枪")
+        
+      endIf
+      if l_bLaserNoGas
+        gotoxy(0,3)
+        put("激光与气体不联动")
+      endIf
+      
+      
+      
+    endIf
+    
+    
+    
+    
+    delay(0)
+    
+    
+  endWhile
+  
+end
+
+  ]]></Code>
+  </Program>
+</Programs>

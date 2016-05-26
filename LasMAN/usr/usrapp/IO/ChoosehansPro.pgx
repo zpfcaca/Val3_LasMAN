@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="ChoosehansPro" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nWorkPlace" type="num" use="reference" xsi:type="element" dimensions="1" />
+      <Parameter name="x_nProductIndex" type="num" use="reference" xsi:type="element" dimensions="1" />
+      <Parameter name="x_nMax" type="num" use="reference" xsi:type="array" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //  //2013.10.30
+  //  //通过数字量来选择产品
+  //  //主要用来检测按钮触发
+  //  //同工位多产品函数
+
+  //2014.05.30
+
+
+
+
+
+  //  x_nProductIndex=0
+  //  x_nProductIndex=0
+  //  l_nNum=0
+
+  if x_nProductIndex>=x_nMax[x_nWorkPlace]
+    x_nProductIndex=0
+  endIf
+
+  if x_nProductIndex>0
+    x_nProductIndex=x_nProductIndex+1
+    return
+
+  endIf
+
+  while true
+    //工位1
+    if dDio["In1_bPrdSta1"]==true and dDio["UsIn_bNull1"]==true and dDio["UsIn_bNull2"]==true
+      delay(0.1)
+      if dDio["In1_bPrdSta1"]==true and dDio["UsIn_bNull1"]==true and dDio["UsIn_bNull2"]==true
+        //
+        x_nProductIndex=1
+        x_nWorkPlace=1
+        return
+      endIf
+    endIf
+
+
+    //工位2
+    if dDio["In1_bPrdSta2"]==true and dDio["UsIn_bNull3"]==true and dDio["UsIn_bNull3"]==true
+      delay(0.1)
+      if dDio["In1_bPrdSta2"]==true and dDio["UsIn_bNull3"]==true and dDio["UsIn_bNull4"]==true
+        //
+        x_nProductIndex=1
+        x_nWorkPlace=2
+        return
+      endIf
+    endIf
+
+
+    //工位3
+    if dDio["In1_bPrdSta2"]==true and dDio["UsIn_bNull5"]==true and dDio["UsIn_bNull6"]==true
+      delay(0.1)
+      if dDio["In1_bPrdSta2"]==true and dDio["UsIn_bNull5"]==true and dDio["UsIn_bNull6"]==true
+        //
+        x_nProductIndex=1
+        x_nWorkPlace=3
+        return
+      endIf
+    endIf
+
+
+
+
+
+
+
+    //2014.06.03
+    //*************************************************************************
+    //*************************************************************************
+
+    //为大族定制
+    //A1,A2,A3,A4
+    if dDio["In1_bPrdSta1"]==true and dDio["UsIn_bNull1"]==true and dDio["UsIn_bNull2"]==true
+      delay(0.1)
+      if dDio["In1_bPrdSta1"]==true and dDio["UsIn_bNull1"]==true and dDio["UsIn_bNull2"]==true
+        //
+        x_nProductIndex=1
+        x_nWorkPlace=1
+        x_nMax[1]=4
+        return
+      endIf
+    endIf
+
+
+    //A1,A2
+    if dDio["In1_bPrdSta1"]==true and dDio["UsIn_bNull1"]==true and dDio["UsIn_bNull2"]==true
+      delay(0.1)
+      if dDio["In1_bPrdSta1"]==true and dDio["UsIn_bNull1"]==true and dDio["UsIn_bNull2"]==true
+        //
+        x_nProductIndex=1
+        x_nWorkPlace=1
+        x_nMax[1]=2
+        return
+      endIf
+    endIf
+
+    //A3,A4
+    if dDio["In1_bPrdSta1"]==true and dDio["UsIn_bNull1"]==true and dDio["UsIn_bNull2"]==true
+      delay(0.1)
+      if dDio["In1_bPrdSta1"]==true and dDio["UsIn_bNull1"]==true and dDio["UsIn_bNull2"]==true
+        //
+        x_nProductIndex=3
+        x_nWorkPlace=1
+        x_nMax[1]=4
+        return
+      endIf
+    endIf
+
+    //***********************************************************************************
+    //**********************************************************************************
+
+
+
+    delay(0)
+  endWhile
+
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="pwrOffDrive2" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nAxNum" type="num" xsi:type="element" />
+    </Parameters>
+    <Locals>
+      <Local name="l_bOK" type="bool" xsi:type="array" size="1" />
+      <Local name="l_sMsg" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  // sequenceur pour desactiver les variateurs
+  
+  // Read current drive State
+  call chkDrvState(x_nAxNum)
+  
+  // Changement d'état ?
+  if nDrvState[x_nAxNum]!=nMemPwrOffStep[x_nAxNum]
+    nMemPwrOffStep[x_nAxNum]=nDrvState[x_nAxNum]
+    bLockPwrOff[x_nAxNum]=false
+  endIf
+  
+  l_sMsg="pwrOffDrive>>Etape : "+toString("",nDrvState[x_nAxNum])+" "
+  switch nDrvState[x_nAxNum]
+    // Not ready to Switch on
+    case 1
+      if bLockPwrOff[x_nAxNum]==false
+        if bAnd(nDebug,cst:nDEBUGDRIVE)==cst:nDEBUGDRIVE
+          l_sMsg=l_sMsg+"Not ready to Switch on"
+          logMsg(l_sMsg)
+        endIf
+        bLockPwrOff[x_nAxNum]=true
+      endIf
+    break
+    // Switch ON disabled
+    case 2
+      if bLockPwrOff[x_nAxNum]==false
+        if bAnd(nDebug,cst:nDEBUGDRIVE)==cst:nDEBUGDRIVE
+          l_sMsg=l_sMsg+"Switch on disabled"
+          logMsg(l_sMsg)
+        endIf
+        call cmdResetAll(x_nAxNum)
+        bLockPwrOff[x_nAxNum]=true
+      endIf
+    break
+    // Ready to switch on
+    case 3
+      if bLockPwrOff[x_nAxNum]==false
+        if bAnd(nDebug,cst:nDEBUGDRIVE)==cst:nDEBUGDRIVE
+          l_sMsg=l_sMsg+"Ready to switch on"
+          logMsg(l_sMsg)
+        endIf
+        call cmdQuickStop(x_nAxNum)
+        call cmdDisableVolt(x_nAxNum)
+        bLockPwrOff[x_nAxNum]=true
+      endIf
+    break
+    // Switched ON
+    case 4
+      if bLockPwrOff[x_nAxNum]==false
+        if bAnd(nDebug,cst:nDEBUGDRIVE)==cst:nDEBUGDRIVE
+          l_sMsg=l_sMsg+"Switched ON"
+          logMsg(l_sMsg)
+        endIf
+        call cmdShutdown(x_nAxNum)
+        bLockPwrOff[x_nAxNum]=true
+      endIf
+    break
+    // Operation enabled
+    case 5
+      if bLockPwrOff[x_nAxNum]==false
+        if bAnd(nDebug,cst:nDEBUGDRIVE)==cst:nDEBUGDRIVE
+          l_sMsg=l_sMsg+"Operation enabled"
+          logMsg(l_sMsg)
+        endIf
+        call cmdDisableOp(x_nAxNum)
+        bLockPwrOff[x_nAxNum]=true
+      endIf
+    break
+    
+    // Fault state
+    case 14
+      if bLockPwrOff[x_nAxNum]==false
+        if bAnd(nDebug,cst:nDEBUGDRIVE)==cst:nDEBUGDRIVE
+          l_sMsg=l_sMsg+"Fault state"
+          logMsg(l_sMsg)
+        endIf
+        bLockPwrOff[x_nAxNum]=true
+      endIf
+    break
+    //
+    // Alarm from status_remote register is set
+    case 15
+      if bLockPwrOff[x_nAxNum]==false
+        if bAnd(nDebug,cst:nDEBUGDRIVE)==cst:nDEBUGDRIVE
+          l_sMsg=l_sMsg+"Alarm Status_remote register"
+          logMsg(l_sMsg)
+        endIf
+        call cmdResetAll(x_nAxNum)
+        bLockPwrOff[x_nAxNum]=true
+      endIf
+    break
+    //
+  endSwitch
+  
+end]]></Code>
+  </Program>
+</Programs>

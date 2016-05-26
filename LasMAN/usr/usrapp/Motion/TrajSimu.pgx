@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="TrajSimu" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nTrajIndex" type="num" xsi:type="element" />
+    </Parameters>
+    <Locals>
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  //路径模拟
+  //需要读取文件
+  
+  //初始化
+  call KillTask()
+  //DataBase:bSimuIO=false
+  DataBase:bIOStart=false
+  nStartTraj=min(max(x_nTrajIndex,1),TxtFile:nTotalTraj)
+  nEndTraj=min(TxtFile:nTotalTraj,x_nTrajIndex)
+  
+  
+  //新建任务，来读写
+  TxtFile:bReadProduct=true
+  TxtFile:nReadCutCount=0
+  taskCreate "ReadFile",100,ReadTraj()
+  //taskCreateSync "Preset",0.008,bSync,Preset()
+  taskCreate "Preset",100,Preset()
+  if TxtFile:bWeldEnable
+    //taskCreateSync "WeldEnd",0.008,bSync,WeldEnd()
+  endIf
+  
+  //等待运动读写
+  delay(0.5)
+  //进行运动
+  
+  call Move()
+  
+end
+
+
+  ]]></Code>
+  </Program>
+</Programs>

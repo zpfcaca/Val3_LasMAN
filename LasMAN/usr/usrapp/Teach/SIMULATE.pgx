@@ -1,0 +1,292 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="Simulate" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nTrajIndex" type="num" xsi:type="element" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_nPointType" type="num" xsi:type="array" size="1" />
+      <Local name="l_nPointIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_sItemTitle" type="string" xsi:type="array" size="1" />
+      <Local name="l_bKeyIO" type="bool" xsi:type="array" size="3" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_nID" type="num" xsi:type="array" size="1" />
+      <Local name="l_nToolMode" type="num" xsi:type="array" size="1" />
+      <Local name="l_trArray" type="trsf" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  logMsg(TxtFile:sProductName+"开始模拟"+toString("",x_nTrajIndex))
+  if x_nTrajIndex>=0
+    call UI:Control_PanelMd("请等待，正在读取文件......")
+  else
+    call UI:Control_PanelMd("请等待，开始模拟......")  
+  endIf
+  
+  
+  
+  //参数初始化
+  DataBase:bIOStart=false
+  
+  
+  // DataBase:bKeyIO[0]= DataBase:bKeyIO[1]= DataBase:bKeyIO[2]=false
+  DataBase:nPointType=0
+  DataBase:nID=0
+  nPointType=-1
+  l_nPointIndex=0
+  nApproIndex=0
+  nCutIndex=0
+  nLeaveIndex=0
+  n500Count=0
+  
+  setMoveId(0)
+  
+  //2015.12.30
+  //需要建立task之前，先kill
+  taskKill("Simulation")
+  wait(taskStatus("Simulation")==-1)
+  
+  
+  
+  //建立路径
+  if x_nTrajIndex==-1
+    taskCreate "Simulation",100,Motion:TeachSimu(0,0)
+  else
+    if x_nTrajIndex==-2
+      taskCreate "Simulation",100,Motion:TeachSimu(DataBase:nPartMove[0],DataBase:nPartMove[1])
+    else
+      taskCreate "Simulation",100,Motion:TrajSimu(x_nTrajIndex)
+    endIf
+  endIf
+  l_bKeyIO[0]=DataBase:bKeyIO[0]
+  l_bKeyIO[1]=DataBase:bKeyIO[1]
+  l_bKeyIO[2]=DataBase:bKeyIO[2]
+  
+  delay(0)
+  wait(getKey()==-1)
+  
+  if TxtFile:b7Axis or TxtFile:b8Axis
+    call UI:Control_PanelMd("外部轴在运动")
+  endIf
+  
+  if DataBase:bExtraContrAxis
+    
+    call UI:Control_PanelMd("等待PLC控制外部轴到位")
+  endIf
+  
+  
+  
+  // wait(Motion:bMoveTask)
+  wait(DataBase:nPointType>0)
+  //轮询
+  while DataBase:bMoveTask
+    //强制使用离散工艺
+    TxtFile:bMatchPreset=false
+    
+    if nPointType!=DataBase:nPointType
+      
+      l_nPointIndex=0
+      n500Count=0
+      nPointType=DataBase:nPointType
+      //获取内容
+      call GetListItems()
+      cls()
+      switch DataBase:nPointType
+        case 1
+          l_sItemTitle="趋近点"
+          call UI:Control_Mess("类型:"+TxtFile:sTrajType[TxtFile:nSingleType],"趋近点个数:"+toString("",size(TxtFile:pAppro)))
+        break
+        
+        case 2
+          l_sItemTitle="切割点"
+          if x_nTrajIndex<0
+            call UI:Control_Mess("类型:"+TxtFile:sTrajType[TxtFile:nSingleType],"切割点个数:"+toString("",size(TxtFile:pCut)))
+          else
+            call UI:Control_Mess("类型:"+TxtFile:sTrajType[TxtFile:nSingleType],"切割点个数:"+toString("",TxtFile:trPointCount.y))
+          endIf
+        break
+        case 3
+          l_sItemTitle="离开点"
+          call UI:Control_Mess("类型:"+TxtFile:sTrajType[TxtFile:nSingleType],"离开点个数:"+toString("",size(TxtFile:pLeave)))
+        break
+      endSwitch
+    endIf
+    
+    
+    
+    l_nKey=getKey()
+    switch l_nKey
+      
+      //激光
+      case 271
+        l_bKeyIO[0]=!l_bKeyIO[0]
+        if l_bKeyIO[0]
+          l_bKeyIO[2]=true
+        endIf
+      break
+      
+      //随动
+      case 272
+        l_bKeyIO[1]=!l_bKeyIO[1]
+      break
+      
+      //气体
+      case 273
+        if !l_bKeyIO[0]
+          l_bKeyIO[2]=!l_bKeyIO[2]
+        else
+          l_bKeyIO[2]=true
+        endIf
+      break
+      
+      //退出
+      case 278
+        call UI:Control_YesNO("确定要终止模拟吗?",l_bRes)
+        if l_bRes
+          DataBase:bMoveTask=false
+          DataBase:bStopSimul=true
+          taskKill("Simulation")
+          wait(taskStatus("Simulation")==-1)
+          //Motion:
+          call Motion:KillTask()
+          resetMotion()
+          disablePower()
+          call IO:SafteyIO()
+          return
+        endIf
+      break
+      
+      
+      
+      
+    endSwitch
+    
+    
+    DataBase:nID=getMoveId()
+    if ((DataBase:nID%500)>(l_nPointIndex+0.8)) or l_nKey!=-1 or DataBase:bPowerOn!=isPowered() or l_nPointIndex>(DataBase:nID%500-0.7) or l_nPointIndex<=0
+      
+      DataBase:bPowerOn=isPowered()
+      //没有上电
+      if !DataBase:bPowerOn
+        l_bKeyIO[0]=l_bKeyIO[1]=l_bKeyIO[2]=false
+      else
+        //在切割点的时候
+        if DataBase:nPointType==2
+          //对于IO进行赋值
+          //
+          
+          //          if !TxtFile:bWeldEnable
+          //            
+          //            call IO:KeyDigtalIO(l_bKeyIO[2],l_bKeyIO[1],l_bKeyIO[0],TxtFile:trIODelay.x,TxtFile:trIODelay.y)
+          //           // DataBase:bSimuIO=true
+          //          else
+          
+          //2015.02.03
+          if DataBase:bIOStart and TxtFile:trWorkplace.rz!=-1
+            if !TxtFile:bWeldEnable or (TxtFile:bWeldEnable and !(TxtFile:trWorkplace.z==1))
+              call IO:KeyDigtalIO(l_bKeyIO[2],l_bKeyIO[1],l_bKeyIO[0],TxtFile:trIODelay.x,TxtFile:trIODelay.y)
+              // DataBase:bSimuIO=true
+            endIf
+          endIf
+          
+          //            
+          //          endIf
+          if roundDown(DataBase:nID/500)!=n500Count
+            n500Count=roundDown(DataBase:nID/500)
+            call GetListItems()
+          endIf
+          
+          // else
+          // call IO:KeyDigtalIO(false,false,false,0,0)
+          // DataBase:bSimuIO=false
+        endIf
+        
+        //点序号变化
+        // l_nPointIndex=max((round(DataBase:nID))%500-1,0)
+        if (DataBase:nID-roundDown(DataBase:nID))>0.8
+          l_nPointIndex=max(roundUp((DataBase:nID))%500-1,0)
+        else
+          l_nPointIndex=max(roundDown(DataBase:nID)%500-1,0)
+        endIf
+        
+        
+        
+        //使用动作
+        if TxtFile:bWeldEnable and TxtFile:trWorkplace.z==1 
+          
+          call IO:GetKeyIO(l_bKeyIO[0],l_bKeyIO[1],l_bKeyIO[2])
+        endIf
+        
+        switch DataBase:nPointType
+          case 1
+            l_nPointIndex=min(l_nPointIndex,size(TxtFile:pAppro)-1)
+          break
+          
+          case 2
+            l_nPointIndex=min(l_nPointIndex,size(TxtFile:pCut)-1)
+          break
+          
+          
+          case 3
+            l_nPointIndex=min(l_nPointIndex,size(TxtFile:pLeave)-1)
+          break
+        endSwitch
+        
+      endIf
+      //2016.04.07
+      //模拟时候添加
+     // if !TxtFile:bWeldEnable
+        if false
+        call UI:Form_Simulation("LasMAN3.6->模拟路径"+toString("",DataBase:nTrajIndex),l_sItemTitle,sSItem,l_nPointIndex,DataBase:nPresetData,l_bKeyIO)
+      else
+        l_trArray=TxtFile:trArray
+        l_trArray.y=DataBase:nArrayX
+        l_trArray.rx=DataBase:nArrayY
+        l_trArray.rz=DataBase:nArrayZ
+        
+        call UI:Form_SimArray("LasMAN3.6->模拟路径"+toString("",DataBase:nTrajIndex),l_sItemTitle,sSItem,l_nPointIndex,DataBase:nPresetData,l_bKeyIO,l_trArray)
+      endIf
+      
+      
+      
+      
+      //2015.02.03 为同步轴设置
+      if TxtFile:trWorkplace.rz==-1
+        gotoxy(0,12)
+        put("(穿孔工艺-1,空走)")
+      endIf
+      // 
+      
+    endIf
+    //2014.4.28
+    DataBase:bKeyIO[0]=l_bKeyIO[0]
+    DataBase:bKeyIO[1]=l_bKeyIO[1]
+    DataBase:bKeyIO[2]=l_bKeyIO[2]
+    
+    delay(0)
+  endWhile
+  
+  
+  cls()
+  
+  //2014.3.6
+  //模拟时初始化
+  TxtFile:bStartRead=false
+  
+  //  if isEmpty() and taskStatus("Simulation")==-1
+  //    
+  //    //call UI:Control_PanelMd("模拟成功")
+  //   // delay(3)
+  //    cls()
+  //    return
+  //  endIf
+  //  
+  
+  
+  
+end
+]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,155 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="WorkPlaceChose" access="public">
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //主要是在生产过程中对工位进行选择
+  
+  
+  //生产程序一开启,变量初始化
+  // DataBase:nWorkPlaceIndex=0
+  //DataBase:nCycleIndex=0
+  //DataBase:nWorkPlaceIndex ==1 表示工位1  ==2 表示工位2  ==3 表示工位3  ==4表示工位4
+  //DataBase:nCycleIndex=1 表示生产第一个周期
+  
+  //参数强制合法化
+  DataBase:nWorkPlaceCount=round(max(DataBase:nWorkPlaceCount,1))
+  DataBase:nCycleCount=round(max(DataBase:nCycleCount,1))
+  
+  //进行判断是否生产结束
+  if (DataBase:nWorkPlaceIndex>=DataBase:nWorkPlaceCount and DataBase:nCycleIndex==DataBase:nCycleCount) or DataBase:nCycleIndex>DataBase:nCycleCount
+    DataBase:nInterfaceType=9
+    DataBase:nWorkPlaceIndex=-1
+    return
+  endIf
+  
+  //按钮与常给信号的区别
+  //
+  
+  
+  
+  
+  //产品与工位选择
+  //单个工位可以放多产品 一个工位最多可以放8个产品
+  
+  
+  
+  //单工位多产品
+  if TxtFile:bMoreProd1Wp
+    call GetProductMess("触发多工位")
+    call OneWpMproChoose()
+  else
+    
+    
+    //六种触发方式  
+    call GetProductMess("等待按钮触发")
+    switch DataBase:nCycleMode
+      
+      //按钮触发单工位：一个按钮一次
+      case 0
+        call IO:ProductReady(DataBase:nWorkPlaceIndex,false)
+        call GetProductMess("工位按钮"+toString("",DataBase:nWorkPlaceIndex)+"触发")
+      break
+      
+      
+      //按钮触发单周期:一个按钮一个周期
+      case 1
+        
+        DataBase:nWorkPlaceIndex=DataBase:nWorkPlaceIndex+1
+        if DataBase:nWorkPlaceIndex>DataBase:nWorkPlaceCount
+          DataBase:nWorkPlaceIndex=1
+        endIf
+        //等待IO
+        if DataBase:nWorkPlaceIndex==1
+          
+          call IO:ProductReady(DataBase:nWorkPlaceIndex,true)
+          DataBase:nCycleIndex=DataBase:nCycleIndex+1
+          call GetProductMess("工位按钮"+toString("",DataBase:nWorkPlaceIndex)+"触发")
+          call GetProductMess("开始执行周期"+toString("",DataBase:nCycleIndex))
+        endIf
+        
+        
+      break
+      
+      
+      //按钮触发多周期:一个按钮多个周期
+      case 2
+        
+        
+        DataBase:nWorkPlaceIndex=DataBase:nWorkPlaceIndex+1
+        if DataBase:nWorkPlaceIndex>DataBase:nWorkPlaceCount
+          DataBase:nWorkPlaceIndex=1
+          DataBase:nCycleIndex=DataBase:nCycleIndex+1
+          call GetProductMess("开始执行周期"+toString("",DataBase:nCycleIndex))
+        endIf
+        //等待IO
+        if DataBase:nWorkPlaceIndex==1 and DataBase:nCycleIndex==0
+          call IO:ProductReady(DataBase:nWorkPlaceIndex,true)
+          DataBase:nCycleIndex=DataBase:nCycleIndex+1
+          call GetProductMess("工位按钮"+toString("",DataBase:nWorkPlaceIndex)+"触发")
+          call GetProductMess("开始执行周期"+toString("",DataBase:nCycleIndex))
+        endIf
+        
+      break
+      
+      //无按钮触发：没有按钮生产多周期
+      case 3
+        
+        DataBase:nWorkPlaceIndex=DataBase:nWorkPlaceIndex+1
+        if DataBase:nWorkPlaceIndex>DataBase:nWorkPlaceCount
+          DataBase:nWorkPlaceIndex=1
+          DataBase:nCycleIndex=DataBase:nCycleIndex+1
+          call GetProductMess("开始执行周期"+toString("",DataBase:nCycleIndex))
+        endIf
+        if DataBase:nCycleIndex==0
+          DataBase:nCycleIndex=1
+          call GetProductMess("开始执行周期"+toString("",DataBase:nCycleIndex))
+        endIf
+      break
+      
+      //按钮触发排队
+      //*********************************************
+      //*********************************************
+      case 4
+
+        //最后一次按钮是OK
+        while DataBase:nWorkPlaceButto==-1
+          call IO:CanProduct(DataBase:nWorkPlaceButto)
+          delay(0)
+        endWhile
+        DataBase:nWorkPlaceIndex=DataBase:nWorkPlaceButto
+        DataBase:nWorkPlaceButto=-1
+      break
+        
+      //**********************************************
+      //
+      //自定义触发方式
+      //客户可以改写这里的代码
+      case 5
+        call Custom:ChooseCustomPro(DataBase:nWorkPlaceIndex,DataBase:nProductIndex)  
+      
+      break
+      
+      //默认为报错
+      default
+        DataBase:nWorkPlaceIndex=-1
+      break
+      
+      
+    endSwitch
+  endIf
+  
+  //工位等待时间
+  if DataBase:nWorkPlaceIndex>0 and DataBase:nWorkPlaceIndex<=DataBase:nWorkPlaceCount
+    
+    if TxtFile:trIODelay.rx>0
+      call GetProductMess("工位等待"+toString(".1",TxtFile:trIODelay.rx)+"秒")
+      delay(max(TxtFile:trIODelay.rx,0))
+    endIf
+  endIf
+  
+end]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://www.staubli.com/robotics/VAL3/Project/3">
+  <Parameters version="s7.3.1" stackSize="5000" millimeterUnit="true" />
+  <Programs>
+    <Program file="ArcLength.pgx" />
+    <Program file="Axis1Offset.pgx" />
+    <Program file="ChangeCirPoint.pgx" />
+    <Program file="ChangeCpoint.pgx" />
+    <Program file="ChangeLength.pgx" />
+    <Program file="CirClePoint.pgx" />
+    <Program file="Circumcircle.pgx" />
+    <Program file="Cshape.pgx" />
+    <Program file="CutIn.pgx" />
+    <Program file="CutOut.pgx" />
+    <Program file="EllipsePoint.pgx" />
+    <Program file="Facula.pgx" />
+    <Program file="GetArcAngle.pgx" />
+    <Program file="GetArcLength.pgx" />
+    <Program file="GetClockwise.pgx" />
+    <Program file="GetCutLength.pgx" />
+    <Program file="GetWeldId.pgx" />
+    <Program file="GetWeldReturn.pgx" />
+    <Program file="HexagonPoint.pgx" />
+    <Program file="Inscribedcircle.pgx" />
+    <Program file="LineSym.pgx" />
+    <Program file="LineSymArray.pgx" />
+    <Program file="NoCloseShape.pgx" />
+    <Program file="PentaclePoint.pgx" />
+    <Program file="PentagonPoint.pgx" />
+    <Program file="ReadMe.pgx" />
+    <Program file="RectanglePoint.pgx" />
+    <Program file="RegulPoint.pgx" />
+    <Program file="SetFrame.pgx" />
+    <Program file="start.pgx" />
+    <Program file="stop.pgx" />
+    <Program file="TrianglePoint.pgx" />
+    <Program file="TubePoint.pgx" />
+  </Programs>
+  <Database>
+    <Data file="Algorith.dtx" />
+  </Database>
+  <Libraries />
+</Project>

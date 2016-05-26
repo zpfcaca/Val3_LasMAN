@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="ReadMe" access="public">
+    <Code><![CDATA[begin
+  //这是一个提供给客户的自定义开发的程序
+  //这个库不引用其他库
+  //这个库里面的界面，IO都是在这个库里面自己定义。
+  //
+  //注意相应的逻辑顺序
+  //客户应该具有VAL3熟练编程能力，知道编程逻辑，理解代码能力
+  //库中已经提供好函数名称与函数的参数，只需要对相应的参数进行定义就好了
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

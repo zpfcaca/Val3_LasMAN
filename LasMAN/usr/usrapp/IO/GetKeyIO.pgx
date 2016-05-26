@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="GetKeyIO" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_AirOn" type="bool" use="reference" xsi:type="element" dimensions="1" />
+      <Parameter name="x_bFollowOn" type="bool" use="reference" xsi:type="element" dimensions="1" />
+      <Parameter name="x_bLaserOn" type="bool" use="reference" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_sS" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+  //气体
+  call IOName(70,l_sS)
+  x_AirOn=dDio[l_sS]==true
+
+
+  //随动
+  call IOName(68,l_sS)
+  x_bFollowOn=dDio[l_sS]==true
+
+
+  //焊接
+  if bWeldEnable
+    call IOName(79,l_sS)
+    x_bLaserOn=dDio[l_sS]==true
+
+  else
+    //   切割
+    call IOName(67,l_sS)
+    x_bLaserOn=dDio[l_sS]==true
+  endIf
+
+end]]></Code>
+  </Program>
+</Programs>

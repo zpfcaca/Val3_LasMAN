@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="BeforeCut" access="public">
+    <Code><![CDATA[begin
+  
+  //在穿孔点之前的函数
+  //可以添加需要的内容
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+        
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

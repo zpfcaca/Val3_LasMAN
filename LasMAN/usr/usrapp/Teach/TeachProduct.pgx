@@ -1,0 +1,352 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="TeachProduct" access="public">
+    <Locals>
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_sProductName" type="string" xsi:type="array" size="1" />
+      <Local name="l_bPause" type="bool" xsi:type="array" size="1" />
+      <Local name="l_sBottom" type="string" xsi:type="array" size="1" />
+      <Local name="l_jJ" type="jointRx" xsi:type="array" size="1" />
+      <Local name="l_bPauseStauts" type="bool" xsi:type="array" size="1" />
+      <Local name="l_sA" type="string" xsi:type="array" size="1" />
+      <Local name="l_nWeld" type="num" xsi:type="array" size="1" />
+      <Local name="l_bWeld" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //生产模式
+  //是否在零位
+  
+  //初始化
+  cls()
+  resetMotion()
+  resize(sSItem,1,12)
+  resize(sMess,1,11)
+  
+  //检查条件
+  DataBase:nToolMode=workingMode()
+  if DataBase:nToolMode!=4
+    popUpMsg("机器手臂请切换到远程模式")
+    return
+  endIf
+  
+  
+  call UI:Control_PanelMd("请等待,正在载入库......")
+  DataBase:bStopPoll=true
+  
+  //检查机械手臂是否在零位
+  l_jJ=herej()
+  l_nKey= abs(l_jJ.j1-TxtFile:jHome.j1)+abs(l_jJ.j2-TxtFile:jHome.j2)+abs(l_jJ.j3-TxtFile:jHome.j3)
+  l_nKey=l_nKey+ abs(l_jJ.j4-TxtFile:jHome.j4)+abs(l_jJ.j5-TxtFile:jHome.j5)+abs(l_jJ.j6-TxtFile:jHome.j6)
+  if l_nKey>0.3
+    popUpMsg("请回到零位")
+    return
+  endIf
+  
+
+  
+  
+  
+  //可以生产的部分为空
+  //  for l_nKey=0 to 9
+  //    DataBase:bCanProduct[l_nKey]=false
+  //  endFor
+  
+  //检查文件是否正确
+  call TxtFile:IsFileOK(l_bRes)
+  if !l_bRes
+    //popUpMsg("读取辅助文件出错")
+    return
+  endIf
+  
+  //如果只有一个工位，则文件预读
+  if DataBase:nWorkPlaceCount==1 and !TxtFile:bMoreProd1Wp
+    call GetProductMess("只有一个工位，预读取文件")
+    call TxtFile:ReadProduct("Disk://Txt/Product1.txt",DataBase:sProductName[1],false,l_bRes)
+    if !l_bRes
+      popUpMsg("读取生产文件出错")
+      return
+    endIf
+    
+    
+    if TxtFile:bMatchPreset
+      call TxtFile:ReadMatchPreset("Disk://Txt/Preset1.txt",TxtFile:sPresetName[0],l_bRes)
+      if !l_bRes
+        popUpMsg("读取工艺文件出错")
+        return
+      endIf
+    endIf  
+  endIf
+  
+  
+  
+  //界面初始化
+  
+  bPowerFlag=false
+  //初始化消息
+  for l_nKey=0 to 10
+    sSItem[l_nKey]=""
+    sMess[l_nKey]=""
+  endFor
+  
+  if TxtFile:bWeldEnable
+    l_sA="回退"
+  else
+    l_sA=""
+  endIf
+  
+  //生产模式记录
+  if TxtFile:bMoreProd1Wp
+    logMsg("生产模式:同工位多产品")
+  else
+    switch DataBase:nCycleMode
+      case 0
+        logMsg("生产模式:按钮触发单工位")
+      break  
+      
+      case 1
+        logMsg("生产模式:按钮触发单周期")
+      break  
+      
+      case 2
+        logMsg("生产模式:按钮触发多周期")
+      break  
+      case 3
+        logMsg("生产模式:无需按钮触发")
+      break  
+      
+      case 4
+        logMsg("生产模式:排队")
+      break  
+      case 5
+        logMsg("生产模式:自定义")
+      break  
+    endSwitch
+  endIf
+  
+  
+  DataBase:bStopPoll=false
+  taskCreate "Product",100,Product()
+  
+  cls()
+  wait(getKey()==-1)
+  while  DataBase:nInterfaceType==13
+    call GetListItems()
+    
+    //机械手臂掉电了
+    DataBase:bPowerOn=isPowered()
+    bPowerFlag=DataBase:bPowerOn or bPowerFlag
+    if DataBase:bPowerOn==false and bPowerFlag
+      logMsg("机械手臂掉电")
+      taskSuspend("Product")
+      stopMove()
+      call IO:SafteyIO()
+      l_bPause=true
+      bPowerFlag=false
+      call GetProductMess("机械手臂掉电")
+    endIf
+    
+    //IO轮询
+    call IO:ProductPoll(DataBase:nCycleCount,DataBase:nInterfaceType,l_bPause)
+    
+    //停止信号被触发
+    if  DataBase:nInterfaceType!=13
+      call UI:Control_PanelMd("停止信号被触发......")
+      delay(2)
+    endIf
+    
+    //暂停信号
+    if l_bPause!=l_bPauseStauts
+      l_bPauseStauts=l_bPause
+      if l_bPause
+        stopMove()
+        if taskStatus("Product")==1
+          taskSuspend("Product")
+        endIf
+        stopMove()
+        call IO:SafteyIO()
+        call IO:Light(0)
+        
+      else
+        
+        //2014.02.03
+        //为同步外部轴设置
+        if DataBase:nPointType==2 and TxtFile:trWorkplace.rz!=-1
+          if !TxtFile:bWeldEnable or (TxtFile:bWeldEnable and !DataBase:bIOControl)
+            
+            call IO:Preset(TxtFile:nPreset,TxtFile:trWorkplace.rz,TxtFile:trPresetData.z,TxtFile:trPresetData.x,TxtFile:trPresetData.y)
+            call IO:PerforatiAction(TxtFile:trIODelay.x,TxtFile:trIODelay.y)
+          endIf
+        endIf
+        if taskStatus("Product")==0
+          taskResume("Product",0)
+          
+        endIf
+        restartMove()
+        call IO:Light(2)
+      endIf
+    endIf
+    
+    
+    //查询按钮
+    l_nKey=getKey()
+    switch l_nKey
+      
+      
+      //暂停与继续
+      case 271
+        if !l_bPause
+          l_bPause=!l_bPause
+        else
+          if !isPowered()
+            popUpMsg("请先上电")
+          else
+            call UI:Control_YesNO("确定要继续吗?",l_bRes)
+            if l_bRes
+              call GetProductMess("机械手臂继续")
+              l_bPause=!l_bPause
+            endIf
+          endIf
+        endIf
+      break
+      
+      //上电
+      case 272
+        if isPowered()
+          bPowerFlag=true
+        else  
+          call UI:Control_YesNO("确定要上电吗?",l_bRes)
+          call UI:Form_Product("LasMAN3.6->生产界面",sMess,sSItem,l_sBottom)
+          if l_bRes
+            if DataBase:nToolMode!=4
+              popUpMsg("机器手臂请切换到远程模式")
+            else
+              enablePower()
+              
+              if !watch(isPowered(),5)
+                popUpMsg("上电失败，检查急停按钮")
+              else
+                logMsg("上电")
+                bPowerFlag=true
+                call GetProductMess("机械手臂上电")
+              endIf
+            endIf
+          endIf
+        endIf
+      break
+      
+      
+      
+      //在焊接下进行回退
+      case 273
+        if TxtFile:bWeldEnable
+          if !l_bPause or TxtFile:trPointCount.y>500
+            popUpMsg("机械手臂只能在暂停状态下与焊接点小于500回退")
+            
+          else
+            if DataBase:nPointType!=2
+              popUpMsg("机械手臂不在焊接状态")
+            else
+              if !l_bWeld
+                call UI:Control_YesNO("确定需要回退吗",l_bRes)
+                if l_bRes
+                  call GetProductMess("执行回退程序")
+                  disablePower()    
+                  call GetProductMess("计算回退路径")
+                  logMsg("执行回退")
+                  call WeldTraj(l_bRes)
+                  if !l_bRes
+                    popUpMsg("回退路径计算失败")
+                  else
+                    if taskStatus("Product")!=-1
+                      taskKill("Product")
+                      wait(taskStatus("Product")==-1)
+                    endIf
+                    call GetProductMess("程序开始执行")
+                    taskCreate "Product",100,Motion:TeachSimu(0,0)
+                    l_bWeld=true
+                  endIf
+                endIf
+              else
+                popUpMsg("已执行回退算法")
+              endIf
+              
+            endIf
+          endIf
+        endIf
+      break
+      
+      
+      //退出
+      case 278
+        call UI:Control_YesNO("确定要退出吗?",l_bRes)
+        if l_bRes
+          logMsg("退出生产程序")
+          DataBase:nInterfaceType=9
+        endIf
+      break
+      
+      
+    endSwitch
+    
+    
+    //界面
+    
+    if !l_bPause
+      l_sBottom="暂停,上电,"+l_sA+",,,,,退出"
+    else
+      l_sBottom="继续,上电,"+l_sA+",,,,,退出"
+    endIf
+    call UI:Form_Product("LasMAN3.6->生产界面",sMess,sSItem,l_sBottom)
+    gotoxy(32,0)
+    
+    
+    //暂停与继续状态确认
+    if !l_bPause
+      l_bWeld=false
+      setTextMode(0)
+      put("     ")
+      //只有排队模式才会去检查按钮信号
+      if DataBase:nCycleMode==4
+        call IO:CanProduct(DataBase:nWorkPlaceButto)
+      endIf
+    else
+      setTextMode(3)
+      put("已暂停")
+    endIf
+    
+    
+    
+    
+    delay(0)
+    
+  endWhile
+  
+  
+  
+  
+  //生产结束
+  DataBase:bMoveTask=false
+  if taskStatus("ReadFile")!=-1
+    taskKill("ReadFile")
+  endIf
+  
+  if taskStatus("Preset")!=-1
+    taskKill("Preset")
+  endIf
+  if taskStatus("Product")!=-1
+    taskKill("Product")
+  endIf
+  if taskStatus("WeldEnd")!=-1
+    taskKill("WeldEnd")
+  endIf
+  call Motion:KillTask()
+  call UI:Control_PanelMd("生产结束......")
+  DataBase:nWorkPlaceButto=-1
+  delay(2)
+  
+end
+  
+]]></Code>
+  </Program>
+</Programs>

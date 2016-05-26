@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="SendSpeed" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nSpeed" type="num" use="value" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Code><![CDATA[begin
+  //2014.3.24 设置机器人速度到O2_aNull
+  x_nSpeed=max(0,x_nSpeed)
+  aioSet(aAio["O2_aNull"],x_nSpeed)
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

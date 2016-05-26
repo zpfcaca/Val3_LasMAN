@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="WriteLine" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nFileID" type="num" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_sContext" type="string" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_bRes" type="bool" use="reference" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_sString" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+  //文件标志符
+
+  x_bRes=false
+  if x_nFileID<0 or x_nFileID>9
+    return
+  endIf
+  l_sString[0]=x_sContext
+  //
+  switch x_nFileID
+    case 0
+      l_nNum=$fileSet(0,l_sString,1)
+    break
+
+    case 1
+      l_nNum=$fileSet(1,l_sString,1)
+    break
+
+    case 2
+      l_nNum=$fileSet(2,l_sString,1)
+    break
+
+    case 3
+      l_nNum=$fileSet(3,l_sString,1)
+    break
+
+    case 4
+      l_nNum=$fileSet(4,l_sString,1)
+    break
+
+    case 5
+      l_nNum=$fileSet(5,l_sString,1)
+    break
+    case 6
+      l_nNum=$fileSet(6,l_sString,1)
+    break
+
+    case 7
+      l_nNum=$fileSet(7,l_sString,1)
+    break
+    case 8
+      l_nNum=$fileSet(8,l_sString,1)
+    break
+
+    case 9
+      l_nNum=$fileSet(9,l_sString,1)
+    break
+
+
+  endSwitch
+  if l_nNum!=1
+    return
+  endIf
+  x_bRes=true
+
+
+end]]></Code>
+  </Program>
+</Programs>

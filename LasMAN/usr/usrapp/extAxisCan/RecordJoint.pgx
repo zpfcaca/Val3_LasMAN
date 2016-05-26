@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="RecordJoint" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_j" type="jointRx" xsi:type="element" use="reference" />
+      <Parameter name="x_trTrsf" type="trsf" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="2" />
+    </Locals>
+    <Code><![CDATA[begin
+  //  $recClean("c")
+  //  $recAdd("c","CanIO\Axis8\posCmd_1")
+  //  $recAdd("c","CanIO\Axis8\posFbk_1")
+  //  $recStart("c",50,250)
+
+  //  $recClean("c")
+  //  $recAdd("c","extDrvCmdPos")
+  //  $recAdd("c","extDrvCmdVel")
+  //  $recAdd("c","extJntCmdPos")
+  //  $recAdd("c","extJntCmdVel")
+  //  $recAdd("c","extError")
+  //  $recAdd("c","extDrvGrpError")
+  //  $recStart("c",50,250)
+  
+ // x_pPos=$here
+  
+ //记录轴的值
+  if nAxesSum<1
+    popUpMsg("轴个数错误")
+    return
+  endIf
+  
+  resize(nBuffSize,1,nAxesSum)
+  x_j=$Xherej(nBuffSize)
+  x_trTrsf.x=nBuffSize[0]
+  if nAxesSum>1
+    x_trTrsf.y=nBuffSize[1]
+  endIf
+  
+end]]></Code>
+  </Program>
+</Programs>

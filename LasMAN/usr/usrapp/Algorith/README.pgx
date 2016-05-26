@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="ReadMe">
+    <Code><![CDATA[begin
+  //利用trsf来实现图形变换的函数库
+  //支持切圆管，三角形，圆，矩形，正五边形，正六边形，腰圆，五角星，切圆管
+  //一般规则图形使用三个点来实现，除了圆心-直径法以外
+  //直接客户根据三点法来实现自定义规则类型
+  
+  
+  //TrianglePoint  三角形
+  //SetFrame  通过三个点来建立frame
+  //LineSym 点关于线对称
+  //ChangeCirPoint   根据圆心，直径来修改点的位置
+  //CirClePoint  根据圆心 直径来求的两个movec的点
+  //Circumcircle 内切圆
+  //Cshape  C型图形 主要是为焊接使用
+  //CutIn   切入引线
+  //CutOut   切出引线
+  
+
+  //TubePoint 切割圆管
+  //TrianglePoint  三角形
+  //RectanglePoint
+ 
+ 
+//Val3进行图形算法库
+  
+  
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="cmdFaultReset" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nAxNum" type="num" xsi:type="element" />
+    </Parameters>
+    <Code><![CDATA[begin
+  //错误复位，'Fault reset'置1
+  doFaultReset[x_nAxNum]=true
+  delay(0.008)
+  doFaultReset[x_nAxNum]=false
+end]]></Code>
+  </Program>
+</Programs>

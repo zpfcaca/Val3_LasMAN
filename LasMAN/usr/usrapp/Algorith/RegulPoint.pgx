@@ -1,0 +1,458 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="RegulPoint" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_trSource" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_nType" type="num" xsi:type="element" />
+      <Parameter name="x_trDownLead" type="trsf" xsi:type="element" />
+      <Parameter name="x_pCut" type="point" xsi:type="array" use="reference" />
+      <Parameter name="x_pMc" type="point" xsi:type="array" use="reference" />
+      <Parameter name="x_bMc" type="bool" xsi:type="array" use="reference" />
+      <Parameter name="x_trPara" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+      <Parameter name="x_bWeld" type="bool" xsi:type="element" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nPointCout" type="num" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_trCutIn" type="trsf" xsi:type="array" size="2" />
+      <Local name="l_trCutOut" type="trsf" xsi:type="array" size="2" />
+      <Local name="l_trPara" type="trsf" xsi:type="array" size="3" />
+      <Local name="l_nBuff" type="num" xsi:type="array" size="1" />
+      <Local name="l_trSupport" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_trBuff" type="trsf" xsi:type="array" size="2" />
+      <Local name="l_trWeld" type="trsf" xsi:type="array" size="3" />
+    </Locals>
+    <Code><![CDATA[begin
+  //规则图形运动点算法
+  //图形类型
+  //根据示教的点数来确定运行的点数
+  //trCut[20]作为规则图形的中心点
+  //如果添加新的类型，只需在Algorith中添加，只支持三个点建立标准图形
+  
+  //参数初始化与参数合法化判断
+  //x_type 图形类型
+  
+  //除了切圆管外，其他图形所有的姿态RX,RY,RZ,都是一样的，可以称为平面图形
+  
+  //三点法第一点是切入点
+  //第二点是切割点
+  //第三点是圆弧的参数
+  
+  
+  //2015.02.12
+  //添加新的路径
+  if x_nType==9
+    x_bRes=true
+    return
+  endIf
+  
+  
+  
+  
+  //参数初始化
+  x_bRes=false
+  resize(trCut,1,100)
+  
+  //判断传入参数合法性
+  if x_trDownLead.x<0 or x_trDownLead.x>3 or x_trDownLead.z<0 or x_trDownLead.z>3
+    return
+  endIf
+  
+  //保留最初的运动参数
+  for l_nNum=0 to min(size(x_trPara)-1,2)
+    l_trPara[l_nNum]=x_trPara[l_nNum]
+  endFor
+  
+  //强制取消切入与切出]
+  if x_bWeld
+    x_trDownLead.x=x_trDownLead.z=0
+  endIf
+  
+  
+  
+  //用来获得规则图形转换为movel movec的点数
+  switch x_nType
+    
+    //圆 三点法
+    case 1,11
+      l_nPointCout=3
+      call Circumcircle(x_trSource,l_trSupport,l_nNum,x_bRes)
+      if !x_bRes
+        
+        return
+      endIf
+      //*******************************
+      //2014.4.8
+      //为焊接
+      if x_bWeld and x_trDownLead.rz!=36 and x_trDownLead.rz>0
+        call Cshape(x_trSource,trCut,x_trDownLead.rz*10,l_nPointCout,l_trSupport,l_nNum,x_bRes)
+        
+        if !x_bRes
+          return
+        endIf
+        //*******************************
+      else
+        call CirClePoint(l_trSupport,l_nNum,trCut,x_bRes)
+      endIf
+    break
+    
+    
+    
+    
+    //圆 圆心直径法
+    case 2,12
+      l_nPointCout=3
+      l_trSupport=x_trSource
+      call CirClePoint(x_trSource,x_trDownLead.ry,trCut,x_bRes)
+      //***********************************
+      //2014.4.8
+      //为焊接
+      if x_bWeld and x_trDownLead.rz!=36 and x_trDownLead.rz>0
+        l_trWeld[0]=trCut[0]
+        l_trWeld[1]=trCut[1]
+        l_trWeld[2]=trCut[2]
+        call Cshape(l_trWeld,trCut,x_trDownLead.rz*10,l_nPointCout,l_trSupport,x_trDownLead.ry,x_bRes)
+        if !x_bRes
+          return
+        endIf
+      endIf
+      //*************************************
+    break
+    
+    
+    
+    //三角形
+    case 3,13
+      l_nPointCout=5
+      call TrianglePoint(x_trSource,trCut,x_bRes)
+    break
+    
+    //矩形
+    case 4,14
+      l_nPointCout=6
+      call RectanglePoint(x_trSource,trCut,x_bRes)
+    break
+    
+    //五边形
+    case 5,15
+      l_nPointCout=7
+      call PentagonPoint(x_trSource,trCut,x_bRes)
+    break
+    
+    //六边形
+    case 6,16
+      l_nPointCout=8
+      call HexagonPoint(x_trSource,trCut,x_bRes)
+    break
+    
+    //腰形孔
+    case 7,17
+      l_nPointCout=6
+      call EllipsePoint(x_trSource,trCut,x_bRes)
+    break
+    //五角星
+    case 21
+      l_nPointCout=11
+      x_trDownLead.x=x_trDownLead.z=0
+      call PentaclePoint(x_trSource,trCut,x_bRes)
+    break
+    
+    // 切圆管
+    case 22
+      l_nPointCout=3
+      x_trDownLead.x=x_trDownLead.z=0
+      call TubePoint(x_trSource,x_trDownLead.rz,trCut,x_bRes)
+    break
+    
+    
+    //C型-三点法
+    case 24
+      x_trDownLead.x=x_trDownLead.z=0
+      call Circumcircle(x_trSource,l_trSupport,l_nNum,x_bRes)
+      if !x_bRes
+        return
+      endIf
+      call Cshape(x_trSource,trCut,x_trDownLead.rz*10,l_nPointCout,l_trSupport,l_nNum,x_bRes)
+      if !x_bRes
+        return
+      endIf
+    break
+    
+    
+    //默认退出，没有定义的图形序号则报错退出
+    default
+      return
+    break
+    
+  endSwitch
+  
+  //××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××
+  //引线处理
+  
+  
+  //××××××××××××××××××××××××××××××××××××××××
+  //2014.10.23
+  //如果引线长度是101，则认为是厚板切割
+  //按照厚板切割程序进行
+  if x_trDownLead.x!=0 and x_trDownLead.y==101  
+    x_trDownLead.x=1 
+  endIf
+  //××××××××××××××××××××××××××××××××××××××××××
+  
+  
+  
+  //引线点数
+  l_nPointCout=l_nPointCout+sel(x_trDownLead.x>0,1,0)+sel(x_trDownLead.z>0,1,0)
+  //把原来运动参数保留
+  
+  
+  
+  //对数组大小进行重新分配
+  resize(x_pCut,1,l_nPointCout)
+  resize(x_pMc,1,l_nPointCout)
+  resize(x_bMc,1,l_nPointCout)
+  resize(x_trPara,1,l_nPointCout)
+  
+  l_nPointCout=l_nPointCout-sel(x_trDownLead.x>0,1,0)-sel(x_trDownLead.z>0,1,0)
+  //对于点数进行规划
+  
+  
+  //根据图形中心点与第一个和第二个点来获得切入切出线点
+  l_trBuff[0]=trCut[0]
+  l_trBuff[1]=trCut[1]
+  
+  switch x_nType
+    case  11,12,1,2
+      l_trBuff[1]=trCut[9]
+    break
+  endSwitch
+  
+  //默认内切
+  //切入点
+  //l_tr
+  call CutIn(trCut[20],l_trBuff,l_trCutIn,l_trSupport,x_trDownLead.x,x_trDownLead.y,x_bRes)
+  if !x_bRes
+    return
+  endIf
+  
+  //切出点
+  call CutOut(trCut[20],l_trBuff,l_trCutOut,l_trSupport,x_trDownLead.z,x_trDownLead.rx,x_bRes)
+  if !x_bRes
+    return
+  endIf
+  
+  
+  l_trBuff[0]=trCut[0]
+  l_trBuff[1]=trCut[1]
+  
+  switch x_nType
+    
+    case  11,12,1,2
+      l_trBuff[1]=trCut[9]
+    break
+  endSwitch
+  
+  
+  //外切图形
+  switch  x_nType
+    
+    case 11,12,13,14,15,16,17,18
+      
+      if x_trDownLead.x>0
+        call LineSymArray(l_trCutIn,l_trBuff,l_trCutIn,x_bRes)
+        if !x_bRes
+          return
+        endIf
+      endIf
+      
+      if x_trDownLead.z>0
+        call LineSymArray(l_trCutOut,l_trBuff,l_trCutOut,x_bRes)
+        if !x_bRes
+          return
+        endIf
+      endIf 
+    break
+    
+  endSwitch
+  
+  
+  
+  //****************************************************
+  //******************************************************
+  
+  
+  //进行点数的赋值
+  //参数初始化
+  for l_nNum=0 to size(x_bMc)-1
+    x_bMc[l_nNum]=false
+    // x_trPara[l_nNum]=l_trPara[0]
+  endFor
+  //切入
+  switch x_trDownLead.x
+    //无
+    case 0
+      x_pCut[0].trsf=trCut[0]
+      
+    break
+    //直线
+    case 1
+      x_pCut[0].trsf=l_trCutIn[0]
+      x_pCut[1].trsf=trCut[0]
+    break
+    
+    //圆弧
+    case 2
+      x_pCut[0].trsf=l_trCutIn[0]
+      x_pMc[1].trsf=l_trCutIn[1]
+      x_pCut[1].trsf=trCut[0]
+      x_bMc[1]=true
+    break
+  endSwitch
+  
+  //切割点
+  //主要是有圆弧点的判断
+  switch x_nType
+    //圆 
+    case 1,11,2,12,22
+      //焊接
+      //2014.4.8
+      if x_bWeld and x_trDownLead.rz!=36 and x_trDownLead.rz>0
+        for l_nNum=1 to l_nPointCout-1
+          x_pMc[l_nNum].trsf=trCut[l_nNum*2-1]
+          x_pCut[l_nNum].trsf=trCut[l_nNum*2]
+          
+          x_bMc[l_nNum]=true
+        endFor
+      else
+        //*************************************************
+        x_pMc[sel(x_trDownLead.x>0,1,0)+1].trsf=trCut[1]
+        x_pCut[sel(x_trDownLead.x>0,1,0)+1].trsf=trCut[2]
+        x_bMc[sel(x_trDownLead.x>0,1,0)+1]=true 
+        
+        x_pMc[sel(x_trDownLead.x>0,1,0)+2].trsf=trCut[3]
+        x_pCut[sel(x_trDownLead.x>0,1,0)+2].trsf=trCut[4]
+        
+        x_bMc[sel(x_trDownLead.x>0,1,0)+2]=true 
+        
+      endIf
+      
+      
+    break
+    
+    //腰形
+    case 7,17
+      
+      x_pCut[sel(x_trDownLead.x>0,1,0)+1].trsf=trCut[1]
+      x_pMc[sel(x_trDownLead.x>0,1,0)+2].trsf=trCut[2]
+      x_pCut[sel(x_trDownLead.x>0,1,0)+2].trsf=trCut[3]
+      x_bMc[sel(x_trDownLead.x>0,1,0)+2]=true 
+      
+      x_pCut[sel(x_trDownLead.x>0,1,0)+3].trsf=trCut[4]
+      x_pCut[sel(x_trDownLead.x>0,1,0)+4].trsf=trCut[6]
+      x_pMc[sel(x_trDownLead.x>0,1,0)+4].trsf=trCut[5]
+      x_bMc[sel(x_trDownLead.x>0,1,0)+4]=true 
+      
+      x_pCut[sel(x_trDownLead.x>0,1,0)+5].trsf=trCut[7]   
+    break
+    
+    
+    //C形
+    case 24
+      for l_nNum=1 to l_nPointCout-1
+        x_pMc[l_nNum].trsf=trCut[l_nNum*2-1]
+        x_pCut[l_nNum].trsf=trCut[l_nNum*2]
+        
+        x_bMc[l_nNum]=true
+      endFor
+    break
+    
+    default
+      for l_nNum=1 to  l_nPointCout-1
+        x_pCut[sel(x_trDownLead.x>0,1,0)+l_nNum].trsf=trCut[l_nNum]
+      endFor
+      
+    break
+    
+    
+  endSwitch
+  
+  
+  
+  //切出
+  switch x_trDownLead.z
+    case 1
+      x_pCut[size(x_pCut)-1].trsf=l_trCutOut[0]
+    break
+    
+    case 2
+      x_pCut[size(x_pCut)-1].trsf=l_trCutOut[0]
+      x_pMc[size(x_pCut)-1].trsf=l_trCutOut[1]
+      x_bMc[size(x_pCut)-1]=true
+    break
+  endSwitch
+  
+  
+  
+  //××××××××××××××××××××××××××××××××
+  //三点建立顺时针或者逆时针时的姿态
+  //  call GetClockwise(x_trSource,l_trBuff,x_bRes)
+  //  
+  //  if x_nType!=22 and x_nType!=11 and x_nType!=1  and x_bRes
+  //    for l_nNum=0 to size(x_pCut)-1
+  //      x_pMc[l_nNum].trsf.rx=x_pCut[l_nNum].trsf.rx=l_trBuff[0].rx
+  //      x_pMc[l_nNum].trsf.ry=x_pCut[l_nNum].trsf.ry=l_trBuff[0].ry
+  //      x_pMc[l_nNum].trsf.rz=x_pCut[l_nNum].trsf.rz=l_trBuff[0].rz
+  //      
+  //    endFor
+  
+  
+  //endIf
+  
+  //*********************************************************
+  
+  
+  //切割参数的分配
+  //类型2 只有一个点
+  x_trPara[0]=l_trPara[0]
+  for l_nBuff=1 to size(x_trPara)-1
+    x_trPara[l_nBuff]=l_trPara[sel(x_nType==2 or x_nType==12,0,1)]
+  endFor
+  
+  //2014.6.23  把第一点的参数强制赋值给切入点
+  if x_trDownLead.x==1 or x_trDownLead.x==2
+    x_trPara[1]=l_trPara[0]
+  endIf
+  
+  
+  
+  
+  //腰形孔
+  //把圆弧段的参数利用第三点的参数
+  if x_nType==7 or x_nType==17
+    for l_nBuff=0 to size(x_pCut)-1
+      if x_pCut[l_nBuff].trsf==trCut[1] or x_pCut[l_nBuff].trsf==trCut[3]
+        x_trPara[l_nBuff]=l_trPara[2]
+      endIf
+    endFor
+  endIf
+  
+  
+  
+  //强制所有规则图形的姿态
+  for l_nBuff=0 to size(x_pCut)-1
+    x_pMc[l_nBuff].trsf.rx=x_pCut[l_nBuff].trsf.rx=x_trSource.rx
+    x_pMc[l_nBuff].trsf.ry=x_pCut[l_nBuff].trsf.ry=x_trSource.ry
+    x_pMc[l_nBuff].trsf.rz= x_pCut[l_nBuff].trsf.rz=x_trSource.rz
+    
+  endFor
+  
+  
+  x_bRes=true
+end
+
+
+  
+]]></Code>
+  </Program>
+</Programs>

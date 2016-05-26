@@ -1,0 +1,190 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="TeachAction" access="public">
+    <Locals>
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_nPointType" type="num" xsi:type="array" size="1" />
+      <Local name="l_nPointIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_sItemTitle" type="string" xsi:type="array" size="1" />
+      <Local name="l_bKeyIO" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_sBuff" type="string" xsi:type="array" size="8" />
+      <Local name="l_nIOSeq" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  //动作示教
+  //参数初始化
+  
+  resetMotion()
+  userPage()
+  DataBase:bStopPoll=true
+  
+  call TxtFile:ReadAction(l_bRes)
+  if !l_bRes
+    popUpMsg("读取动作文件不正确")
+    return
+  endIf
+  
+  //轮询
+  resize(sSItem,1,50)
+  for l_nNum=0 to 49
+    sSItem[l_nNum]="序号:"+toString("",l_nNum+1)
+    
+  endFor
+  for l_nNum=0 to 3
+    l_sBuff[2*l_nNum+0]=IO:sIOName[TxtFile:nAction[l_nPointIndex+1,l_nNum+l_nIOSeq*4,0]]
+    l_sBuff[2*l_nNum+0]=toString("",l_nNum+l_nIOSeq*4+1)+"名称:"+ l_sBuff[2*l_nNum+0]
+    l_sBuff[2*l_nNum+1]="值:"+toString(".3",TxtFile:nAction[l_nPointIndex+1,l_nNum+l_nIOSeq*4,1])
+    
+  endFor
+  cls()
+  call UI:Form_Action("LasMAN3.6->示教动作","动作表",sSItem,l_nPointIndex,l_bKeyIO,l_nPointIndex+1,l_sBuff)
+  
+  
+  
+  DataBase:bStopPoll=false
+  
+  while true
+    
+    l_nKey=getKey()
+    switch l_nKey
+      
+      //执行
+      case 271
+        nTeachAction=l_nPointIndex+1
+        l_bKeyIO[0]=!l_bKeyIO[0]
+        if l_bKeyIO
+          if !isPowered()
+            popUpMsg("请先上电")
+            l_bKeyIO=!l_bKeyIO
+          else
+            taskCreate "Action",100, OnAction()
+          endIf
+        else
+          if taskStatus("Action")!=-1
+            taskKill("Action")
+            
+          endIf
+          
+          
+        endIf
+      break
+      
+      
+      //上传
+      case 275
+        call UI:Control_YesNO("确定要上传吗?",l_bRes)
+        if l_bRes
+          call Kit:UpLoad()
+          //return
+        endIf
+      break
+      
+      
+      //退出
+      case 278
+        call UI:Control_YesNO("确定要退出吗?",l_bRes)
+        if l_bRes
+          if taskStatus("Action")!=-1
+            taskKill("Action")
+            
+          endIf
+          return
+        endIf
+      break
+      
+      
+      //修改
+      case 276,270
+        if l_bKeyIO
+          popUpMsg("动作正在执行")
+        else
+          call UI:Control_Action(TxtFile:nAction,l_nPointIndex+1,IO:sIOName,IO:bDigtal)
+        endIf
+        cls()
+      break
+      
+      
+      case 277
+        call UI:Control_YesNO("确定要保存吗?",l_bRes)
+        if l_bRes
+          call TxtFile:SaveAction(l_bRes)
+          if !l_bRes
+            popUpMsg("保存出错")
+          else
+            popUpMsg("保存成功")
+          endIf
+          cls()
+          // return
+        endIf
+      break
+      
+      case 264
+        l_nIOSeq=max(0,l_nIOSeq-1)
+   
+      break
+      
+      
+      case 268
+        l_nIOSeq=min(2,l_nIOSeq+1)
+   
+      break
+      
+      
+      case 261
+        l_nPointIndex=max(0,l_nPointIndex-1)
+        l_nIOSeq=0
+         disablePower()
+      break
+      
+      
+      case 266
+        l_nPointIndex=min(size(sSItem)-1,l_nPointIndex+1)
+        l_nIOSeq=0
+         disablePower()
+      break
+      
+      
+      
+      
+    endSwitch
+    
+    if !DataBase:bPowerOn
+      l_bKeyIO=false
+      if taskStatus("Action")!=-1
+        taskKill("Action")
+        wait(taskStatus("Action")==-1)
+      endIf
+    endIf
+    if l_nKey!=-1  and l_nKey>=260
+      for l_nNum=0 to 3
+        
+        l_sBuff[2*l_nNum+0]=IO:sIOName[TxtFile:nAction[l_nPointIndex+1,l_nNum+l_nIOSeq*4,0]]
+        l_sBuff[2*l_nNum+0]=toString("",l_nNum+l_nIOSeq*4+1)+"名称:"+ l_sBuff[2*l_nNum+0]
+        l_sBuff[2*l_nNum+1]="值:"+toString(".3",TxtFile:nAction[l_nPointIndex+1,l_nNum+l_nIOSeq*4,1])
+        
+        
+      endFor
+      call UI:Form_Action("LasMAN3.6->示教动作","动作表",sSItem,l_nPointIndex,l_bKeyIO,l_nPointIndex+1,l_sBuff)
+      
+      
+    endIf
+    
+    
+    
+    
+  endWhile
+  
+  
+  
+  
+  
+  
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

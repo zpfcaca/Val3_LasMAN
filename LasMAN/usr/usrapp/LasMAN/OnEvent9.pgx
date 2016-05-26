@@ -1,0 +1,196 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="OnEvent9" access="private" >
+    <Locals>
+      <Local name="l_bBool" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //-----------------------------------------------------------------------
+  //Header begin
+  //LasMAN3.6
+  //Description of program
+  // 
+  //Input parameters
+  //
+  //Output paramaters
+  //Example
+  //  call OnEvent1()
+  //History
+  //  Creation : 2013-06-23  y.ye@staubli.com
+  //Header end
+  //-----------------------------------------------------------------------
+  //初始化时所有的文件全部关闭
+  //主界面也是安全界面
+  resetMotion()
+  //disablePower()
+  call IO:SafteyIO()
+  $fileClose(0)
+  $fileClose(1)
+  $fileClose(2)
+  $fileClose(3)
+  $fileClose(4)
+  $fileClose(5)
+  $fileClose(6)
+  $fileClose(7)
+  $fileClose(8)
+  $fileClose(9)
+
+  //设置MoveID为0
+  setMoveId(0)
+  //参数初始化
+  DataBase:bSaveTrajPoint=false
+  DataBase:bIOStart=false
+  DataBase:bStopPoll=false
+  DataBase:bUpload=false
+  DataBase:bDebugMode=false
+  TxtFile:cCfg.shoulder=ssame
+  TxtFile:cCfg.elbow=esame
+  TxtFile:cCfg.wrist=wsame
+  DataBase:bMoveTask=false
+  $jogContext(TxtFile:tCfg,world,0)
+  DataBase:nSpeedPercent=1
+  DataBase:nCycleCount=0
+  DataBase:nWorkPlaceCount=0
+  //强制一个按钮一次
+  DataBase:nCycleMode=0
+  DataBase:nWorkPlaceButto=-1
+  DataBase:nWorkPlaceIndex=0
+  DataBase:nPointType=0
+  TxtFile:bReadProduct=false
+  TxtFile:nReadCutCount=0
+  DataBase:nProductIndex=0
+  //2013.10.30
+  //  for l_nKey=0 to size(DataBase:sProductName)-1
+  //    DataBase:sProductName[l_nKey]=""
+  //  endFor
+  DataBase:nWpMutiCount[1]=DataBase:nWpMutiCount[2]=DataBase:nWpMutiCount[3]=DataBase:nWpMutiCount[4]=0
+  //对数据强制进行初始化
+  resize(TxtFile:pCut,1,1)
+  resize(TxtFile:pMoveC,1,1)
+  delay(0)
+  resize(TxtFile:bMoveC,1,1)
+  resize(TxtFile:trCut,1,1)
+
+  TxtFile:pCut.config=TxtFile:pMoveC.config=TxtFile:cCfg
+
+
+
+  //2014.11.28
+  TxtFile:trPointCount={0,0,0,0,0,0}
+
+
+  //安全化IO点
+  call IO:SafteyIO()
+  call IO:Light(1)
+
+  //界面
+  title("LasMAN3.6->主界面")
+  if TxtFile:b7Axis
+    call UI:Form_MainS("回零,七轴,工艺,动作,产品,远程,配置,退出")
+  else
+    call UI:Form_MainS("回零,对齐,工艺,动作,产品,远程,配置,退出")
+  endIf
+  gotoxy(1,11)
+  if TxtFile:bWeldEnable
+    put("激光精密焊接")
+  else
+    put("激光精密切割")
+  endIf
+
+
+
+
+  //事件响应
+  while DataBase:nInterfaceType==9
+    //
+    //    if IO:dDio["In1_bHome"]==true
+    //      DataBase:nInterfaceType=1
+    //    endIf
+
+    l_nKey=getKey()
+    //按钮响应
+    if l_nKey>=271 and l_nKey<=278
+      if TxtFile:b7Axis and l_nKey==272
+        DataBase:nInterfaceType=12
+      else
+        DataBase:nInterfaceType=l_nKey-270
+      endIf
+    endIf
+
+
+    //使用默认的调试文件
+    //double shift +Q
+    if l_nKey==81
+      DataBase:nInterfaceType=17
+    endIf
+
+
+    //示教Home
+    if l_nKey==97
+      DataBase:nInterfaceType=15
+    endIf
+
+    //示教TCP
+    if l_nKey==122
+      DataBase:nInterfaceType=14
+    endIf
+
+    //示教第七轴
+    if l_nKey==119
+      DataBase:nInterfaceType=12
+    endIf
+
+
+    //示教第八轴
+    if l_nKey==115
+      DataBase:nInterfaceType=16
+    endIf
+
+    //示教同步轴
+    if l_nKey==120
+      DataBase:nInterfaceType=18
+    endIf
+
+
+    //显示时间
+    if l_nKey==-1
+      gotoxy(20,9)
+
+      if DataBase:bAlarm
+        setTextMode(3)
+        put("报警触发")
+      else
+        put("       ")
+      endIf
+      setTextMode(0)
+      if TxtFile:b8Axis
+        gotoxy(1,9)
+        put("s->示教八轴")
+      endIf
+
+      gotoxy(20,11)
+      put(left("时间:"+getDate("%H:%M:%S"),20))
+
+
+      //同步七八轴
+      //2014.07.30
+      if TxtFile:bSync7Axis
+        gotoxy(1,9)
+        if !TxtFile:bSync8Axis
+          put("同步七轴")
+        else
+          put("同步七八轴")
+        endIf
+      endIf
+
+
+    endIf
+
+
+    delay(0)
+  endWhile
+
+end]]></Code>
+  </Program>
+</Programs>

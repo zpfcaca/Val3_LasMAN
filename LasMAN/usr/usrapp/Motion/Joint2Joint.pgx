@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="Joint2Joint" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_jJSource" type="jointRx" xsi:type="element" />
+      <Parameter name="x_jDest" type="jointRx" xsi:type="element" use="reference" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_p" type="pointRx" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  //2015.09.08
+  //更换这个运算
+ // if TxtFile:fPofffset.trsf=={0,0,0,0,0,0} and TxtFile:fToffset.trsf=={0,0,0,0,0,0} and (TxtFile:fArray.trsf=={0,0,0,0,0,0} or TxtFile:fArray.trsf=={1,0,1,0,0,0})
+ if TxtFile:fPofffset.trsf=={0,0,0,0,0,0} and TxtFile:fToffset.trsf=={0,0,0,0,0,0} and (TxtFile:fArray.trsf.x<2 and TxtFile:fArray.trsf.z<2)
+    x_bRes=true
+    x_jDest=x_jJSource
+    
+  else
+    
+    //Joint点的建立与frame无关，
+    //joint点会偏移，当有Array
+    l_p=jointToPoint(TxtFile:tCfg,world,x_jJSource)
+    l_p.trsf=!TxtFile:fTraj.trsf*!TxtFile:fProduct.trsf*l_p.trsf
+    link(l_p,TxtFile:fArray)
+    
+    x_bRes=pointToJoint(TxtFile:tCfg,x_jJSource,l_p,x_jDest)
+    
+  endIf
+  
+  
+  
+  
+  
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

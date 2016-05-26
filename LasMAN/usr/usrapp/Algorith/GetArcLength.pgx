@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="GetArcLength" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_trSource" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_nLength" type="num" xsi:type="element" use="reference" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_fFrame" type="frame" xsi:type="array" size="1" />
+      <Local name="l_trCenter" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_nDia" type="num" xsi:type="array" size="1" />
+      <Local name="l_nLength" type="num" xsi:type="array" size="1" />
+      <Local name="l_nAngle" type="num" xsi:type="array" size="1" />
+      <Local name="l_trBuff" type="trsf" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //获得圆弧长度
+  
+  call Circumcircle(x_trSource,l_trCenter,l_nDia,x_bRes)
+  if !x_bRes or l_nDia<=0
+    x_bRes=false
+    return
+  endIf
+  
+  
+  
+  
+  
+  
+  //计算三点的圆弧长度
+  //2015.09.09
+  //
+  
+  //强制二分，避免出现多边弧的问题
+  l_trBuff=interpolateC(x_trSource[0],x_trSource[1],x_trSource[2],0.5)
+  
+  
+  
+  l_nLength=distance(x_trSource[0],l_trBuff)
+  l_nAngle=asin(l_nLength/l_nDia)
+  x_nLength=l_nAngle/180*l_nLength
+  
+  
+  l_nLength=distance(l_trBuff,x_trSource[2])
+  l_nAngle=asin(l_nLength/l_nDia)  
+  x_nLength=l_nAngle/180*l_nLength+x_nLength
+  
+  
+  
+  
+  
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="ThickPlateCut" access="public">
+    <Locals>
+      <Local name="l_jBuff" type="jointRx" xsi:type="array" size="1" />
+      <Local name="l_p" type="pointRx" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //2015.05.21
+  //厚板添加二级穿孔功能
+  //停留时间就是 开光延时
+  //工艺就是穿孔工艺
+  
+    if TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+      //-10是高度
+      movel(appro(TxtFile:pCut[0],{0,0,-10,0,0,0}),TxtFile:tCfg,mRun)
+    else
+      call ExtAxis:SingleMove(2,l_jBuff,l_p,appro(TxtFile:pCut[0],{0,0,-10,0,0,0}),TxtFile:tCfg,mRun,TxtFile:trCutAxis[0])
+    endIf
+    
+    
+    //等待第一级穿孔点到位
+    waitEndMove()
+    
+    //2015.02.02
+    //等于-1时，不开光开气开随动
+    if  TxtFile:trWorkplace.rz!=-1
+      //穿孔工艺
+      call IO:Preset(TxtFile:nPreset,TxtFile:trWorkplace.rz,TxtFile:trPresetData.z,TxtFile:trPresetData.x,TxtFile:trPresetData.y)
+      
+      //开光开气开随动
+      if DataBase:nInterfaceType==6 or DataBase:nInterfaceType==13  
+        call IO:KeyDigtalIO(true,false,true,TxtFile:trIODelay.x,0)
+      else
+        call IO:KeyDigtalIO(DataBase:bKeyIO[2],false,DataBase:bKeyIO[0],TxtFile:trIODelay.x,0)
+        DataBase:bIOStart=true
+      endIf
+    else
+      logMsg("穿孔工艺设置为-1，不开光开气开随动")
+    endIf
+    delay(max(TxtFile:nTrajDelay[0],0))
+    
+    
+    
+    
+    //第二级穿孔
+    if TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+      //-5是高度
+      movel(appro(TxtFile:pCut[0],{0,0,-5,0,0,0}),TxtFile:tCfg,mRun)
+    else
+      call ExtAxis:SingleMove(2,l_jBuff,l_p,appro(TxtFile:pCut[0],{0,0,-5,0,0,0}),TxtFile:tCfg,mRun,TxtFile:trCutAxis[0])
+    endIf
+    
+    
+    //等待第二级穿孔点到位
+    waitEndMove()
+    
+    delay(max(TxtFile:nTrajDelay[0],0))
+    
+    
+  
+end
+]]></Code>
+  </Program>
+</Programs>

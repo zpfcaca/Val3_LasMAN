@@ -1,0 +1,252 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="Product">
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nTime" type="num" xsi:type="array" size="1" />
+      <Local name="l_jJ" type="joint" xsi:type="array" size="1" />
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //生产函数
+  
+  
+  //变量初始化
+  DataBase:nWorkPlaceIndex=0
+  DataBase:nCycleIndex=0
+  bPowerFlag=false
+  DataBase:nCycleCount=max(1,DataBase:nCycleCount)
+  
+  
+  //等待机械手臂上电
+  if !isPowered()
+    call GetProductMess("等待上电")
+    wait(DataBase:bPowerOn and isPowered())
+  endIf
+  
+  bPowerFlag=true
+  
+  
+  
+  //标志符响应
+  
+  while DataBase:nInterfaceType==13
+    
+    //检查机械手臂是否在零位
+    // l_jJ=herej()
+    //l_nKey= abs(l_jJ.j1-TxtFile:jHome.j1)+abs(l_jJ.j2-TxtFile:jHome.j2)+abs(l_jJ.j3-TxtFile:jHome.j3)
+    // l_nKey=l_nKey+ abs(l_jJ.j4-TxtFile:jHome.j4)+abs(l_jJ.j5-TxtFile:jHome.j5)+abs(l_jJ.j6-TxtFile:jHome.j6)
+    
+    
+    //    if l_nKey>0.3
+    //      popUpMsg("机械手臂请回到零位")
+    //      return
+    //    endIf
+    
+    if distance(here(TxtFile:tCfg,world),jointToPoint(TxtFile:tCfg,world,TxtFile:jHome))>1
+      popUpMsg("机械手臂请回到零位")
+      return
+    endIf
+    
+    
+    //机械手臂在安全点位置
+    call IO:AtHome(true)
+    
+    //等待按钮触发
+    
+    TxtFile:nReadTrajIndex=0
+    
+    
+    //产品与工位选择
+    call WorkPlaceChose()
+    
+    
+    //机械手臂在安全点位置
+    call IO:AtHome(false)
+    
+    
+    //报错机制,
+    if DataBase:nWorkPlaceIndex<1 or DataBase:nWorkPlaceIndex>DataBase:nWorkPlaceCount
+      DataBase:nInterfaceType=9
+      logMsg("生产结束")
+      return
+    endIf
+    
+    
+    //如果多于一个工位或者同工位多产品，则读取文件
+    DataBase:bStopPoll=true
+    if DataBase:nWorkPlaceCount>1 or TxtFile:bMoreProd1Wp
+      //读取路径名
+      
+      call TxtFile:ReadProduct("Disk://Txt/Product"+toString("",DataBase:nWorkPlaceIndex)+".txt",DataBase:sProductName[DataBase:nWorkPlaceIndex],false,l_bRes)
+      
+      //路径个数必须大于或者等于1
+      if !l_bRes or TxtFile:nTotalTraj<1
+        popUpMsg("读取工位"+toString("",DataBase:nWorkPlaceIndex)+"生产文件出错")
+        return
+      endIf 
+    endIf
+    
+    //如果读取文件中的PresetName
+    if TxtFile:sPresetName!="StaubliPreset"
+      call TxtFile:ReadMatchPreset("Disk://Txt/Preset"+toString("",DataBase:nWorkPlaceIndex)+".txt",TxtFile:sPresetName,l_bRes)
+    endIf
+    
+    
+    //开始生产
+    DataBase:bStopPoll=false
+    call IO:Light(2)
+    call GetProductMess("工位"+toString("",DataBase:nWorkPlaceIndex)+"开始启动")
+    call GetProductMess("开始生产"+DataBase:sProductName[DataBase:nWorkPlaceIndex])
+    logMsg("工位"+toString("",DataBase:nWorkPlaceIndex)+"生产"+DataBase:sProductName[DataBase:nWorkPlaceIndex])
+    
+    
+    
+    //2014.4.16
+    //每个工位的值加,计数
+    //用户上位机进行统计使用
+    
+    DataBase:nWpProduct[DataBase:nWorkPlaceIndex]=DataBase:nWpProduct[DataBase:nWorkPlaceIndex]+1
+    DataBase:nProductCount=DataBase:nProductCount+1  
+    
+    
+    //路径过滤
+    if TxtFile:bTrajFilter
+      call GetProductMess("信号控制路径过滤")
+    endIf
+    
+    //产品生产前的动作
+    call Custom:BeforeProduct(DataBase:nWorkPlaceIndex)
+    
+    
+    //生产的总个数
+    Motion:nStartTraj=1
+    Motion:nEndTraj=TxtFile:nTotalTraj
+    l_nTime=clock()
+    
+    
+    
+    
+    //建立两个任务
+    if taskStatus("ReadFile")!=-1
+      taskKill("ReadFile")
+    endIf
+    
+    if taskStatus("Preset")!=-1
+      taskKill("Preset")
+    endIf
+    
+    
+    if taskStatus("WeldEnd")!=-1
+      taskKill("WeldEnd")
+    endIf
+    TxtFile:bReadProduct=true
+    taskCreate "ReadFile",100,Motion:ReadTraj()
+    delay(0)
+    taskCreate "Preset",100,Motion:Preset()
+    
+    
+    if TxtFile:bWeldEnable
+      taskCreateSync "WeldEnd",0.004,bSyc,Motion:WeldEnd()
+    endIf
+    
+    delay(0)
+    
+    
+    
+    //机器人运动 
+    call Motion:Move()
+    
+    //结束生产
+    TxtFile:bReadProduct=false
+    if taskStatus("ReadFile")!=-1
+      taskKill("ReadFile")
+    endIf
+    
+    if taskStatus("Preset")!=-1
+      taskKill("Preset")
+    endIf
+    
+    if taskStatus("WeldEnd")!=-1
+      taskKill("WeldEnd")
+    endIf
+    
+    
+    //工位完成,发出信号
+    waitEndMove()
+    //l_jJ=herej()
+    // l_nNum=abs(l_jJ.j1-TxtFile:jHome.j1)+abs(l_jJ.j2-TxtFile:jHome.j2)+abs(l_jJ.j3-TxtFile:jHome.j3)
+    // l_nNum=l_nNum+abs(l_jJ.j4-TxtFile:jHome.j4)+abs(l_jJ.j5-TxtFile:jHome.j5)+abs(l_jJ.j6-TxtFile:jHome.j6)
+    
+    
+    //生产中途退出
+    //if l_nNum>0.3
+    //  return
+    // endIf
+    
+    //2014.12.08
+    //代码重构
+    //如果与安全点距离大于1mm,则跳出循环
+    if distance(here(TxtFile:tCfg,world),jointToPoint(TxtFile:tCfg,world,TxtFile:jHome))>1
+      return
+    endIf
+    
+    
+    //输出工位完成信息
+    //**************************
+    //2015.04.20
+    call IO:WorkPlaceFinish(0)
+    
+    
+    
+    
+    
+    //多工位多产品
+    if (DataBase:bMultiNormal and TxtFile:bMoreProd1Wp and DataBase:nWorkPlaceIndex>=DataBase:nWpProduct[DataBase:nWorkPlaceIndex]) and DataBase:bWpFinishIOOut
+      call IO:WorkPlaceFinish(DataBase:nWorkPlaceIndex)
+    endIf
+    
+    
+    //一般情况下的
+    //多工位多产品
+    if !TxtFile:bMoreProd1Wp and !DataBase:bExtraContrAxis  and DataBase:bWpFinishIOOut
+      call IO:WorkPlaceFinish(DataBase:nWorkPlaceIndex)
+    endIf
+    
+    //外部PLC控制第七轴运动，到底home位置时发出工位完成信号
+    if DataBase:bExtraContrAxis 
+      call IO:AtHomePulse()
+    endIf
+    
+    
+    //**************************************
+    
+    //生产IO初始化
+    call IO:WaitProIOEnd(DataBase:nWorkPlaceIndex)
+    //DataBase:bCanProduct[DataBase:nWorkPlaceIndex]=false
+    //生产结束
+    call GetProductMess("结束生产"+DataBase:sProductName[DataBase:nWorkPlaceIndex-1])
+    DataBase:nCycleTime=clock()-l_nTime
+    
+    //生产完成之后
+    call Custom:AfterWorkPlace(DataBase:nWorkPlaceIndex)
+    
+  endWhile
+  
+  
+end
+    
+    
+  
+    
+
+
+    
+  
+
+    
+
+]]></Code>
+  </Program>
+</Programs>

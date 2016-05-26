@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="TubePoint" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_trSource" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_nAngle" type="num" xsi:type="element" />
+      <Parameter name="x_trDest" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_ni" type="num" xsi:type="array" size="1" />
+      <Local name="l_fFrame" type="frame" xsi:type="array" size="1" />
+      <Local name="l_Dia" type="num" xsi:type="array" size="1" />
+      <Local name="l_pBuff" type="point" xsi:type="array" size="1" />
+      <Local name="l_trSupport" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_trBuff" type="trsf" xsi:type="array" size="3" />
+    </Locals>
+    <Code><![CDATA[begin
+ //切管子应用
+ //设置三点和一个角度就可以进行实现
+  
+  call Circumcircle(x_trSource,l_trSupport,l_Dia,x_bRes)
+  if !x_bRes
+    return
+  endIf
+  call CirClePoint(l_trSupport,l_Dia,x_trDest,x_bRes)
+  if !x_bRes
+    return
+  endIf
+  x_trDest[20]=l_trSupport
+  
+  
+  
+  
+  //对点在对应坐标系下进行偏移
+  for l_ni=0 to 3
+    l_trBuff[0]=x_trDest[l_ni]
+    l_trBuff[1]=l_trSupport
+    l_trBuff[2]=x_trDest[l_ni+1]
+    call SetFrame(l_trBuff,l_fFrame,x_bRes)
+    if !x_bRes
+      return
+    endIf
+    l_pBuff.trsf=x_trDest[l_ni]
+    link(l_pBuff,world)
+   l_pBuff=compose(l_pBuff,l_fFrame,{0,0,0,0,-x_nAngle,0})
+    x_trDest[l_ni]=position(l_pBuff,world)
+  endFor
+  x_trDest[4]=x_trDest[0]
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

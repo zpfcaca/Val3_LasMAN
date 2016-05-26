@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="Inscribedcircle" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_trSource" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_trCenter" type="trsf" xsi:type="element" use="reference" />
+      <Parameter name="x_nDia" type="num" xsi:type="element" use="reference" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_ni" type="num" xsi:type="array" size="1" />
+      <Local name="l_fFrame" type="frame" xsi:type="array" size="1" />
+      <Local name="l_pCenter" type="point" xsi:type="array" size="1" />
+      <Local name="a" type="num" xsi:type="array" size="1" />
+      <Local name="b" type="num" xsi:type="array" size="1" />
+      <Local name="c" type="num" xsi:type="array" size="1" />
+      <Local name="p" type="num" xsi:type="array" size="1" />
+      <Local name="s" type="num" xsi:type="array" size="1" />
+      <Local name="r" type="num" xsi:type="array" size="1" />
+      <Local name="l_angle" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //由三角形求内切圆圆心
+  //内切圆圆心
+  x_bRes=false
+  a=distance(x_trSource[0],x_trSource[1])
+  b=distance(x_trSource[1],x_trSource[2])
+  c=distance(x_trSource[0],x_trSource[2])
+  p=(a+b+c)/2
+  s=sqrt(p*(p-a)*(p-b)*(p-c))
+  r=s/p
+  l_angle=acos((c*c+a*a-b*b)/2/a/c)/2
+  
+  if l_angle<0
+    return
+  endIf
+  
+ 
+  call SetFrame(x_trSource,l_fFrame,x_bRes)
+  if !x_bRes
+    return
+  endIf
+  
+  link(l_pCenter,l_fFrame)
+  l_pCenter.trsf={r/tan(l_angle),r,0,0,0,0}
+  x_trCenter=position(l_pCenter,world)
+  x_nDia=r
+end]]></Code>
+  </Program>
+</Programs>

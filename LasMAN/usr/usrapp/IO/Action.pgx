@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="Action" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nAction" type="num" xsi:type="array" use="reference" dimensions="2" />
+      <Parameter name="x_bMoveId" type="bool" xsi:type="element" />
+      <Parameter name="x_nMoveID" type="num" xsi:type="element" />
+    </Parameters>
+    <Locals>
+      <Local name="l_bFirst" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bInput" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bNull" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nLast" type="num" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //延时是否需要停止等待？
+  //
+  
+  
+  
+  
+  //一共是每个点上最多12个IO
+  
+  
+  //如果都为空，则直接跳出 
+  l_bNull=false
+  for l_nNum=0 to 11
+    l_bNull=x_nAction[l_nNum,0]!=0 or x_nAction[l_nNum,1]!=0 or l_bNull
+  endFor
+  if !l_bNull
+    return
+  endIf
+  
+  
+  
+  
+  //通过MOVEID来实现
+  for l_nNum=0 to 11
+    
+    //如果后面的都是0则退出
+    l_bNull=false
+    for l_nLast=l_nNum to 11
+      l_bNull=x_nAction[l_nLast,0]!=0 or x_nAction[l_nLast,1]!=0 or l_bNull
+    endFor
+    if !l_bNull
+      return
+    endIf
+    
+    
+    //通过MOVEID来实现
+    if x_bMoveId
+      call IsInput(x_nAction[l_nNum,0],l_bInput)
+      //如果有等待信号，直接退出
+      if l_bInput
+        return
+      else
+        wait(getMoveId()>x_nMoveID+0.8)
+        call IOvalue(x_nAction[l_nNum,0],x_nAction[l_nNum,1])
+      endIf
+      
+      
+      
+      
+      
+     // 
+    else
+      
+      //跟在运动指令后面
+      call IsInput(x_nAction[l_nNum,0],l_bInput)
+      //如果有等待信号 则运行
+      if l_bInput
+        l_bFirst=true
+        
+      endIf
+      
+      if l_bFirst
+        //如果不是收弧时间
+        
+        
+        if x_nAction[l_nNum,0]!=166 and l_bInput
+          if x_nMoveID==-2
+            waitEndMove()
+          else
+            if x_nMoveID>=0
+              wait(getMoveId()>x_nMoveID+0.8)
+            endIf
+          endIf
+        endIf
+      endIf
+      
+      call IOvalue(x_nAction[l_nNum,0],x_nAction[l_nNum,1])
+      
+      
+      if x_nAction[l_nNum,0]==166
+        //  logMsg(toString(".3",x_nAction[l_nNum,1]))
+        logMsg(toString(".3",clock())+"  "+toString(".3",getMoveId()))
+      endIf
+      
+      
+    endIf
+    
+    
+    //把数字量输出
+    call Digtal2Analog()
+    
+  endFor
+  
+  
+end
+
+
+
+      ]]></Code>
+  </Program>
+</Programs>

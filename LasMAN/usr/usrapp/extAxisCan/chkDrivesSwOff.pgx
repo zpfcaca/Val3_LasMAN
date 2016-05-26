@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="chkDrivesSwOff" access="private" >
+    <Locals>
+      <Local name="l_bDrvSwOnDis" type="bool" xsi:type="array" size="1" />
+      <Local name="l_i" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  // 检测驱动器“switch on disabled"的状态
+  bDrivesSwOnDis=true
+  for l_i=0 to nAxesSum-1
+    bSWOnDis[l_i]=(diSwOnDis[l_i]==true)
+    bDrivesSwOnDis=bDrivesSwOnDis and bSWOnDis[l_i]
+  endFor
+  //    
+end]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="OnEvent5" access="private" >
+    <Code><![CDATA[begin
+  //-----------------------------------------------------------------------
+  //Header begin
+  //LasMAN3.6
+  //Description of program
+  // 
+  //Input parameters
+  //
+  //Output paramaters
+  //Example
+  //  call OnEvent1()
+  //History
+  //  Creation : 2013-06-23  y.ye@staubli.com
+  //Header end
+  //-----------------------------------------------------------------------
+
+
+
+
+  //单个七轴
+  //2015.03.13
+  //异步七轴
+  if (TxtFile:b8Axis and DataBase:bSingleAxisMode)
+    popUpMsg("异步外部轴配置出错")
+    DataBase:nInterfaceType=9
+    return
+  endIf
+  //**********
+
+
+  if DataBase:bMutexAxis==false
+
+  else
+    //2014.4.15 为异步七八轴
+    if (TxtFile:b7Axis or TxtFile:b8Axis) and DataBase:nWorkPlaceIndex<1
+      // call UI:control_md
+      call UI:Control_PanelMd("异步轴启动,等待工作台按钮信号")
+      call UI:Control_BottomS(",,,,,,,终止")
+
+      while DataBase:nWorkPlaceIndex<1
+        if getKey()==278
+          DataBase:nInterfaceType=9
+          return
+        endIf
+        call IO:CanProduct(DataBase:nWorkPlaceIndex)
+        delay(0)
+      endWhile
+
+    endIf
+
+  endIf
+
+  //2015.04.21
+  TxtFile:trPointCount={0,0,0,0,0,0}
+  call TxtFile:DeleteBuffTraj()
+
+
+
+  //
+  call Teach:TeachRecipe()
+  DataBase:nInterfaceType=9
+
+
+  //DataBase:sProductName=""
+end]]></Code>
+  </Program>
+</Programs>

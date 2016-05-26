@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="RecordExtAxis" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_trTrsf" type="trsf" xsi:type="element" use="reference" />
+      <Parameter name="x_trPos" type="trsf" xsi:type="element" use="reference" />
+      <Parameter name="x_tTool" type="tool" xsi:type="element" />
+    </Parameters>
+    <Locals>
+      <Local name="l_jJ" type="jointRx" xsi:type="array" size="1" />
+      <Local name="l_pP" type="pointRx" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //  $recClean("c")
+  //  $recAdd("c","CanIO\Axis8\posCmd_1")
+  //  $recAdd("c","CanIO\Axis8\posFbk_1")
+  //  $recStart("c",50,250)
+
+  //  $recClean("c")
+  //  $recAdd("c","extDrvCmdPos")
+  //  $recAdd("c","extDrvCmdVel")
+  //  $recAdd("c","extJntCmdPos")
+  //  $recAdd("c","extJntCmdVel")
+  //  $recAdd("c","extError")
+  //  $recAdd("c","extDrvGrpError")
+  //  $recStart("c",50,250)
+  
+ // x_pPos=$here
+//    resize(nBuffSize,1,sel(x_b8Axis,2,1))
+//  x_j=$XH(nBuffSize)
+//  x_trTrsf.x=nBuffSize[0]
+//  if x_b8Axis
+//    x_trTrsf.y=nBuffSize[1]
+//  endIf
+
+
+if bMoveType
+  $XframeLink(fFrame)
+ l_pP=here(x_tTool,fFrame)
+  x_trPos=l_pP.trsf
+  
+endIf
+
+
+
+
+//记录七轴，八轴位置
+call RecordJoint(l_jJ,x_trTrsf)
+
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

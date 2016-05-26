@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="start">
+    <Locals>
+      <Local name="l_trTrsf" type="trsf" xsi:type="array" size="3" />
+      <Local name="l_trTrsf1" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_bBool" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  l_trTrsf[0]={0,1,0,0,0,0}
+   l_trTrsf[1]={0,0,1,0,0,0}
+   l_trTrsf[2]={1,0,0,0,0,0}
+  
+  
+  
+  call Circumcircle(l_trTrsf,l_trTrsf1,l_nNum,l_bBool)
+  if !l_bBool
+    popUpMsg("")
+  else
+    popUpMsg(toString(".5",l_nNum))
+  endIf
+  
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

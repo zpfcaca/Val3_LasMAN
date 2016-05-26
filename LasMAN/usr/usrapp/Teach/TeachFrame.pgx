@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="TeachFrame" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_fFrame" type="frame" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_fFrame" type="frame" xsi:type="array" size="1" />
+      <Local name="l_p" type="point" xsi:type="array" size="3" />
+      <Local name="l_nIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nErr" type="num" xsi:type="array" size="1" />
+      <Local name="l_fBuff" type="frame" xsi:type="array" size="1" />
+      <Local name="l_sData" type="string" xsi:type="array" size="3" />
+      <Local name="l_trFirst" type="trsf" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  //用户坐标系示教
+  //link(l_fFrame,world)
+  l_trFirst=x_fFrame.trsf
+  l_fFrame=x_fFrame
+  l_fBuff=x_fFrame
+  l_fFrame.trsf={0,0,0,0,0,0}
+  //2013.10.26
+  // DataBase:fJogContext=x_fFrame
+  link(DataBase:fJogContext,world)
+  DataBase:fJogContext.trsf=position(l_fFrame,world)
+  if DataBase:bWorldMove
+    $jogContext(TxtFile:tCfg,world,0)
+  else
+    $jogContext(TxtFile:tCfg,DataBase:fJogContext,0)
+  endIf
+  //
+  for l_nErr=0 to 2
+    
+    link(l_p[l_nErr],l_fFrame)
+    l_p[l_nErr]=here(TxtFile:tCfg,l_fFrame)
+    
+  endFor
+  
+  resetMotion()
+  
+  resize(sSItem,1,6)
+  l_sData[0]="原点"
+  l_sData[1]="X方向点"
+  l_sData[2]="Y方向点"
+  
+  sSItem[0]="X   :"+toString(".3",l_fBuff.trsf.x)
+  sSItem[1]="Y   :"+toString(".3",l_fBuff.trsf.y)
+  sSItem[2]="Z   :"+toString(".3",l_fBuff.trsf.z)
+  sSItem[3]="RX  :"+toString(".3",l_fBuff.trsf.rx)
+  sSItem[4]="RY  :"+toString(".3",l_fBuff.trsf.ry)
+  sSItem[5]="RZ  :"+toString(".3",l_fBuff.trsf.rz)
+  
+  
+  
+  cls()
+  userPage()
+  if DataBase:nInterfaceType==5
+    call UI:Form_LabelList("LasMAN3.6->坐标系示教","用户坐标系",sSItem,"参考点",l_sData,l_nIndex,"记录,对齐,测试,默认,,计算,保存,退出")
+  else
+    
+    call UI:Form_LabelList("LasMAN3.6->坐标系示教","用户坐标系",sSItem,"参考点",l_sData,l_nIndex,"记录,对齐,测试,默认,上传,计算,保存,退出")
+    
+  endIf
+  movej(l_p[0],TxtFile:tCfg,mNomSpeed)
+  while  true
+    l_nKey=getKey()
+    switch l_nKey
+      case 261
+        // DataBase:fJogContext.trsf={0,0,0,0,0,0}
+        // $jogContext(TxtFile:tCfg,DataBase:fJogContext,0)
+        l_nIndex=max(l_nIndex-1,0)
+        
+        resetMotion()
+        mNomSpeed.blend=off
+        
+        movej(l_p[l_nIndex],TxtFile:tCfg,mNomSpeed)
+        
+      break
+      
+      
+      case 266
+        //DataBase:fJogContext.trsf={0,0,0,0,0,0}
+        //$jogContext(TxtFile:tCfg,DataBase:fJogContext,0)
+        l_nIndex=min(l_nIndex+1,2)
+        resetMotion()
+        mNomSpeed.blend=off
+        movej(l_p[l_nIndex],TxtFile:tCfg,mNomSpeed)
+        
+        
+      break
+      
+      
+      
+      
+      //记录
+      case 271
+        // $jogContext(TxtFile:tCfg,l_fFrame,0)
+        call UI:Control_YesNO("确定要记录吗?",l_bRes)
+        if l_bRes
+          l_p[l_nIndex]=here(TxtFile:tCfg,l_fFrame)
+        endIf
+      break
+      
+      //对齐
+      case 272
+        //  $jogContext(TxtFile:tCfg,l_fFrame,0)
+        call Kit:Align(TxtFile:tCfg)
+        
+      break
+      
+      //验证
+      case 273
+        // $jogContext(TxtFile:tCfg,l_fBuff,0)
+        DataBase:fJogContext.trsf=  DataBase:fJogContext.trsf=position(l_fBuff,world)
+        $jogContext(TxtFile:tCfg,DataBase:fJogContext,0)
+      break
+      
+      case 274
+        call UI:Control_YesNO("把默认值赋值给当前用户坐标系吗?",l_bRes)
+        if l_bRes
+          l_fBuff.trsf=TxtFile:trDefaultFrame
+          sSItem[0]="X   :"+toString(".3",l_fBuff.trsf.x)
+          sSItem[1]="Y   :"+toString(".3",l_fBuff.trsf.y)
+          sSItem[2]="Z   :"+toString(".3",l_fBuff.trsf.z)
+          sSItem[3]="RX  :"+toString(".3",l_fBuff.trsf.rx)
+          sSItem[4]="RY  :"+toString(".3",l_fBuff.trsf.ry)
+          sSItem[5]="RZ  :"+toString(".3",l_fBuff.trsf.rz)
+        endIf
+      break
+      case 115
+        call UI:Control_YesNO("把当前坐标系设为默认值吗?",l_bRes)
+        if l_bRes
+          TxtFile:trDefaultFrame=l_fBuff.trsf
+        endIf
+      break
+      
+      case 275
+        if DataBase:nInterfaceType==10
+          call UI:Control_YesNO("确定要上传吗?",l_bRes)
+          if l_bRes
+            call Kit:UpLoad()
+          endIf
+          
+          
+        endIf
+        
+      break
+      
+      
+      //计算
+      case 276
+        call UI:Control_YesNO("确定要计算吗?",l_bRes)
+        if l_bRes
+          
+          l_nErr=setFrame(l_p[0],l_p[1],l_p[2],l_fBuff)
+          if l_nErr==-1
+            popUpMsg("X方向点离原点太近")
+          endIf
+          if l_nErr==-2
+            popUpMsg("Y方向点离原点太近")
+          endIf
+          sSItem[0]="X   :"+toString(".3",l_fBuff.trsf.x)
+          sSItem[1]="Y   :"+toString(".3",l_fBuff.trsf.y)
+          sSItem[2]="Z   :"+toString(".3",l_fBuff.trsf.z)
+          sSItem[3]="RX  :"+toString(".3",l_fBuff.trsf.rx)
+          sSItem[4]="RY  :"+toString(".3",l_fBuff.trsf.ry)
+          sSItem[5]="RZ  :"+toString(".3",l_fBuff.trsf.rz)
+        endIf
+      break
+      
+      
+      
+      //保存
+      case 277
+        if l_trFirst==l_fBuff.trsf
+          popUpMsg("没有计算")
+        else
+          call UI:Control_YesNO("确定要保存吗?",l_bRes)
+          if l_bRes
+            x_fFrame.trsf=l_fBuff.trsf
+          endIf
+        endIf
+        cls()
+        
+        
+      break
+      
+      
+      
+      
+      //退出
+      case 278
+        call UI:Control_YesNO("确定要退出吗?",l_bRes)
+        if l_bRes
+          
+          return
+        endIf
+      break
+      
+      //点位
+      case 270
+        call UI:Control_Point(l_p[l_nIndex])
+      break
+      
+    endSwitch
+    
+    if l_nKey!=-1
+      if DataBase:nInterfaceType==5
+        call UI:Form_LabelList("LasMAN3.6->坐标系示教","用户坐标系",sSItem,"参考点",l_sData,l_nIndex,"记录,对齐,测试,默认,,计算,保存,退出")
+      else
+        
+        call UI:Form_LabelList("LasMAN3.6->坐标系示教","用户坐标系",sSItem,"参考点",l_sData,l_nIndex,"记录,对齐,测试,默认,上传,计算,保存,退出")
+        
+      endIf
+    endIf
+    
+    delay(0)
+    
+  endWhile
+  
+  
+  
+  
+  
+  
+  
+end
+]]></Code>
+  </Program>
+</Programs>

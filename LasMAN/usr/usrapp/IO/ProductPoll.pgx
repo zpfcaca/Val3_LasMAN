@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="ProductPoll" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nCycleCount" type="num" use="reference" xsi:type="element" dimensions="1" />
+      <Parameter name="x_nInterface" type="num" use="reference" xsi:type="element" dimensions="1" />
+      <Parameter name="x_bPause" type="bool" use="reference" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_sS" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //在生产过程中进行轮询
+  //主要是上电，暂停，结束本周期，继续
+  //客户可以在这里进行修改
+
+
+
+
+  //上电
+  call IOName(1,l_sS)
+  if dDio[l_sS]==true
+    if !isPowered()
+      enablePower()
+      logMsg("上电信号被触发")
+      if !watch(dDio[l_sS]==false,10)
+        disablePower()
+        popUpMsg("上电按钮不能超过10秒")
+      endIf
+    endIf
+  endIf
+
+  //结束本周期
+  call IOName(5,l_sS)
+  if x_nCycleCount!=0 and dDio[l_sS]==true
+    delay(0.1)
+    if watch(dDio[l_sS]==true,0.1)
+      x_nCycleCount=0
+    endIf
+  endIf
+
+
+
+  //立即结束
+  call IOName(3,l_sS)
+  if dDio[l_sS]==true
+    delay(0.05)
+    if watch(dDio[l_sS]==true,0.1)
+
+      //2015.01.16立即结束
+      aioSet(aAio["Out_a66_81"],0)
+      stopMove()
+
+      //
+      x_nInterface=9
+      logMsg("停止信号被触发")
+      return
+    endIf
+  endIf
+
+
+  //暂停
+  // call IOName(8,l_sS)
+  if dDio["In1_bPausCycl"]==true
+    if !x_bPause
+      // delay(max(0.1,x_nPauseDelay))
+      delay(0.05)
+      if dDio["In1_bPausCycl"]==true
+        logMsg("暂停信号被触发")
+        x_bPause=!x_bPause
+      endIf
+    endIf
+    return
+  endIf
+
+
+
+
+
+
+  //客户可以在这里进行修改 继续按钮
+  //继续
+  if x_bPause
+    //    call IOName(6,l_sS)
+    if dDio["In1_bPrdSta1"]==true
+      delay(0.1)
+      if !watch(dDio["In1_bPrdSta1"]==false,10)
+        disablePower()
+        popUpMsg("按钮不能超过10秒")
+      else
+        logMsg("继续信号被触发")
+        x_bPause=!x_bPause
+      endIf
+    endIf
+  endIf
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

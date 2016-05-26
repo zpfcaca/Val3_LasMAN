@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="OnEvent8" access="private" >
+    <Locals>
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //-----------------------------------------------------------------------
+  //Header begin
+  //LasMAN3.6
+  //Description of program
+  // 
+  //Input parameters
+  //
+  //Output paramaters
+  //Example
+  //  call OnEvent1()
+  //History
+  //  Creation : 2013-06-23  y.ye@staubli.com
+  //Header end
+  //-----------------------------------------------------------------------
+
+  call UI:Control_YesNO("确定要退出吗?",l_bRes)
+  if l_bRes
+    bExit=true
+  else
+    DataBase:nInterfaceType=9
+  endIf
+
+end]]></Code>
+  </Program>
+</Programs>

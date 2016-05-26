@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="start" access="private" >
+    <Locals>
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //  
+  //  call ReadAction(l_bRes)
+  //  call ReadPreset(l_bRes)
+  //  call ReadMatchPreset("Disk://Txt/Preset1.txt","StaubliPreset",l_bRes)
+  //  call ReadProduct("Disk://Txt/product.txt","Test",true,l_bRes)
+  // 
+  //  if !l_bRes
+  //    popUpMsg("Error")
+  //  else
+  //   // popUpMsg("OK")
+  //  endIf
+  //  
+  //  call ReadTraj("Disk://Txt/product.txt","Test",1,1,l_bRes)
+  //
+  //    if !l_bRes
+  //    popUpMsg("Error")
+  //  else
+  //    popUpMsg("OK")
+  //    endIf
+
+
+  //  call ReadTraj("Disk://Txt/Product1.txt","1234",1,1,l_bRes)
+  call ReadCfg(l_bRes)
+  if !l_bRes
+    disablePower()
+    popUpMsg("读取配置信息出现异常")
+    logMsg("读取配置信息出现异常")
+  else
+    //popUpMsg("读取路径OK")
+  endIf
+
+
+  //  //  call ReadAction(l_bRes)
+  //  call ReadCfg(l_bRes)
+  //  if !l_bRes
+  //    popUpMsg("读取动作信息出现异常")
+  //    return
+  //  else
+  //    popUpMsg("ok")
+  //  endIf
+
+  //    call ReadPreset(l_bRes)
+  //  if !l_bRes
+  //    popUpMsg("Preset ERROR")
+  //    return
+  //  endIf
+  //  
+  //call ReadProduct("Disk://Txt/Recipe.txt","1008",true,l_bRes)
+  //   if !l_bRes
+  //    popUpMsg("Product ERROR")
+  //    return
+  //  endIf 
+  //  
+  //    call ReadTraj("Disk://Txt/Recipe.txt","1008",1,2,l_bRes)
+  //  if !l_bRes
+  //    popUpMsg("Error")
+  //  endIf
+  //  
+  //  
+  ////  
+  ////  
+  //  
+  // wait(false)
+
+end]]></Code>
+  </Program>
+</Programs>

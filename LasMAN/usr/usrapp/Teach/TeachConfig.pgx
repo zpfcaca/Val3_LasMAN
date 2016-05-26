@@ -1,0 +1,278 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="TeachConfig" access="public">
+    <Locals>
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_nPointIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_sBuff" type="string" xsi:type="array" size="2" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="40" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  //配置示教
+  
+  
+  //参数初始化
+  
+  
+  
+  title("LasMAN3.6->配置")
+  call TxtFile:ReadCfg(l_bRes)
+   IO:bWeldEnable=TxtFile:bWeldEnable
+   IO:bExt7AxisEnable=TxtFile:b7Axis
+   IO:bExt8AxisEnable=TxtFile:b8Axis
+  if !l_bRes
+    popUpMsg("读取配置文件不正确")
+    return
+  endIf
+  l_sBuff[0]="关"
+  l_sBuff[1]="开"
+  //工具
+  l_nNum[0]=TxtFile:tCfg.trsf.x
+  l_nNum[1]=TxtFile:tCfg.trsf.y
+  l_nNum[2]=TxtFile:tCfg.trsf.z
+  l_nNum[3]=TxtFile:tCfg.trsf.rx
+  l_nNum[4]=TxtFile:tCfg.trsf.ry
+  l_nNum[5]=TxtFile:tCfg.trsf.rz
+  
+  //基本设置
+  l_nNum[6]=TxtFile:nHomeSpeed
+  l_nNum[7]=sel(TxtFile:bTeachToolMode,1,0)
+  l_nNum[8]=sel(TxtFile:bMoveBack,1,0)
+  
+  //工艺
+  l_nNum[9]=TxtFile:trPresetData.x
+  l_nNum[10]=TxtFile:trPresetData.y
+  l_nNum[11]=TxtFile:trPresetData.z
+  l_nNum[12]=TxtFile:trPresetData.rx
+  l_nNum[13]=TxtFile:trPresetData.ry
+  
+  
+  
+  //动作
+  l_nNum[14]=TxtFile:trIODelay.x
+  l_nNum[15]=TxtFile:trIODelay.y
+  l_nNum[16]=TxtFile:trIODelay.rx
+  //拐角
+  l_nNum[17]=TxtFile:trCorner.z
+  l_nNum[18]=TxtFile:trCorner.rx
+  l_nNum[19]=TxtFile:trCorner.ry
+  l_nNum[20]=TxtFile:trCorner.x
+  
+  
+  l_nNum[21]=sel(TxtFile:b7Axis,1,0)
+  l_nNum[22]=TxtFile:trAxisData.x
+  l_nNum[23]=TxtFile:trAxisData.y
+  l_nNum[24]=TxtFile:trAxisData.z
+  
+  
+  
+  l_nNum[25]=sel(TxtFile:bWeldEnable,1,0)
+  l_nNum[26]=TxtFile:trIODelay.z
+  // l_nNum[27]=sel(TxtFile:bStepMove,1,0)
+  l_nNum[28]=TxtFile:nStepLength
+  l_nNum[29]=DataBase:nRemoteProduct
+  l_nNum[30]=sel(TxtFile:bMoreProd1Wp,1,0)
+  l_nNum[27]=TxtFile:trIODelay.ry
+  l_nNum[31]=sel(TxtFile:bAdjustSpEnable,1,0)
+  
+  //八轴
+  l_nNum[32]=sel(TxtFile:b8Axis,1,0)
+  l_nNum[33]=TxtFile:trAxisData.rx
+  l_nNum[34]=TxtFile:trAxisData.ry
+  l_nNum[35]=TxtFile:trAxisData.rz
+  
+  
+   l_nNum[36]=sel(DataBase:bWpFinishIOOut,1,0)
+   l_nNum[37]=sel(DataBase:bExtraContrAxis,1,0)
+   l_nNum[38]=sel(DataBase:bThickPlate,1,0)
+  
+  
+  cls()
+  userPage()
+  
+  //******************
+  //2013.11.14
+  gotoxy(0,0)
+  put("Val3版本号:")
+  gotoxy(0,1)
+  put(DataBase:sVersion[0])
+  gotoxy(0,2)
+  put("手臂类型:")
+  gotoxy(0,3)
+  put(DataBase:sVersion[1])
+  gotoxy(0,4)
+  put("安装方式:")
+  gotoxy(0,5)
+  put(DataBase:sVersion[2])
+  gotoxy(0,6)
+  put("控制器序号:")
+  gotoxy(0,7)
+  put(DataBase:sVersion[3])
+  
+  //********************
+  call UI:Form_Config(l_nNum,l_nPointIndex)
+  while true
+    
+    l_nKey=getKey()
+    switch l_nKey
+      
+      
+      //退出
+      case 278
+        call UI:Control_YesNO("确定要退出吗?",l_bRes)
+        if l_bRes
+          return
+        endIf
+      break
+      
+      
+      //上传
+      case 276
+        call UI:Control_YesNO("确定要上传吗?",l_bRes)
+        if l_bRes
+          call Kit:UpLoad()
+          //return
+        endIf
+      break
+      
+      case 277
+        call UI:Control_YesNO("确定要保存吗?",l_bRes)
+        if l_bRes
+          TxtFile:tCfg.trsf.x  =    l_nNum[0]
+          TxtFile:tCfg.trsf.y  =    l_nNum[1]
+          TxtFile:tCfg.trsf.z  =    l_nNum[2]
+          TxtFile:tCfg.trsf.rx  =    l_nNum[3]
+          TxtFile:tCfg.trsf.ry  =    l_nNum[4]
+          TxtFile:tCfg.trsf.rz  =    l_nNum[5]
+          
+          TxtFile:nHomeSpeed=l_nNum[6]
+          TxtFile:bTeachToolMode=(l_nNum[7]==1)
+          TxtFile:bMoveBack=(l_nNum[8]==1)
+          
+          //工艺
+          //保证PWM频率低值为5，高值一定大于等于5
+          TxtFile:trPresetData.y=max(5,l_nNum[10])
+          TxtFile:trPresetData.x=max(TxtFile:trPresetData.y,l_nNum[9])
+          
+          TxtFile:trPresetData.z=max(0,l_nNum[11])
+          TxtFile:trPresetData.rx=max(0,l_nNum[12])
+          TxtFile:trPresetData.ry=max(0,l_nNum[13])
+          
+          
+          
+          //动作
+          TxtFile:trIODelay.x=l_nNum[14]
+          TxtFile:trIODelay.y=l_nNum[15]
+          TxtFile:trIODelay.rx=l_nNum[16]
+          //拐角
+          TxtFile:trCorner.z=max(0,l_nNum[17])
+          TxtFile:trCorner.rx=max(0,l_nNum[18])
+          TxtFile:trCorner.ry=max(0,l_nNum[19])
+          TxtFile:trCorner.x=round(min(max(0,l_nNum[20]),50))
+          
+          //7轴
+          TxtFile:b7Axis=(l_nNum[21]==1)
+          TxtFile:trAxisData.x=max(0,l_nNum[22])
+          TxtFile:trAxisData.y=max(0,l_nNum[23])
+          TxtFile:trAxisData.z=max(0,l_nNum[24])
+          
+          TxtFile:bWeldEnable=(l_nNum[25]==1)
+          TxtFile:trIODelay.z=max(0,l_nNum[26])
+          // TxtFile:bStepMove=(l_nNum[27]==1)
+          TxtFile:nStepLength=max(0,l_nNum[28])
+          DataBase:nRemoteProduct=l_nNum[29]
+          TxtFile:bMoreProd1Wp=(l_nNum[30]==1)
+          TxtFile:trIODelay.ry=max(0,l_nNum[27])
+          TxtFile:bAdjustSpEnable=(l_nNum[31]==1)
+          
+          //8轴
+          TxtFile:b8Axis=(l_nNum[32]==1)
+          TxtFile:trAxisData.rx=max(0,l_nNum[33])
+          TxtFile:trAxisData.ry=max(0,l_nNum[34])
+          TxtFile:trAxisData.rz=max(0,l_nNum[35])
+          
+          
+          //其他配置
+          DataBase:bWpFinishIOOut=(l_nNum[36]==1)
+          DataBase:bExtraContrAxis=(l_nNum[37]==1)
+          DataBase:bThickPlate=(l_nNum[38]==1)
+          
+          
+          
+          
+          
+          
+          
+          
+          call TxtFile:SaveCfg(l_bRes)
+          if !l_bRes
+            popUpMsg("保存出错")
+          else
+            popUpMsg("保存成功")
+            //2014.2.17  在哪个坐标系中运动
+            if !DataBase:bWorldMove
+              $jogContext(TxtFile:tCfg,TxtFile:fArray,0)
+            else
+              $jogContext(TxtFile:tCfg,world,0)
+            endIf
+            DataBase:libSave()
+          endIf
+          cls()
+          // return
+        endIf
+      break
+      
+          
+      
+      case 270
+        switch l_nPointIndex
+          case 7,8,21,25,30,31,32,36,37,38
+            call UI:Sel_Edit(l_nNum[l_nPointIndex],32,min(10,l_nPointIndex+1),l_sBuff)
+          break
+          
+          default 
+            call UI:Float_Edit(l_nNum[l_nPointIndex],32,min(10,l_nPointIndex+1))
+          break
+        endSwitch
+        
+      break
+      
+      
+      
+      case 261
+        l_nPointIndex=l_nPointIndex-1
+        if l_nPointIndex<0
+          l_nPointIndex=38
+        endIf
+        
+        // l_nPointIndex=max(0,l_nPointIndex-1)
+      break
+      
+      
+      case 266
+        l_nPointIndex=l_nPointIndex+1
+        if l_nPointIndex>38
+          l_nPointIndex=0
+        endIf
+        // l_nPointIndex=min(35,l_nPointIndex+1)
+      break
+      
+    endSwitch
+    
+    
+    if  l_nKey!=-1
+      call UI:Form_Config(l_nNum,l_nPointIndex)
+      
+    endIf
+    
+    
+    delay(0)
+    
+  endWhile
+
+end
+  ]]></Code>
+  </Program>
+</Programs>

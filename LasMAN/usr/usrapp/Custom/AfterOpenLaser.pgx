@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="AfterOpenLaser" access="public">
+    <Code><![CDATA[begin
+  //激光打开以后需要做的动作
+  //机械手臂在穿孔的时候
+  //在motion.pjx中的move.pgx中
+  //请使用ctr+F进行全局查找
+  
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

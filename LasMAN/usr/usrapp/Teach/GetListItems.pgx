@@ -1,0 +1,176 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="GetListItems">
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_nCount" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //获取选项框中列表
+  if DataBase:nInterfaceType!=13
+    switch nPointType
+      case 1
+        resize(sSItem,1,size(TxtFile:pAppro,1))
+        for l_nNum=0 to size(TxtFile:bAppro,1)-1
+          if TxtFile:bAppro[l_nNum]
+            sSItem[l_nNum]=toString("",l_nNum+1)+"."+"MoveL"
+            
+          else
+            sSItem[l_nNum]=toString("",l_nNum+1)+"."+"MoveJ"
+          endIf
+          
+        endFor
+        
+      break
+      
+      
+      case 2
+        resize(sSItem,1,size(TxtFile:pCut,1))
+        for l_nNum=0 to size(TxtFile:bMoveC,1)-1
+          if TxtFile:bMoveC[l_nNum]
+            sSItem[l_nNum]=toString("",l_nNum+1+500*n500Count)+"."+"MoveC 1  2"
+            
+          else
+            sSItem[l_nNum]=toString("",l_nNum+1+500*n500Count)+"."+"MoveL"
+          endIf
+          
+          //焊接的话，把动作放在外面
+          if TxtFile:bWeldEnable and TxtFile:trWorkplace.z==1
+            
+            sSItem[l_nNum]=sSItem[l_nNum]+"_"+toString("",TxtFile:trCut[l_nNum].y)
+          endIf
+          
+          
+        endFor
+        if  size(TxtFile:pCut)==1 and (TxtFile:nSingleType==12 or TxtFile:nSingleType==2 or TxtFile:nSingleType==23)
+          sSItem[0]="1.圆心点"
+        else
+          
+          if TxtFile:nSingleType!=10 and TxtFile:nSingleType!=20 and size(TxtFile:pCut)==3
+            //            sSItem[0]="1.第一点(原点)"
+            //            sSItem[1]="2.第二点(X轴)"
+            //            sSItem[2]="3.第三点(Y轴)"
+            sSItem[0]="1.第一点"
+            sSItem[1]="2.第二点"
+            sSItem[2]="3.第三点"
+          endIf
+        endIf
+        
+      break
+      
+      case 3
+        resize(sSItem,1,size(TxtFile:pLeave,1))
+        for l_nNum=0 to size(TxtFile:bLeave,1)-1
+          if TxtFile:bLeave[l_nNum]
+            sSItem[l_nNum]=toString("",l_nNum+1)+"."+"MoveL"
+            
+          else
+            sSItem[l_nNum]=toString("",l_nNum+1)+"."+"MoveJ"
+          endIf
+          
+        endFor
+        
+      break
+      
+      
+      
+      
+    endSwitch
+    
+  else
+    switch DataBase:nPointType
+      case 1
+        l_nCount=TxtFile:trPointCount.x
+      break
+      
+      case 2
+        l_nCount=TxtFile:trPointCount.y
+      break
+      case 3
+        l_nCount=TxtFile:trPointCount.z
+      break
+      default
+        l_nCount=0
+      break
+    endSwitch
+    sSItem[0]="---产品信息---"
+    sSItem[1]="               "
+    sSItem[2]="工位号:"+toString("",DataBase:nWorkPlaceIndex)+"->"+toString("",DataBase:nWorkPlaceCount)
+    sSItem[3]="产品名:"+DataBase:sProductName[max(1,DataBase:nWorkPlaceIndex)]
+    sSItem[4]="路径号:"+toString("",TxtFile:nReadTrajIndex)+"->"+toString("",TxtFile:nTotalTraj)
+    sSItem[5]="点数号:"
+    switch DataBase:nPointType
+      case 1
+        sSItem[5]=sSItem[5]+"趋"
+      break
+      case 2
+        if !TxtFile:bWeldEnable
+          sSItem[5]=sSItem[5]+"切"
+        else
+          sSItem[5]=sSItem[5]+"焊"
+        endIf
+      break
+      
+      case 3
+        sSItem[5]=sSItem[5]+"离"
+      break
+      
+      
+    endSwitch
+    
+    sSItem[5]=sSItem[5]+toString(".1",DataBase:nID)+"->"+toString("",l_nCount) 
+    
+    sSItem[6]="周期号:"+toString("",DataBase:nCycleIndex)+"->"+toString("",DataBase:nCycleCount)
+    sSItem[7]="周期时间(秒):"+toString(".1",DataBase:nCycleTime)
+    sSItem[8]="速度(m/min):"+toString(".2",DataBase:nRobotSpeed*60/1000)
+    sSItem[9]="生产个数:"+toString("",DataBase:nProductCount)
+    sSItem[10]="按钮触发:"
+    if TxtFile:bMoreProd1Wp
+      sSItem[10]=sSItem[10]+"同工多产"
+    else
+      switch DataBase:nCycleMode
+        case 0
+          sSItem[10]=sSItem[10]+"单工位"
+        break  
+        
+        case 1
+          sSItem[10]=sSItem[10]+"单周期"
+        break  
+        
+        case 2
+          sSItem[10]=sSItem[10]+"多周期"
+        break  
+        case 3
+          sSItem[10]=sSItem[10]+"无需触发"
+        break  
+        
+        case 4
+          sSItem[10]=sSItem[10]+"排队("+toString("",DataBase:nWorkPlaceButto)+")"
+        break  
+        case 5
+          sSItem[10]=sSItem[10]+"自定义"
+        break  
+        
+      endSwitch
+   
+      
+    endIf
+    
+    if TxtFile:bWeldEnable
+      
+      sSItem[11]="阵列:"+toString("",DataBase:nArrayX)+"->"+toString("",DataBase:nArrayY)+"->"+toString("",DataBase:nArrayZ) 
+    else
+      sSItem[11]=""
+    endIf
+    
+    
+  endIf
+  
+  
+end
+  
+
+
+]]></Code>
+  </Program>
+</Programs>

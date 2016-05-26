@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="TrajBypass" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_bByPass" type="bool" use="reference" xsi:type="element" dimensions="1" />
+      <Parameter name="x_nIndex" type="num" use="value" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Code><![CDATA[begin
+
+  //通过外围信号来对路径是否生产进行判断
+
+  aioSet(aAio["O2_aNull"],x_nIndex)
+  logMsg("等待信号"+toString("",x_nIndex)+"路径是否过滤")
+
+  //信号自定义
+  //仅仅作为测试使用
+  //  wait(aioGet(aAio["In4_a7CurPosH"])==x_nIndex)
+  //  x_bByPass=(dDio["In1_bNull1"]==true)
+
+end]]></Code>
+  </Program>
+</Programs>

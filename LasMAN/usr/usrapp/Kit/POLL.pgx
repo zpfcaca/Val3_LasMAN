@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="Poll" access="public">
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_nBuffTime" type="num" xsi:type="array" size="1" />
+      <Local name="l_bIsAlarm" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+    //不推荐客户自己改动此函数代码
+  //-----------------------------------------------------------------------
+  //轮询
+  //MoveID
+  DataBase:nID=getMoveId()
+  DataBase:jCurrentJoint=herej()
+  DataBase:pCurrentPoint=here(TxtFile:tCfg,world)
+  l_nNum=abs(DataBase:jCurrentJoint.j1-TxtFile:jHome.j1)+abs(DataBase:jCurrentJoint.j2-TxtFile:jHome.j2)+abs(DataBase:jCurrentJoint.j3-TxtFile:jHome.j3)
+  l_nNum= l_nNum+abs(DataBase:jCurrentJoint.j4-TxtFile:jHome.j4)+abs(DataBase:jCurrentJoint.j5-TxtFile:jHome.j5)+abs(DataBase:jCurrentJoint.j6-TxtFile:jHome.j6)
+  DataBase:bIsHome=l_nNum<0.3
+  
+  
+  //实时轮询
+  while  true
+    
+    //一般在读写文本的时候，对bStopPoll停止
+    
+    //2016.03.24
+    //为天其
+    if esStatus()==2 
+      if l_bIsAlarm==false
+        l_bIsAlarm=true
+        call RecordAlarm()
+      endIf
+    else
+      l_bIsAlarm=false
+    endIf
+    //**************
+    
+    
+    //模式
+    l_nBuffTime=clock()
+    call IO:Alarm(TxtFile:trIODelay.ry,DataBase:nInterfaceType,DataBase:bAlarm)
+    if !DataBase:bStopPoll
+      //查看是否上电
+      DataBase:nToolMode=workingMode()
+      DataBase:bPowerOn=isPowered()
+      call IO:GetPreset(DataBase:nPresetData,TxtFile:trPresetData.z,TxtFile:trPresetData.x,TxtFile:trPresetData.y)
+      //掉点以后，安全IO
+      if !DataBase:bPowerOn
+        call IO:SafteyIO()
+        DataBase:bAirOn=DataBase:bFollowOn=DataBase:bLaserOn=false
+        //   DataBase:nPresetData[0]=DataBase:nPresetData[1]=DataBase:nPresetData[2]=DataBase:nPresetData[3]=DataBase:nPresetData[4]=0
+      else
+        
+        call IO:GetKeyIO(DataBase:bAirOn,DataBase:bFollowOn,DataBase:bLaserOn)
+        
+        //机器人实时线速度
+        DataBase:nRobotSpeed=getSpeed(TxtFile:tCfg)
+        
+        //2014.3.24 设置机器人速度到O2_aNull
+        call IO:SendSpeed(DataBase:nRobotSpeed)
+        //MoveID
+        DataBase:nID=getMoveId()
+        
+        //机器人位置
+        DataBase:jCurrentJoint=herej()
+        DataBase:pCurrentPoint=here(TxtFile:tCfg,world)
+        
+        //检查是否在Home
+        //        l_nNum=abs(DataBase:jCurrentJoint.j1-TxtFile:jHome.j1)+abs(DataBase:jCurrentJoint.j2-TxtFile:jHome.j2)+abs(DataBase:jCurrentJoint.j3-TxtFile:jHome.j3)
+        //        l_nNum= l_nNum+abs(DataBase:jCurrentJoint.j4-TxtFile:jHome.j4)+abs(DataBase:jCurrentJoint.j5-TxtFile:jHome.j5)+abs(DataBase:jCurrentJoint.j6-TxtFile:jHome.j6)
+        //        DataBase:bIsHome=l_nNum<0.1
+        
+        //代码重构
+        DataBase:bIsHome=distance(jointToPoint(flange,world,DataBase:jCurrentJoint),jointToPoint(flange,world,TxtFile:jHome))<0.1
+        
+      endIf
+        
+      
+      
+      //用户自定义轮询
+      call Custom:CustomPoll()
+      
+      //数字量转换为模拟量
+      if  DataBase:nPointType==0 or !TxtFile:bWeldEnable  or !DataBase:bMoveTask
+        call IO:Digtal2Analog()
+      endIf
+    endIf
+
+
+    //2014.12.11
+    //*************************
+    if TxtFile:bSync7Axis or TxtFile:bSync8Axis
+     if taskStatus("SyncAxis")!=1 and DataBase:bPowerOn
+      
+      disablePower()
+    endIf
+      
+    //*******************  
+    endIf
+   
+    
+    
+    
+    delay(0)
+    
+    //每次poll循环需要的时间
+    DataBase:nPollTime=clock()-l_nBuffTime
+  endWhile
+  
+  
+end
+  
+  
+  ]]></Code>
+  </Program>
+</Programs>

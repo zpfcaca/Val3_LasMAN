@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="TeachRemote" access="public">
+    <Locals>
+      <Local name="l_nIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bUFile" type="bool" xsi:type="array" size="1" />
+      <Local name="l_sSFileName" type="string" xsi:type="array" size="1" />
+      <Local name="l_jJ" type="joint" xsi:type="array" size="1" />
+      <Local name="l_bFirst" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //远程模式
+  //不需要上位机来进行产品的生产
+  
+  
+  //安全机制
+  resetMotion()
+  
+  
+  
+  
+  //是否在零位
+  l_jJ=herej()
+  l_nKey= abs(l_jJ.j1-TxtFile:jHome.j1)+abs(l_jJ.j2-TxtFile:jHome.j2)+abs(l_jJ.j3-TxtFile:jHome.j3)
+  l_nKey=l_nKey+abs(l_jJ.j4-TxtFile:jHome.j4)+abs(l_jJ.j5-TxtFile:jHome.j5)+abs(l_jJ.j6-TxtFile:jHome.j6)
+  if l_nKey>0.1
+    popUpMsg("请回到零位")
+    return
+  endIf
+  
+  
+  if DataBase:nToolMode!=4
+    popUpMsg("请切换到远程模式")
+    return
+  endIf
+  
+  //同工位多产品不支持远程生产
+  if TxtFile:bMoreProd1Wp
+    popUpMsg("同工位多产品模式不支持远程生产")
+    return
+  endIf
+  
+  //界面初始化
+  
+  resize(sMess,1,1)
+  sMess[0]=""
+  DataBase:nCycleCount=1
+  DataBase:nWorkPlaceCount=0
+  DataBase:bStopPoll=true
+  if $fileExists("Disk://Txt/Recipe.txt")
+    $copy("Disk://Txt/Recipe.txt","Disk://OffTxt/Recipe.txt")
+  endIf
+  
+  if $fileExists("Disk://Txt/Product1.txt")
+    $copy("Disk://Txt/Product1.txt","Disk://OffTxt/Product1.txt")
+  endIf
+  
+  if $fileExists("Disk://Txt/Product2.txt")
+    $copy("Disk://Txt/Product2.txt","Disk://OffTxt/Product2.txt")
+  endIf 
+  if $fileExists("Disk://Txt/Product3.txt")
+    $copy("Disk://Txt/Product3.txt","Disk://OffTxt/Product3.txt")
+  endIf
+  
+  if $fileExists("Disk://Txt/Product4.txt")
+    $copy("Disk://Txt/Product4.txt","Disk://OffTxt/Product4.txt")
+  endIf
+  if !libList("Disk://OffTxt",sSItem)
+    popUpMsg("路径不存在")
+    return
+  endIf
+  cls()
+  
+  DataBase:bStopPoll=false
+  
+  //按键响应模式
+  while  true
+    l_nKey=getKey()
+    switch l_nKey
+      
+      //向上
+      case 261
+        l_nIndex=max(l_nIndex-1,0)
+        
+        
+      break
+      
+      //向下
+      case 266
+        l_nIndex=min(l_nIndex+1,size(sSItem)-1)
+        
+        
+      break
+      
+      
+      
+      
+      //添加
+      case 271  
+        DataBase:bStopPoll=true
+        if size(sMess)>=4
+          popUpMsg("工位数不能超过4个")
+        else
+          if (size(sSItem)==1 and sSItem[0]=="") or l_nIndex==-1
+            popUpMsg("没有文件")
+          else
+            call UI:Control_YesNO("确定要添加吗?",l_bRes)
+            
+            if l_bRes
+              call UI:Control_PanelMd("请等待,正在配置文件......")
+              if l_bUFile
+                
+                l_sSFileName="USB0://"+sSItem[l_nIndex]
+                
+              else
+                
+                l_sSFileName="Disk://OffTxt/"+sSItem[l_nIndex]
+              endIf
+              
+              //查看一般情况是否有问题
+              call TxtFile:ReadProductName(l_sSFileName,l_bRes)
+              if !l_bRes 
+                popUpMsg("文件不符合规范")
+              else
+                //查看tool是否是一样
+                call TxtFile:ReadProduct(l_sSFileName,TxtFile:sProductName,false,l_bRes)
+                if !l_bRes  or  TxtFile:nTotalTraj<1
+                  popUpMsg("文件不符合规范")
+                else
+                  if sMess[0]==""
+                    DataBase:nWorkPlaceCount=1
+                  else
+                    DataBase:nWorkPlaceCount=size(sMess)+1
+                  endIf
+                  
+                  resize(sMess,1,DataBase:nWorkPlaceCount)
+                  sMess[DataBase:nWorkPlaceCount-1]="工位"+toString("",DataBase:nWorkPlaceCount)+":"+TxtFile:sProductName
+                  DataBase:sProductName[DataBase:nWorkPlaceCount]=TxtFile:sProductName
+                  call TxtFile:BackupProduct(l_sSFileName,DataBase:nWorkPlaceCount,false)
+                endIf  
+              endIf
+            endIf
+          endIf
+        endIf
+        cls()
+      break
+      
+      
+      
+      //删除
+      case 272
+        if DataBase:nWorkPlaceCount==0
+          popUpMsg("工位已清空")
+        else
+          call UI:Control_YesNO("确定要删除吗?",l_bRes)
+          if l_bRes
+            if DataBase:nWorkPlaceCount==1
+              resize(sMess,1,1)
+              sMess[0]=""
+            else
+              resize(sMess,1,DataBase:nWorkPlaceCount-1)
+              
+            endIf
+            DataBase:nWorkPlaceCount=DataBase:nWorkPlaceCount-1
+          endIf
+        endIf
+      break
+      
+      
+      //U盘
+      case 273
+        l_bUFile=true
+        if !libList("USB0://",sSItem)
+          popUpMsg("路径不存在")
+        endIf
+        
+        
+      break
+      //CS8C
+      case 274 
+        l_bUFile=false
+        if !libList("Disk://OffTxt",sSItem)
+          popUpMsg("路径不存在")
+          return
+        endIf
+        
+      break
+      //参数
+      case 275
+        //  call UI:control
+        call UI:Control_Remote(DataBase:nCycleMode,DataBase:nCycleCount)
+      break
+      
+      
+      
+      //生产
+      case 277
+        call UI:Control_YesNO("确定要生产吗?",l_bRes)
+        if l_bRes
+          disablePower()
+          if DataBase:nWorkPlaceCount<1 or DataBase:nWorkPlaceCount>4
+            popUpMsg("工位个数不正确!")
+          else
+            cls()
+            call UI:Control_PanelMd("请等待,正在载入库......")
+            for l_nIndex=1 to DataBase:nWorkPlaceCount
+              call TxtFile:BackupProduct("",l_nIndex,true)
+              
+            endFor
+            DataBase:nInterfaceType=13
+            call TeachProduct()
+            return
+            
+          endIf  
+          
+        endIf
+      break
+      
+      
+      
+      
+      //退出
+      case 278
+        call UI:Control_YesNO("确定要退出吗?",l_bRes)
+        if l_bRes
+          
+          return
+        endIf
+      break
+      
+    endSwitch
+    
+    
+    
+    //界面刷新
+    if (l_nKey>0 and l_nKey<279) or !l_bFirst
+      l_bFirst=true
+      if l_bUFile
+        call UI:Form_LabelList("LasMAN3.6->远程生产","工位信息",sMess,"U盘文件",sSItem,l_nIndex,"添加,删除,U盘,CS8C,配置,,生产,退出")
+        
+      else
+        call UI:Form_LabelList("LasMAN3.6->远程生产","工位信息",sMess,"控制器文件",sSItem,l_nIndex,"添加,删除,U盘,CS8C,配置,,生产,退出")
+        
+      endIf
+      
+      
+      
+    endIf
+    
+    delay(0)
+    DataBase:bStopPoll=false
+  endWhile
+  
+  
+  
+  
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

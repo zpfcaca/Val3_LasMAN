@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="init" access="public">
+    <Locals>
+      <Local name="l_i" type="num" xsi:type="array" size="1" />
+      <Local name="l_bError" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  call cst:init()
+  //获取外部轴数目
+  nAxesSum=$XgetNbAxes()
+  
+  if nAxesSum<1
+    popUpMsg("外部轴不正确")
+    return
+  endIf
+  
+  //根据外部轴数目更改变量数目
+  resize(nCntDrvEnable,1,nAxesSum)
+  resize(nDrvPos,1,nAxesSum)
+  resize(bDrvFault,1,nAxesSum)
+  resize(nAxesPosFbk,1,nAxesSum)
+  resize(nDrvFbkPos,1,nAxesSum)
+  resize(bDrvFault,1,nAxesSum)
+  resize(bOpeEnabled,1,nAxesSum)
+  resize(bQuickStop,1,nAxesSum)
+  resize(blifebit,1,nAxesSum)
+  resize(nDrvState,1,nAxesSum)
+  //  if size(nDrvPos)!=nAxesSum
+  //    resize(nDrvPos,1,nAxesSum)
+  //  endIf
+  
+  //  if size(nDrvFbkPos)!=nAxesSum
+  //    resize(nDrvFbkPos,1,nAxesSum)
+  //  endIf
+  //  if size(bDrvFault)!=nAxesSum
+  //    resize(bDrvFault,1,nAxesSum)
+  //  endIf
+  //  if size(nAxesPosFbk)!=nAxesSum
+  //    resize(nAxesPosFbk,1,nAxesSum)
+  //  endIf
+  //  if size(bOpeEnabled)!=nAxesSum
+  //    resize(bOpeEnabled,1,nAxesSum)
+  //  endIf
+  //  
+  //  if size(bQuickStop)!=nAxesSum
+  //    resize(bQuickStop,1,nAxesSum)
+  //  endIf
+  //  
+  //  if size(blifebit)!=nAxesSum
+  //    resize(blifebit,1,nAxesSum)
+  //  endIf
+  //  
+  //  if size(nCntDrvEnable)!=nAxesSum
+  //    resize(nCntDrvEnable,1,nAxesSum)
+  //  endIf
+  //  
+  //  // 驱动器状态变量
+  //  if size(nDrvState)!=nAxesSum
+  //    resize(nDrvState,1,nAxesSum)
+  //  endIf
+  //  
+  //  
+  
+  
+  
+  
+  
+  //初始化
+  for l_i=0 to nAxesSum-1
+    call cmdResetAll(l_i)
+    call cmdFaultReset(l_i)
+    bDrvFault[l_i]=false
+    aioSet(aoWorkMode[l_i],cst:nINTERPMODE)
+    doStartHoming[l_i]=true
+    nCntDrvEnable[l_i]=0
+    bQuickStop=false
+  endFor
+  delay(0.008)
+  disablePower()
+  wait(isPowered()==false)
+  bSysShut=false
+  //
+  // call Version()
+  // libSave()
+end
+]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="PresetLaser" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nLaserPower" type="num" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_nPWM" type="num" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_nPercent" type="num" use="value" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+
+  //激光工艺设置
+  // if x_nIndex>0 and x_nIndex<51
+  // x_nIndex=roundDown(x_nIndex)
+  aioSet(aAio["O1_aLasPwr"],min(max(x_nLaserPower,0),100)/100*x_nPercent)
+  //  aioSet(aAio["O1_aAirPress"],x_nPreset[x_nIndex,1]/100*x_nPercent)
+  //  aioSet(aAio["O1_aFPWM"],x_nPreset[x_nIndex,2]/100*x_nPercent)
+  // aioSet(aAio["O1_aFPWM"],x_nPWM*(x_nHZHight-x_nHZLow)/100+x_nHZLow)
+  //  aioSet(aAio["O1_aPMW"],x_nPreset[x_nIndex,3]/100*x_nPercent)
+  aioSet(aAio["O1_aPMW"],min(max(x_nPWM,0),100))
+  // aioSet(aAio["O2_aFollowSensitive"],x_nPreset[x_nIndex,4]/100*x_nPercent)
+  //  aioSet(aAio["O1_aLasPwr"],x_nPreset[x_nIndex,4])
+
+  //    if !bDigFollowHight
+  //      return
+  //    endIf
+  //2014.05.27
+  //对随动高度进行转换
+  //0 false false false
+  //1~12  true false false
+  //13~25  true false false
+  //26~38  true false false
+
+
+  //    // l_nNum=round(x_nPreset[x_nIndex,4]/12.5)
+  //    l_nNum=round(x_nPreset[x_nIndex,4])
+  //    switch l_nNum
+  //      case 0
+  //        dDio["O2_bFollowHeigh1"]=false
+  //        dDio["O2_bFollowHeigh2"]=false
+  //        dDio["O2_bFollowHeigh3"]=false
+  //      break
+  //      
+  //      case 1
+  //        dDio["O2_bFollowHeigh1"]=true
+  //        dDio["O2_bFollowHeigh2"]=false
+  //        dDio["O2_bFollowHeigh3"]=false
+  //      break
+  //      case 2
+  //        dDio["O2_bFollowHeigh1"]=false
+  //        dDio["O2_bFollowHeigh2"]=true
+  //        dDio["O2_bFollowHeigh3"]=false
+  //      break
+  //      case 3
+  //        dDio["O2_bFollowHeigh1"]=true
+  //        dDio["O2_bFollowHeigh2"]=true
+  //        dDio["O2_bFollowHeigh3"]=false
+  //      break
+  //      
+  //      
+  //      case 4
+  //        dDio["O2_bFollowHeigh1"]=false
+  //        dDio["O2_bFollowHeigh2"]=false
+  //        dDio["O2_bFollowHeigh3"]=true
+  //      break
+  //      case 5
+  //        dDio["O2_bFollowHeigh1"]=true
+  //        dDio["O2_bFollowHeigh2"]=false
+  //        dDio["O2_bFollowHeigh3"]=true
+  //      break
+  //      case 6
+  //        dDio["O2_bFollowHeigh1"]=false
+  //        dDio["O2_bFollowHeigh2"]=true
+  //        dDio["O2_bFollowHeigh3"]=true
+  //      break
+  //      case 7,8
+  //        dDio["O2_bFollowHeigh1"]=true
+  //        dDio["O2_bFollowHeigh2"]=true
+  //        dDio["O2_bFollowHeigh3"]=true
+  //      break
+  //      
+  //    endSwitch
+  //    
+
+  //  endIf
+
+
+end]]></Code>
+  </Program>
+</Programs>

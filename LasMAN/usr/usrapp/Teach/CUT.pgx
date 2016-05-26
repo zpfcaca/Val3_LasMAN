@@ -1,0 +1,684 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="Cut" access="public">
+    <Locals>
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_sProductName" type="string" xsi:type="array" size="1" />
+      <Local name="l_sBottom" type="string" xsi:type="array" size="1" />
+      <Local name="l_bCut" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nSaveTime" type="num" xsi:type="array" size="1" />
+      <Local name="l_trOffset" type="frame" xsi:type="array" size="1" />
+      <Local name="l_nTo" type="num" xsi:type="array" size="5" />
+      <Local name="l_nFrom" type="num" xsi:type="array" size="5" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_bFirst" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nSpeed" type="num" xsi:type="array" size="2" />
+      <Local name="l_sTtile" type="string" xsi:type="array" size="1" />
+      <Local name="l_bBatPara" type="bool" xsi:type="array" size="5" />
+      <Local name="l_nBatPara" type="num" xsi:type="array" size="5" />
+      <Local name="l_nFromTo" type="num" xsi:type="array" size="2" />
+      <Local name="l_trTrsf" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_nAtPosition" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //切割点主界面
+  //参数初始化
+  // call IO:Follow(false)
+  call IO:SafteyIO()
+  TxtFile:fArray.trsf={0,0,0,0,0,0}
+  
+  
+  //2014.2.17  在哪个坐标系中运动
+  if !DataBase:bWorldMove
+    $jogContext(TxtFile:tCfg,TxtFile:fArray,0)
+  else
+    $jogContext(TxtFile:tCfg,world,0)
+  endIf
+  
+  //2014.2.18 区分焊接与切割
+  if TxtFile:bWeldEnable
+    l_sTtile="焊接点"
+  else
+    l_sTtile="切割点"
+  endIf
+  
+  
+  
+  nPartID=1
+  if TxtFile:trPointCount.y>500
+    DataBase:bStopPoll=true
+    call TxtFile:ReadPartTraj(nPartID,l_bRes)
+  endIf
+  DataBase:bStopPoll=false
+  nCutMc=0
+  l_nSaveTime=0
+  n500Count=0
+  
+  if TxtFile:nSingleType!=10 and TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+    
+    for l_nKey=0 to size(TxtFile:pCut)-1
+      TxtFile:bMoveC[l_nKey]=false
+    endFor
+  endIf
+  
+  //界面
+  call GetListItems()
+  if TxtFile:nSingleType==10 or TxtFile:nSingleType==20
+    l_sBottom="插入,记录,参数,删除,全局,偏差,返回,继续"
+  else
+    l_sBottom=",记录,参数,,全局,偏差,返回,继续"
+  endIf
+  
+  
+  //界面初始化
+  resetMotion()
+  cls()
+  
+  
+  //循环
+  while  nPointType==2
+    DataBase:bStopPoll=false
+    TxtFile:fArray.trsf={0,0,0,0,0,0}
+    l_nKey=getKey()
+    switch l_nKey
+      
+      //配置
+      case 112,275
+        call SetTrajPara()
+        
+        
+      break
+      
+      //步进打开
+      case 122
+        //Z
+        // if TxtFile:bStepMove
+        TxtFile:nStepLength=max(0,TxtFile:nStepLength)
+        call UI:Control_YesNO("确定使用步进"+toString(".1",TxtFile:nStepLength)+"毫米模式吗?",l_bRes)
+        if l_bRes
+          TxtFile:fArray.trsf={0,0,0,0,0,0}
+          $jogContext(TxtFile:tCfg,TxtFile:fArray,TxtFile:nStepLength)
+        endIf
+        //  endIf
+      break
+      
+      
+      //步进关
+      case 90
+        
+        TxtFile:fArray.trsf={0,0,0,0,0,0}
+        $jogContext(TxtFile:tCfg,TxtFile:fArray,0)
+        popUpMsg("不使用步进模式")
+      break
+      
+      
+      //快捷设置
+      case 113
+        //Q
+        call UI:Control_YesNO("确定要使用快捷参数吗?",l_bRes)
+        if l_bRes
+          //工艺
+          TxtFile:trCut[nCutIndex].z=TxtFile:trCorner.x
+          //速度
+          TxtFile:trCut[nCutIndex].z=TxtFile:trCorner.z
+          //加速度
+          TxtFile:trCut[nCutIndex].rx=TxtFile:trCorner.rx
+          //blend
+          TxtFile:trCut[nCutIndex].ry=TxtFile:trCorner.ry
+        endIf
+        
+        
+      break
+      
+      //向上
+      case 261
+        nCursonIndex=nCutIndex
+        nCutMc=0
+        nCutIndex=nCutIndex-1
+        if nCutIndex<0
+          nCutIndex=size(TxtFile:pCut)-1
+        endIf
+        nCutIndex=max(nCutIndex,0)
+        
+        
+      break
+      
+      //向下
+      case 266
+        nCursonIndex=nCutIndex
+        nCutMc=0
+        nCutIndex=nCutIndex+1
+        if nCutIndex>=size(TxtFile:pCut)
+          nCutIndex=0
+        endIf
+        nCutIndex=min(nCutIndex,size(TxtFile:pCut)-1)
+      break
+      
+      //向左
+      case 264
+        //2015.08.16
+        if  TxtFile:bMoveC[nCutIndex] 
+          nCutMc=max(0,nCutMc-1)
+        else
+          nPointType=1
+        endIf
+      break
+      
+      //向右
+      case 268
+        if  TxtFile:bMoveC[nCutIndex] 
+          nCutMc=min(2,nCutMc+1)
+        else
+          nPointType=3
+        endIf
+        
+        
+      break
+      //点位
+      case 270
+        if  TxtFile:bMoveC[nCutIndex] and nCutMc==1
+          call UI:Control_Point(TxtFile:pMoveC[nCutIndex])
+          
+        else
+          if TxtFile:bMoveC[nCutIndex] and nCutMc==2 or !TxtFile:bMoveC[nCutIndex]
+            call UI:Control_Point(TxtFile:pCut[nCutIndex])
+          endIf
+        endIf
+        
+        
+      break
+      
+      
+      //插入
+      case 271
+        if TxtFile:nSingleType==10 or TxtFile:nSingleType==20
+          if  (!insert(TxtFile:pCut[nCutIndex+1])) or (!insert(TxtFile:bMoveC[nCutIndex+1])) or (!insert(TxtFile:pMoveC[nCutIndex+1])) or (!insert(TxtFile:trCut[nCutIndex+1]))  or (!insert(TxtFile:trCutAxis[nCutIndex+1]))
+            popUpMsg("插入失败")
+          else
+            TxtFile:pCut[nCutIndex+1]=TxtFile:pCut[nCutIndex]
+            TxtFile:bMoveC[nCutIndex+1]=TxtFile:bMoveC[nCutIndex]
+            TxtFile:pMoveC[nCutIndex+1]=TxtFile:pMoveC[nCutIndex]
+            TxtFile:trCut[nCutIndex+1]=TxtFile:trCut[nCutIndex]
+            TxtFile:trCutAxis[nCutIndex+1]=TxtFile:trCutAxis[nCutIndex]
+            nCutIndex=nCutIndex+1
+            
+            //2014.05.30
+            if TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+              TxtFile:pMoveC[nCutIndex]=here(TxtFile:tCfg,TxtFile:fArray) 
+              TxtFile:pCut[nCutIndex]=here(TxtFile:tCfg,TxtFile:fArray)
+            else
+              //2015.03.21
+              call ExtAxis:RecordExtAxis(TxtFile:trCutAxis[nCutIndex],TxtFile:pMoveC[nCutIndex].trsf,TxtFile:tCfg)
+              call ExtAxis:RecordExtAxis(TxtFile:trCutAxis[nCutIndex],TxtFile:pCut[nCutIndex].trsf,TxtFile:tCfg)
+              
+            endIf
+            
+            //×××××××××××××××××××××××××××××××8
+            
+            
+          endIf
+          
+        endIf
+        //        TxtFile:trPointCount.y=size(TxtFile:pCut)
+        
+      break
+      
+      //记录
+      case 272
+        if !((TxtFile:nSingleType==10 or TxtFile:nSingleType==20)and TxtFile:bMoveC[nCutIndex] and nCutMc==0) 
+          //2015.08.10
+          l_bRes=true
+          // call UI:Control_YesNO("确定要记录吗?",l_bRes)
+          if l_bRes
+            //2014.12.08
+            //为同步轴进行修改
+            if TxtFile:bMoveC[nCutIndex] 
+              if nCutMc==1
+                TxtFile:pMoveC[nCutIndex]=here(TxtFile:tCfg,TxtFile:fArray) 
+              else
+                TxtFile:pCut[nCutIndex]=here(TxtFile:tCfg,TxtFile:fArray) 
+              endIf
+            else
+              TxtFile:pMoveC[nCutIndex]=TxtFile:pCut[nCutIndex]=here(TxtFile:tCfg,TxtFile:fArray) 
+            endIf
+            //2014.07.28记录同步外部轴
+            if TxtFile:nSingleType==20
+              if TxtFile:bMoveC[nCutIndex] and nCutMc==1
+                
+                call ExtAxis:RecordExtAxis(TxtFile:trCutAxis[nCutIndex],TxtFile:pMoveC[nCutIndex].trsf,TxtFile:tCfg)
+              else
+                call ExtAxis:RecordExtAxis(TxtFile:trCutAxis[nCutIndex],TxtFile:pCut[nCutIndex].trsf,TxtFile:tCfg)
+              endIf
+            endIf
+          endIf
+        endIf
+        
+        
+        
+        
+        
+        
+      break
+      
+      //参数
+      case 273
+        //  call UI:Form_4jHome() 
+        call UI:Control_Para(TxtFile:trCut,TxtFile:bMoveC,true,TxtFile:nSingleType,nCutIndex,TxtFile:trCutAxis)
+        //强制赋值为false
+        if (TxtFile:nSingleType!=10 and TxtFile:nSingleType!=20)
+          TxtFile:bMoveC[nCutIndex]=false
+        endIf
+        
+        if TxtFile:trPointCount.x<500
+          TxtFile:bMoveC[0]=false
+        endIf
+        
+        
+      break
+      
+      //删除
+      case 274
+        if TxtFile:nSingleType==10 or TxtFile:nSingleType==20
+          if size(TxtFile:pCut)==1
+            popUpMsg(l_sTtile+"必须有一个")
+          else
+            call UI:Control_YesNO("确定要删除吗?",l_bRes)
+            if l_bRes
+              //              if  !delete(TxtFile:pCut[nCutIndex]) or !delete(TxtFile:pMoveC[nCutIndex]) or !delete(TxtFile:bMoveC[nCutIndex]) or !delete(TxtFile:trCut[nCutIndex]) 
+              //                popUpMsg("删除失败")
+              //              endIf
+              delete(TxtFile:pCut[nCutIndex])
+              delete(TxtFile:pMoveC[nCutIndex])
+              delete(TxtFile:bMoveC[nCutIndex])
+              delete(TxtFile:trCut[nCutIndex])
+              delete(TxtFile:trCutAxis[nCutIndex])
+              
+            endIf
+          endIf
+        endIf
+        //        if TxtFile:trPointCount.y<500
+        //            TxtFile:trPointCount.y=size(TxtFile:pCut)
+        //        endIf
+        nCutIndex=min(size(TxtFile:pCut)-1,nCutIndex)
+        
+      break
+      
+      //对齐
+      case 100
+        call Kit:Align(TxtFile:tCfg)
+        
+      break 
+      
+      //偏差
+      case 276
+        call UI:Control_YesNO("确定要示教偏差吗?",l_bRes)
+        if l_bRes
+          call TeachOffset(TxtFile:fToffset)
+          
+        endIf 
+      break
+      
+      //返回
+      case 277
+        if  TxtFile:trPointCount.y>500
+          //          call UI:Control_YesNO("切割点是否需要进行局部保存",l_bRes)
+          //          if l_bRes
+          DataBase:bStopPoll=true
+          call TxtFile:SavePartTraj(nPartID,l_bRes)
+          DataBase:bStopPoll=false
+          if l_bRes
+            //popUpMsg("保存成功")
+            TxtFile:nPartTrajCount[nPartID]=size(TxtFile:pCut)
+          else
+            popUpMsg("局部切割路径保存失败")
+          endIf
+          //          endIf
+        endIf
+        
+        
+        if bFirstTeach==false or TxtFile:trPointCount.y<=500 or (TxtFile:nSingleType!=10 and TxtFile:nSingleType!=20) or nPartID<=1
+          nPointType=1
+        else
+          nPartID=nPartID-1
+          DataBase:bStopPoll=true
+          call TxtFile:ReadPartTraj(nPartID,l_bRes)
+          DataBase:bStopPoll=false
+          if !l_bRes
+            popUpMsg("读取文件出错")
+          endIf
+        endIf
+      break
+      
+      
+      //继续
+      case 278
+        //        if bFirstTeach==false or TxtFile:trPointCount.y<=500 or TxtFile:nSingleType!=10 or nPartID*500>TxtFile:trPointCount.y
+        if  TxtFile:trPointCount.y>500 or size(TxtFile:pCut)>500
+          //          call UI:Control_YesNO("切割点是否需要进行局部保存",l_bRes)
+          //          if l_bRes
+          DataBase:bStopPoll=true
+          call TxtFile:SavePartTraj(nPartID,l_bRes)
+          DataBase:bStopPoll=false
+          if l_bRes
+            //popUpMsg("保存成功")
+            TxtFile:nPartTrajCount[nPartID]=size(TxtFile:pCut)
+          else
+            popUpMsg("局部路切割径保存失败")
+          endIf
+          //          endIf
+        endIf
+        
+        
+        if nPartID*500>TxtFile:trPointCount.y or TxtFile:trPointCount.y<=500
+          nPointType=3
+        else
+          
+          
+          nPartID=nPartID+1
+          DataBase:bStopPoll=true
+          call TxtFile:ReadPartTraj(nPartID,l_bRes)
+          DataBase:bStopPoll=false
+          if !l_bRes
+            popUpMsg("读取文件出错")
+          else
+            nCutIndex=0
+          endIf
+        endIf
+      break
+      
+      //示教局部偏差
+      case 119
+        call UI:Control_YesNO("确定要示教局部偏差吗?",l_bRes)
+        link(l_trOffset,TxtFile:fToffset)
+        if l_bRes
+          l_trOffset.trsf={0,0,0,0,0,0}
+          call TeachOffset(l_trOffset)
+          if l_trOffset.trsf!={0,0,0,0,0,0}
+            l_nFromTo[0]=l_nFromTo[1]=0
+            call UI:Control_Loffset(l_nFromTo[0],l_nFromTo[1])
+            if l_nFromTo[0]!=0 and l_nFromTo[1]!=0
+              l_nFromTo[0]=max(0,l_nFromTo[0])
+              l_nFromTo[1]=min(l_nFromTo[1],size(TxtFile:pCut))
+              for l_nNum=l_nFromTo[0] to l_nFromTo[1]
+                TxtFile:pCut[l_nNum].trsf=l_trOffset.trsf*TxtFile:pCut[l_nNum].trsf
+                TxtFile:pMoveC[l_nNum].trsf=l_trOffset.trsf*TxtFile:pMoveC[l_nNum].trsf
+                
+              endFor
+              popUpMsg("偏差已修正,请模拟")
+            endIf
+          endIf
+        endIf 
+        
+        
+        
+        
+      break
+      
+      
+      //局部模拟
+      case 115
+        //数据预设
+        DataBase:nPartMove[2]=nCutIndex
+        DataBase:nPartMove[0]=nCutIndex+1
+        DataBase:nPartMove[1]=size(TxtFile:pCut)
+        if TxtFile:nSingleType!=10 or size(TxtFile:pCut)<=1
+          popUpMsg("规则图形与点数小于1不能进行局部模拟")
+          
+        else
+          
+          call UI:Control_YesNO("确定要进行局部模拟吗",l_bRes)
+          if l_bRes
+            call UI:Control_PatMove(DataBase:nPartMove[0],DataBase:nPartMove[1])
+            //输入数据合法处理
+            DataBase:nPartMove[0]=roundDown(DataBase:nPartMove[0])
+            DataBase:nPartMove[1]=roundDown(DataBase:nPartMove[1])
+            DataBase:nPartMove[0]=min(size(TxtFile:pCut)-1,max(1,DataBase:nPartMove[0]))
+            DataBase:nPartMove[1]=min(size(TxtFile:pCut),max(DataBase:nPartMove[0]+1,DataBase:nPartMove[1]))
+            TxtFile:nReadCutCount=DataBase:nPartMove[1]-DataBase:nPartMove[0]+1
+            call Simulate(-2)
+            call IO:SafteyIO()
+            call UI:Control_PanelMd("模拟结束")
+            delay(2)
+            cls()
+          endIf
+          
+        endIf
+        DataBase:nPointType=2
+        nPointType=2
+        nCutIndex=DataBase:nPartMove[2]
+      break
+      
+      
+      //      //局部保存
+      //      case 120
+      //        
+      //        if TxtFile:nSingleType==10 
+      //          call UI:Control_YesNO("确定要局部保存吗?",l_bRes)
+      //          if l_bRes
+      //            call TxtFile:SavePartTraj(nPartID,l_bRes)
+      //            if l_bRes
+      //              popUpMsg("保存成功")
+      //              TxtFile:nPartTrajCount[nPartID]=size(TxtFile:pCut)
+      //            else
+      //              popUpMsg("保存失败")
+      //            endIf
+      //            
+      //          endIf 
+      //        endIf
+      //        
+      //        
+      //        
+      //        
+      //        
+      //      break
+      
+      
+      //批处理参数
+      case 101
+        call UI:Control_YesNO("确定要批处理参数吗?",l_bRes)
+        if l_bRes
+          //          l_nSpeed[0]=l_nSpeed[1]=0
+          //          l_nFromTo[0]=1 
+          //          l_nFromTo[1]=size(TxtFile:pCut)
+          //          call UI:Control_BatSpd(l_nFromTo[0],l_nFromTo[1],l_nSpeed[0],l_nSpeed[1])
+          //l_nFrom=resize(size(TxtFile:pCut))
+          call UI:Control_BatPara(size(TxtFile:pCut),l_nFrom,l_nTo,l_nBatPara,l_bBatPara)
+          if l_bRes
+            //          if l_nFromTo[0]>0 and l_nFromTo>0 and l_nSpeed[0]>=0 and l_nSpeed[1]>=0 and l_nFromTo[1]>=l_nFromTo[0]
+            
+            
+            for l_nSpeed[1]=0 to 4
+              if l_bBatPara[l_nSpeed[1]]
+                l_nFrom[l_nSpeed[1]]=max(0,l_nFrom[l_nSpeed[1]])
+                l_nTo[l_nSpeed[1]]=min(l_nTo[l_nSpeed[1]],size(TxtFile:pCut))
+                l_nSpeed[0]=l_nBatPara[l_nSpeed[1]]
+                for l_nNum= l_nFrom[l_nSpeed[1]] to l_nTo[l_nSpeed[1]]
+                  //              TxtFile:trCut[l_nNum-1].z=l_nSpeed[0]
+                  //              TxtFile:trCut[l_nNum-1].rx=l_nSpeed[1]
+                  switch l_nSpeed[1]
+                    case 0
+                      TxtFile:trCut[l_nNum-1].z=l_nSpeed[0]
+                    break
+                    
+                    case 1
+                      TxtFile:trCut[l_nNum-1].rx=l_nSpeed[0]
+                    break
+                    case 2
+                      TxtFile:trCut[l_nNum-1].ry=l_nSpeed[0]
+                    break
+                    case 3
+                      TxtFile:trCut[l_nNum-1].x=l_nSpeed[0]
+                    break
+                    case 4
+                      TxtFile:trCut[l_nNum-1].y=l_nSpeed[0]
+                    break
+                    
+                  endSwitch
+                  
+                endFor
+              endIf
+            endFor
+            if l_bBatPara[0] or l_bBatPara[1] or l_bBatPara[2] or l_bBatPara[3] or l_bBatPara[4]   
+              popUpMsg("参数已修改")
+            endIf
+          endIf
+        endIf 
+        
+      break
+      
+      
+      
+      
+      //x 修改工艺
+      case 120
+        call UI:Control_CPreset(TxtFile:nPreset,TxtFile:trCut,size(TxtFile:trCut),nCutIndex,TxtFile:trCutAxis)
+        
+        cls()
+      break
+      
+      //      //批处理工艺
+      //      case 99
+      //        call UI:Control_YesNO("确定要批处理工艺吗?",l_bRes)
+      //        if l_bRes
+      //          l_nSpeed[0]=l_nSpeed[1]=0
+      //          l_nFromTo[0]=1 
+      //          l_nFromTo[1]=size(TxtFile:pCut)
+      //          call UI:Control_BatPrt(l_nFromTo[0],l_nFromTo[1],l_nSpeed[0])
+      //          if l_nFromTo[0]>0  and l_nSpeed[0]>0  and l_nFromTo[1]>=l_nFromTo[0] 
+      //            l_nFromTo[0]=max(0,l_nFromTo[0])
+      //            l_nFromTo[1]=min(l_nFromTo[1],size(TxtFile:pCut))
+      //            for l_nNum=l_nFromTo[0] to l_nFromTo[1]
+      //              TxtFile:trCut[l_nNum-1].x=l_nSpeed[0]
+      //            endFor
+      //            popUpMsg("工艺已修改")
+      //          endIf
+      //        endIf 
+      //        
+      //        
+      //      break
+      
+    endSwitch
+    n500Count=max(nPartID-1,0)
+    
+    //界面刷新
+    if (l_nKey>=97 and l_nKey<279) or !l_bFirst or l_nKey==120
+      
+      //机械手臂移动
+      if l_nKey==97 or l_nKey==122
+      else
+        call SingleMove(2)
+      endIf
+      
+      //界面
+      l_bFirst=true
+      call GetListItems()
+      call UI:Form_PanelList("LasMAN3.6->示教路径",l_sTtile,sSItem,nCutIndex,l_sBottom)
+      call UI:Control_LeftCut(2)
+      call UI:Control_Mess("类型:"+TxtFile:sTrajType[TxtFile:nSingleType],l_sTtile+"个数:"+toString("",size(TxtFile:pCut)))
+      if TxtFile:bMoveC[nCutIndex]
+        call UI:Control_MCShow(nCutIndex,nCutMc)
+      endIf
+      
+      
+      //
+      
+      
+    endIf
+    
+    //2014.11.28
+    //强制第一个点是MOVEL
+    if TxtFile:trPointCount.y<500
+      TxtFile:bMoveC[0]=false
+    endIf
+    
+    
+    
+    
+    
+    
+    //2014.7.30
+    //同步七八轴
+    if TxtFile:nSingleType==20 and (TxtFile:bSync7Axis or TxtFile:bSync8Axis)
+      call ExtAxis:RecordExtAxis(l_trTrsf,l_trTrsf,TxtFile:tCfg)
+      gotoxy(0,12)
+      put("七轴:"+toString(".3",l_trTrsf.x))
+      if TxtFile:bSync8Axis
+        gotoxy(20,12)
+        put("八轴:"+toString(".3",l_trTrsf.y))
+      endIf
+    endIf
+    
+    
+    
+    //根据值来进行判断
+    //call IO:Follow(true)
+    
+    //示教操作20分，则自动保存
+    if clock()-l_nSaveTime>1200
+      l_nSaveTime=clock()
+      //  taskCreate "AutoSave",100,TxtFile:SaveAutoTraj() 
+    endIf
+    
+    
+    
+    //为了表示到达位置
+    //2015.08.10
+    //2015.09.22
+    //为整个列表进行修改
+    
+    if nCutIndex>10
+      l_nAtPosition=nCutIndex-10
+    else
+      l_nAtPosition=0
+    endIf
+    
+    for l_nNum=0 to min(size(TxtFile:bMoveC)-1,10)
+      gotoxy(22,min(l_nNum+1,10))
+      setTextMode(sel((l_nAtPosition+l_nNum)==nCutIndex,1,0))
+      
+      //2015.8.25
+      //MOVEC添加到位
+      if TxtFile:bMoveC[l_nAtPosition+l_nNum]==false or (TxtFile:bMoveC[l_nAtPosition+l_nNum] and nCutMc!=1)
+        if distance(TxtFile:pCut[l_nAtPosition+l_nNum],here(TxtFile:tFileTool,TxtFile:fArray))<0.1
+          put("@")
+        else
+          put("│")
+        endIf
+      else
+        
+        if distance(TxtFile:pMoveC[l_nAtPosition+l_nNum],here(TxtFile:tFileTool,TxtFile:fArray))<0.1
+          put("@")
+        else
+          put("│")
+        endIf
+      endIf
+    endFor
+    
+    
+    //*************************
+    
+    
+    
+    
+    delay(0)
+    
+  endWhile
+  
+  
+  
+end
+
+
+
+
+
+
+
+
+
+
+
+]]></Code>
+  </Program>
+</Programs>

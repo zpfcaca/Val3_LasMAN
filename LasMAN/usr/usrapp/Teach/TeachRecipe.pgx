@@ -1,0 +1,319 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="TeachRecipe" access="public">
+    <Locals>
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bFirst" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nMonitor" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  //下位机对于产品编辑主界面
+  //包括删除，示教，模拟，调图
+  
+  resetMotion()
+  
+  DataBase:bStopPoll=true
+  call TxtFile:ReadCfg(l_bRes)
+  IO:bWeldEnable=TxtFile:bWeldEnable
+  IO:bExt7AxisEnable=TxtFile:b7Axis
+  IO:bExt8AxisEnable=TxtFile:b8Axis
+  if !l_bRes
+    popUpMsg("读取配置文件出错")
+    return
+  endIf
+  call TxtFile:ReadProductName("Disk://Txt/Recipe.txt",l_bRes)
+  if !l_bRes
+    popUpMsg("读取产品名出错")
+    return
+  endIf
+  call TxtFile:ReadProduct("Disk://Txt/Recipe.txt",TxtFile:sProductName,true,l_bRes)
+  DataBase:sProductName=TxtFile:sProductName
+  if !l_bRes
+    if TxtFile:tCfg.trsf!=TxtFile:tFileTool.trsf
+      popUpMsg("产品的工具不一致")
+    else
+      popUpMsg("读取生产文件出错")
+    endIf
+    return
+  endIf
+  
+  call TxtFile:ReadAction(l_bRes)
+  if !l_bRes
+    popUpMsg("读取动作文件出错")
+    return
+  endIf
+  call TxtFile:ReadPreset(l_bRes)
+  if !l_bRes
+    popUpMsg("读取工艺文件出错")
+    return
+  endIf
+  cls()
+  
+  //2014.07.28
+  //同步七八轴
+  if TxtFile:bSync7Axis or TxtFile:bSync8Axis
+    if !ExtAxis:libExist("Disk://extAxisCan/extAxisCan.pjx")
+      if ExtAxis:libLoad("Disk://extAxisCan/extAxisCan.pjx")!=0
+        popUpMsg("加载外部轴出错")
+        disablePower()
+        return
+      endIf
+    endIf
+  endIf
+  
+  
+  DataBase:bStopPoll=false
+  
+  //第七或者8轴到达安全点
+  
+  if TxtFile:b7Axis and ((DataBase:nWorkPlaceIndex==1 and DataBase:bMutexAxis) or !DataBase:bMutexAxis)
+    bCheckAxisSafte=true
+    call TeachAxis(TxtFile:trAxisData.x,TxtFile:trAxisData.y,TxtFile:trAxisData.z,TxtFile:trAxisData.rx,false)
+    bCheckAxisSafte=false
+    call IO:Axis7onPosition(TxtFile:trAxisData.x,TxtFile:trAxisData.z,l_bRes)
+    if !l_bRes
+      popUpMsg("异步外部7轴没有处在安全点")
+      return
+    endIf
+  endIf
+  
+  if TxtFile:b8Axis  and ((DataBase:nWorkPlaceIndex==2 and DataBase:bMutexAxis) or !DataBase:bMutexAxis)
+    bCheckAxisSafte=true
+    call TeachAxis(TxtFile:trAxis8Data.x,TxtFile:trAxis8Data.y,TxtFile:trAxis8Data.z,TxtFile:trAxis8Data.rx,true)
+    bCheckAxisSafte=false
+    call IO:Axis8onPosition(TxtFile:trAxis8Data.x,TxtFile:trAxis8Data.z,l_bRes)
+    if !l_bRes
+      popUpMsg("异步外部8轴没有处在安全点")
+      return
+    endIf
+  endIf
+  
+  
+  
+  
+  
+  
+  
+  
+  while  DataBase:nInterfaceType==5
+    for l_nKey=0 to size(TxtFile:nPartTrajCount)-1
+      TxtFile:nPartTrajCount[l_nKey]=0
+    endFor
+    bSaveTxt=false
+    l_nKey=getKey()
+    
+    switch l_nKey
+      case 261
+        if TxtFile:nTotalTraj>1
+          nTrajIndex=nTrajIndex-1
+        endIf
+      break
+      
+      
+      case 266
+        if TxtFile:nTotalTraj>1
+          nTrajIndex=nTrajIndex+1
+        endIf
+      break
+      
+      
+      //回零
+      case 271
+        
+        call Kit:GoHome()
+      break
+      
+      //示教
+      case 272
+        //2015.09.08
+        //对序号进行初始化
+        nApproIndex=nLeaveIndex=nCutIndex=0
+        TxtFile:nTrajIndex=TxtFile:nTotalTraj+1
+        call TeachNewTraj()
+        nTrajIndex=TxtFile:nTotalTraj-1
+        cls()
+      break
+      
+      //模拟
+      case 273
+        if TxtFile:nTotalTraj<1
+          popUpMsg("产品没有路径")
+        else
+          call UI:Control_YesNO("确定要模拟吗?",l_bRes)
+          if l_bRes
+            DataBase:bKeyIO[0]= DataBase:bKeyIO[1]= DataBase:bKeyIO[2]=false
+            TxtFile:nTrajIndex=nTrajIndex+1
+            call Simulate(nTrajIndex+1)
+            call UI:Control_PanelMd("模拟结束")
+            DataBase:bKeyIO[0]= DataBase:bKeyIO[1]= DataBase:bKeyIO[2]=false
+            delay(1)
+            cls()
+            
+          endIf
+        endIf
+      break
+      
+      
+      //开始整体模拟
+      
+      
+      case 113
+        if TxtFile:nTotalTraj<1
+          popUpMsg("产品没有路径")
+        else
+          call UI:Control_YesNO("确定要从当前路径模拟吗?",l_bRes)
+          if l_bRes
+            DataBase:bKeyIO[2]=DataBase:bKeyIO[1]=DataBase:bKeyIO[0]=false
+            DataBase:bStopSimul=false
+            while nTrajIndex<TxtFile:nTotalTraj and DataBase:bStopSimul==false
+              TxtFile:nTrajIndex=nTrajIndex+1
+              call Simulate(nTrajIndex+1)
+              
+              nTrajIndex=nTrajIndex+1
+            endWhile
+            DataBase:bKeyIO[2]=DataBase:bKeyIO[1]=DataBase:bKeyIO[0]=false
+            call UI:Control_PanelMd("模拟结束")
+            delay(1)
+            cls()
+          endIf
+        endIf
+        
+      break
+      
+      
+      
+      
+      //对齐
+      case 276
+        call UI:Control_YesNO("确定要对齐吗?",l_bRes)
+        if l_bRes
+          call Kit:Align(TxtFile:tCfg)
+          cls()
+        endIf
+        
+      break
+      
+      
+      
+      //调图
+      case 274,270
+        if TxtFile:nTotalTraj<1
+          popUpMsg("产品没有路径")
+        else
+          //2015.12.30
+          //安全因素进行切换
+          while workingMode()!=1
+            popUpMsg("请先切换到手动模式,然后点击OK")
+            delay(0.1)
+          endWhile
+          
+          
+          call UI:Control_YesNO("确定要调图吗?",l_bRes)
+          if l_bRes
+            //2015.09.08
+            //对序号进行初始化
+            nApproIndex=nLeaveIndex=nCutIndex=0
+            TxtFile:nTrajIndex=nTrajIndex+1
+            call AdjustTraj(nTrajIndex+1)
+            cls()
+          endIf
+        endIf
+      break
+      
+      //删除
+      case 275
+        DataBase:bStopPoll=true
+        if TxtFile:nTotalTraj<1
+          popUpMsg("产品没有路径")
+        else
+          call UI:Control_YesNO("确定要删除路径吗?",l_bRes)
+          if l_bRes
+            call UI:Control_PanelMd("请等待,正在删除......")
+            call TxtFile:EditRecipe(nTrajIndex+1,true,l_bRes)
+            if !l_bRes
+              popUpMsg("删除文件出错")
+            else
+              call TxtFile:ReadProduct("Disk://Txt/Recipe.txt",TxtFile:sProductName,true,l_bRes)
+              if !l_bRes
+                popUpMsg("读取生产文件出错")
+                return
+              endIf
+            endIf
+          endIf
+        endIf
+        cls()
+      break 
+      
+      
+      
+      
+      //上传
+      case 277
+        if TxtFile:nTotalTraj<1
+          popUpMsg("产品没有路径")
+        else
+          call UI:Control_YesNO("确定要上传吗?",l_bRes)
+          if l_bRes
+            
+            call Kit:UpLoad()
+            //return
+          endIf
+        endIf
+      break
+      
+      //退出
+      case 278,255
+        call UI:Control_YesNO("确定要退出吗?",l_bRes)
+        if l_bRes
+          return
+        endIf
+      break
+      
+      
+      
+      //112
+      //修改产品的坐标系与偏差
+      case 112
+        call UI:Control_Recipe(TxtFile:fProduct.trsf,TxtFile:fPofffset.trsf)
+      break
+      
+      
+      
+      
+    endSwitch
+    
+    if l_nKey!=-1  or !l_bFirst
+      l_bFirst=true
+      
+      //2015.5.21
+      TxtFile:trPointCount={0,0,0,0,0,0}
+      resetMotion()
+      //  call UI:Form_PanelList("LasMAN3.6->编辑产品","路径列表",TxtFile:sTrajName,nTrajIndex,"回零,新建,模拟,调图,删除,对齐,上传,退出")
+      call UI:Form_PanelList("LasMAN3.6->编辑产品","路径列表",TxtFile:sTrajNameType,nTrajIndex,"回零,新建,模拟,调图,删除,对齐,上传,退出")
+      call UI:Control_LeftCut(0)
+      
+      
+      if TxtFile:nTotalTraj>=1
+        nTrajIndex=max(0,nTrajIndex)
+        TxtFile:nSingleType=TxtFile:nTrajType[nTrajIndex]
+        call UI:Control_Mess("产品名称:"+TxtFile:sProductName,toString("",nTrajIndex+1)+"->"+left(TxtFile:sTrajType[TxtFile:nSingleType]+"            ",12))
+      else
+        call UI:Control_Mess("产品名称:"+TxtFile:sProductName,"")
+        
+      endIf
+    endIf
+    DataBase:bStopPoll=false
+    delay(0)
+    
+  endWhile
+  
+  
+  
+end
+
+
+]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="Facula" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_trSource" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_nDia" type="num" xsi:type="element" />
+      <Parameter name="x_nType" type="num" xsi:type="element" />
+      <Parameter name="x_trDownLead" type="trsf" xsi:type="element" use="reference" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_trTrsf" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_nDia" type="num" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //光斑补偿
+  
+  if  x_nDia<=0 or x_nType==10 or x_nType==9
+     x_bRes=true
+     return
+  endIf
+
+  //光斑强制设置为0.1
+  if x_nDia>1 
+    x_nDia=0.1
+  endIf
+  
+  
+  if x_nType==2 
+    x_trDownLead.ry=max(x_trDownLead.ry-x_nDia,0.1)
+    x_bRes=true
+    return
+  endIf
+  
+  if x_nType==12 
+    x_trDownLead.ry=x_trDownLead.ry+x_nDia
+    x_bRes=true
+    return
+  endIf
+  
+  l_nDia=0
+  
+  call Circumcircle(x_trSource,l_trTrsf,l_nDia,x_bRes)
+  if !x_bRes 
+    return
+  endIf
+  
+  if x_nDia>=l_nDia/2
+    x_nDia=0
+    x_bRes=true
+    return
+  endIf
+  
+  
+  switch x_nType
+    case 1,3,4,5,6,7,8
+      
+      l_nDia=l_nDia-x_nDia*2
+    break
+    
+    case 11,13,14,15,16,17,18
+      l_nDia=l_nDia+x_nDia*2
+      
+    break
+    
+  endSwitch
+  
+  
+  call ChangeCpoint(x_trSource,l_nDia,x_bRes)
+  
+end]]></Code>
+  </Program>
+</Programs>

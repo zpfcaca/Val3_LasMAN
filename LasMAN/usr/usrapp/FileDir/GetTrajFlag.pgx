@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="GetTrajFlag" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_bRes" type="bool" use="reference" xsi:type="element" dimensions="1" />
+      <Parameter name="x_sFileName" type="string" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_nTrajIndex" type="num" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_nStart" type="num" use="reference" xsi:type="element" dimensions="1" />
+      <Parameter name="x_nEnd" type="num" use="reference" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_sBuff" type="string" xsi:type="array" size="1" />
+      <Local name="l_nIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_nStartIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_nEndIndex" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //参数初始化
+  x_bRes=false
+  x_nStart=0
+  x_nEnd=0
+  l_sBuff=""
+  l_nIndex=0
+  l_nEndIndex=0
+  l_nStartIndex=0
+
+  //传入参数合法性判断
+  if x_sFileName=="" or x_nTrajIndex<1
+    return
+  endIf
+
+  //打开文件
+  nFileID=$fileOpen(x_sFileName,"r")
+  if nFileID<0 or nFileID>9
+    return
+  endIf
+
+
+  //查询关键字
+  while !x_bRes and $fileGet(nFileID,l_sBuff,1)==1
+    l_nIndex=l_nIndex+1
+
+    if find(l_sBuff,"=BEGIN")>=0
+      l_nStartIndex=l_nStartIndex+1
+      x_nStart=l_nIndex
+    endIf
+
+    if find(l_sBuff,"=END")>=0
+      l_nEndIndex=l_nEndIndex+1
+      x_nEnd=l_nIndex
+    endIf
+
+    if l_nStartIndex==x_nTrajIndex and l_nEndIndex==x_nTrajIndex
+
+      x_bRes=true
+    endIf
+
+  endWhile
+
+  call CloseAllFile()
+
+  //把所有文件给关闭掉
+
+end]]></Code>
+  </Program>
+</Programs>

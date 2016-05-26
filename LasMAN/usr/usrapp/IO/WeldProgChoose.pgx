@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="WeldProgChoose" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nNum" type="num" use="value" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Code><![CDATA[begin
+
+  //激光工序号选择
+  //客户自定义
+  //2014.2.21  焊接
+  //2014.4.15  焊接程序调试
+
+  //强制把收弧点信号置空
+  dDio["UsO_bNull5"]=false
+  dDio["UsO_bNull4"]=false
+  //  if x_nNum!=0
+  //    aioSet(aAio["O1_aFPWM"],100)
+  //    aioSet(aAio["O1_aPMW"],100)
+  //  else
+  //
+  //    
+  //  endIf
+  aioSet(aAio["O1_aFPWM"],sel(x_nNum==0,0,100))
+  aioSet(aAio["O1_aPMW"],sel(x_nNum==0,0,100))
+  call Digtal2Analog()
+  // delay(0.1)
+
+
+  //对于值进行解析
+  if x_nNum<=0
+    dDio["UsO_bNull1"]=dDio["UsO_bNull2"]=dDio["UsO_bNull3"]=false
+  else
+    dDio["UsO_bNull1"]=(x_nNum%2)==1
+    dDio["UsO_bNull2"]=((x_nNum%4)/2>=1)
+    dDio["UsO_bNull3"]=(x_nNum>=4)
+  endIf
+
+  call Digtal2AnalogS(0)
+  if x_nNum!=0
+    delay(0.1)
+  endIf
+
+end]]></Code>
+  </Program>
+</Programs>

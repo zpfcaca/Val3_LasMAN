@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="GetLine" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nFileID" type="num" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_sContext" type="string" use="reference" xsi:type="element" dimensions="1" />
+      <Parameter name="x_bRes" type="bool" use="reference" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+
+  //文件标志符
+
+  x_bRes=false
+  if x_nFileID<0 or x_nFileID>9
+    return
+  endIf
+  //
+  switch x_nFileID
+    case 0
+      l_nNum=$fileGet(0,x_sContext,1)
+    break
+
+    case 1
+      l_nNum=$fileGet(1,x_sContext,1)
+    break
+
+    case 2
+      l_nNum=$fileGet(2,x_sContext,1)
+    break
+
+    case 3
+      l_nNum=$fileGet(3,x_sContext,1)
+    break
+
+    case 4
+      l_nNum=$fileGet(4,x_sContext,1)
+    break
+
+    case 5
+      l_nNum=$fileGet(5,x_sContext,1)
+    break
+    case 6
+      l_nNum=$fileGet(6,x_sContext,1)
+    break
+
+    case 7
+      l_nNum=$fileGet(7,x_sContext,1)
+    break
+    case 8
+      l_nNum=$fileGet(8,x_sContext,1)
+    break
+
+    case 9
+      l_nNum=$fileGet(9,x_sContext,1)
+    break
+
+
+  endSwitch
+  if l_nNum!=1
+    return
+  endIf
+  x_bRes=true
+
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

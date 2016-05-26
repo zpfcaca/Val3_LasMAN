@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="DeleteAlarmFile" access="public" >
+    <Code><![CDATA[begin
+  //删除报警文件
+  if $fileExists("Usr://configs/sfty.dat")
+    $delete("Usr://configs/sfty.dat")
+
+  endIf
+
+
+  if $fileExists("Usr://temp/pdrv.dat")
+
+    $delete("Usr://temp/pdrv.dat")
+  endIf
+
+
+
+
+
+
+
+
+
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

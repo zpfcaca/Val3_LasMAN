@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="ReadMe">
+    <Code><![CDATA[begin
+//在通用版本上对lasman进行定制
+//1.添加了三个四个函数
+//checkAxis
+//SingleMove
+//RecordExtAxis
+//RecordJoint
+
+  
+//还有一些变量需要添加
+
+  
+  
+  
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="Joint2Point" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_jJSource" type="jointRx" xsi:type="element" />
+      <Parameter name="x_pP" type="pointRx" xsi:type="element" use="reference" />
+    </Parameters>
+    <Code><![CDATA[begin
+  //把joint点转换为point
+  //movel与movej之间相互转换
+  
+  x_pP=jointToPoint(TxtFile:tCfg,world,x_jJSource)
+  //x_pP.trsf=x_pP.trsf*!TxtFile:fProduct.trsf*!TxtFile:fTraj.trsf
+  x_pP.trsf=!TxtFile:fTraj.trsf*!TxtFile:fProduct.trsf*x_pP.trsf
+  link(x_pP,TxtFile:fArray)
+  
+  
+  
+  
+  
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

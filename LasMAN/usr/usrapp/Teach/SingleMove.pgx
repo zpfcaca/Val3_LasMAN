@@ -1,0 +1,281 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="SingleMove">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nType" type="num" xsi:type="element" />
+    </Parameters>
+    <Locals>
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_jBuff" type="jointRx" xsi:type="array" size="1" />
+      <Local name="l_p" type="point" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //判断单个点是否可达
+  
+  
+  
+  resetMotion()
+  setTextMode(0)
+  gotoxy(0,0)
+  put("                     ")
+  
+  //  //2014.07.28
+  //  //同步七八轴
+  //  if TxtFile:bSync7Axis or TxtFile:bSync8Axis
+  //    if !ExtAxis:libExist("Disk://extAxisCan/extAxisCan.pjx")
+  //      if ExtAxis:libLoad("Disk://extAxisCan/extAxisCan.pjx")!=0
+  //        popUpMsg("加载外部轴出错")
+  //        disablePower()
+  //        DataBase:nPointType=5
+  //        return
+  //      endIf
+  //    endIf
+  //  endIf
+  
+  //2014.07.28
+  //同步轴选项
+  
+  //2015.04.21
+  //
+  if TxtFile:nSingleType==20 or TxtFile:nSingleType==9
+    if TxtFile:bSync7Axis==false and TxtFile:bSync8Axis==false
+      popUpMsg("请先配置同步轴!")
+      disablePower()
+      DataBase:nPointType=5
+      DataBase:bMoveTask=false
+      return
+    endIf
+  endIf
+  
+  
+  
+  //*************************************
+  //2014.12.08
+  //修改基于第七轴坐标系点的判断
+  if (TxtFile:nSingleType==20 or TxtFile:nSingleType==9)
+    //and ExtAxis:bMoveType 
+    
+    switch x_nType
+      case 1
+        call Motion:SpeedFilter(TxtFile:trAppro[nApproIndex],mNomSpeed)
+        mNomSpeed.blend=off
+        if TxtFile:bAppro[nApproIndex]
+          
+          call ExtAxis:SingleMove(2,l_jBuff,l_p,TxtFile:pAppro[nApproIndex],TxtFile:tCfg,mNomSpeed,TxtFile:trApproAxis[nApproIndex])
+        else
+          call ExtAxis:SingleMove(1,TxtFile:jAppro[nApproIndex],l_p,TxtFile:pAppro[nApproIndex],TxtFile:tCfg,mNomSpeed,TxtFile:trApproAxis[nApproIndex])
+        endIf
+      break
+      
+      
+      case 2
+        call Motion:SpeedFilter(TxtFile:trCut[nCutIndex],mNomSpeed)
+        mNomSpeed.blend=off
+        if TxtFile:bMoveC[nCutIndex] and nCutMc==0
+          if TxtFile:pMoveC[nCutIndex]!=TxtFile:pCut[nCutIndex]
+            call ExtAxis:SingleMove(3,l_jBuff,TxtFile:pMoveC[nCutIndex],TxtFile:pCut[nCutIndex],TxtFile:tCfg,mNomSpeed,TxtFile:trCutAxis[nCutIndex])
+          endIf
+        else
+          if  TxtFile:bMoveC[nCutIndex] and nCutMc==1
+            call ExtAxis:SingleMove(2,l_jBuff,l_p,TxtFile:pMoveC[nCutIndex],TxtFile:tCfg,mNomSpeed,TxtFile:trCutAxis[nCutIndex])
+          else
+            call ExtAxis:SingleMove(2,l_jBuff,l_p,TxtFile:pCut[nCutIndex],TxtFile:tCfg,mNomSpeed,TxtFile:trCutAxis[nCutIndex])
+          endIf
+        endIf
+      break
+      
+      
+      
+      
+      case 3
+        call Motion:SpeedFilter(TxtFile:trLeave[nLeaveIndex],mNomSpeed)
+        mNomSpeed.blend=off
+        if TxtFile:bLeave[nLeaveIndex]
+          call ExtAxis:SingleMove(2,l_jBuff,l_p,TxtFile:pLeave[nLeaveIndex],TxtFile:tCfg,mNomSpeed,TxtFile:trLeaveAxis[nLeaveIndex])
+        else
+          call ExtAxis:SingleMove(1,TxtFile:jLeave[nLeaveIndex],l_p,TxtFile:pLeave[nLeaveIndex],TxtFile:tCfg,mNomSpeed,TxtFile:trLeaveAxis[nLeaveIndex])
+        endIf
+      break
+      
+    endSwitch
+    //2015.04.23
+    //强制让其跳出
+    return
+  endIf
+  
+  
+  
+  //**********************************************
+  //*************************************************
+  
+  
+  switch x_nType
+    
+    
+    //趋近点
+    case 1
+      
+      call Motion:SpeedFilter(TxtFile:trAppro[nApproIndex],mNomSpeed)
+      mNomSpeed.blend=off
+      if TxtFile:bAppro[nApproIndex]
+        call IsPointOK(nApproIndex,1,nCutMc,l_bRes)
+        if l_bRes
+          if TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+            movel(TxtFile:pAppro[nApproIndex],TxtFile:tCfg,mNomSpeed)
+          else
+            call ExtAxis:SingleMove(2,l_jBuff,l_p,TxtFile:pAppro[nApproIndex],TxtFile:tCfg,mNomSpeed,TxtFile:trApproAxis[nApproIndex])
+          endIf
+        else
+          setTextMode(3)
+          gotoxy(0,0)
+          put("当前位置不可到达目标点")
+        endIf 
+      else
+        call Motion:Joint2Joint(TxtFile:jAppro[nApproIndex],l_jBuff,l_bRes)
+        if !l_bRes
+          popUpMsg("关节点转换出现异常")
+          //return
+        else
+          //movej(l_jBuff,TxtFile:tCfg,mNomSpeed)
+          
+          if TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+            movej(l_jBuff,TxtFile:tCfg,mNomSpeed)
+          else
+            call ExtAxis:SingleMove(1,l_jBuff,l_p,TxtFile:pAppro[nApproIndex],TxtFile:tCfg,mNomSpeed,TxtFile:trApproAxis[nApproIndex])
+          endIf
+          
+          
+          
+        endIf
+      endIf
+      
+      
+      
+    break
+    
+    
+    //切割点
+    case 2
+      //运动初始化
+      if nCutIndex>=size(TxtFile:trCut)
+        popUpMsg("nCutIndex序号异常")
+      else
+        call Motion:SpeedFilter(TxtFile:trCut[nCutIndex],mNomSpeed)
+        mNomSpeed.blend=off
+        call IsPointOK(nCutIndex,2,nCutMc,l_bRes)
+        
+        
+        if l_bRes
+          if TxtFile:bMoveC[nCutIndex] and nCutMc==0
+            //2014.07.24
+            //逆着走
+            if nCutIndex<nCursonIndex
+              if TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+                movel(TxtFile:pCut[nCutIndex],TxtFile:tCfg,mNomSpeed)
+                movec(TxtFile:pMoveC[nCutIndex],TxtFile:pCut[nCutIndex-1],TxtFile:tCfg,mNomSpeed)
+              else
+                call ExtAxis:SingleMove(2,l_jBuff,l_p,TxtFile:pCut[nCutIndex],TxtFile:tCfg,mNomSpeed,TxtFile:trCutAxis[nCutIndex])
+                call ExtAxis:SingleMove(3,l_jBuff,TxtFile:pMoveC[nCutIndex],TxtFile:pCut[nCutIndex-1],TxtFile:tCfg,mNomSpeed,TxtFile:trCutAxis[nCutIndex])
+                
+              endIf
+            else
+              if TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+                movel(TxtFile:pCut[nCutIndex-1],TxtFile:tCfg,mNomSpeed)
+                movec(TxtFile:pMoveC[nCutIndex],TxtFile:pCut[nCutIndex],TxtFile:tCfg,mNomSpeed)
+              else
+                call ExtAxis:SingleMove(2,l_jBuff,l_p,TxtFile:pCut[nCutIndex-1],TxtFile:tCfg,mNomSpeed,TxtFile:trCutAxis[nCutIndex])
+                call ExtAxis:SingleMove(3,l_jBuff,TxtFile:pMoveC[nCutIndex],TxtFile:pCut[nCutIndex],TxtFile:tCfg,mNomSpeed,TxtFile:trCutAxis[nCutIndex])
+              endIf
+            endIf
+            
+          else
+            if TxtFile:bMoveC[nCutIndex] and nCutMc==1
+              movel(TxtFile:pMoveC[nCutIndex],TxtFile:tCfg,mNomSpeed)
+            else
+              if TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+                movel(TxtFile:pCut[nCutIndex],TxtFile:tCfg,mNomSpeed)
+              else
+                call ExtAxis:SingleMove(2,l_jBuff,l_p,TxtFile:pCut[nCutIndex],TxtFile:tCfg,mNomSpeed,TxtFile:trCutAxis[nCutIndex])
+              endIf
+            endIf
+          endIf
+          
+        else
+          setTextMode(3)
+          gotoxy(0,0)
+          put("当前位置不可到达目标点")
+        endIf
+        
+        
+      endIf
+    break
+    
+    
+    
+    
+    //离开点
+    case 3
+      
+      
+      
+      resetMotion()
+      call Motion:SpeedFilter(TxtFile:trLeave[nLeaveIndex],mNomSpeed)
+      mNomSpeed.blend=off
+      
+      if TxtFile:bLeave[nLeaveIndex]
+        call IsPointOK(nLeaveIndex,3,nCutMc,l_bRes)
+        if l_bRes
+          //  movel(TxtFile:pLeave[nLeaveIndex],TxtFile:tCfg,mNomSpeed)
+          if TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+            movel(TxtFile:pLeave[nLeaveIndex],TxtFile:tCfg,mNomSpeed)
+          else
+            call ExtAxis:SingleMove(2,l_jBuff,l_p,TxtFile:pLeave[nLeaveIndex],TxtFile:tCfg,mNomSpeed,TxtFile:trLeaveAxis[nLeaveIndex])
+          endIf
+          
+          
+        else
+          setTextMode(3)
+          gotoxy(0,0)
+          put("当前位置不可到达目标点")
+        endIf
+      else
+        call Motion:Joint2Joint(TxtFile:jLeave[nLeaveIndex],l_jBuff,l_bRes)
+        if !l_bRes
+          popUpMsg("关节点转换出现异常")
+        else
+          //  movej(l_jBuff,TxtFile:tCfg,mNomSpeed)
+          
+          if TxtFile:nSingleType!=20 and TxtFile:nSingleType!=9
+            movej(l_jBuff,TxtFile:tCfg,mNomSpeed)
+          else
+            call ExtAxis:SingleMove(1,l_jBuff,l_p,TxtFile:pAppro[nApproIndex],TxtFile:tCfg,mNomSpeed,TxtFile:trLeaveAxis[nLeaveIndex])
+          endIf
+          
+          
+          
+        endIf
+      endIf
+      
+      
+    break
+  endSwitch
+  
+  
+  setTextMode(0)
+  
+  
+  
+  
+  
+  
+end
+  
+  
+  
+  
+  
+
+  
+  ]]></Code>
+  </Program>
+</Programs>

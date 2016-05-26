@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="TeachTool" access="public">
+    <Locals>
+      <Local name="l_bBool" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //示教工具
+  //1.两点法进行示教
+  //2.使用不拆工具法示教
+  if TxtFile:bTeachToolMode
+    CalTool:bUpLoad=false
+    call CalTool:start()
+     if CalTool:bUpLoad
+      TxtFile:tCfg=CalTool:tTool
+      call TxtFile:SaveCfg(l_bBool)
+       if !l_bBool
+        popUpMsg("保存失败")
+      endIf
+      call Kit:UpLoad()
+    endIf  
+      
+  else
+    call  Teach2Tool()
+    
+  endIf
+
+end]]></Code>
+  </Program>
+</Programs>

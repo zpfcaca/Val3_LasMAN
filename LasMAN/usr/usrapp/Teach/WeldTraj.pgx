@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="WeldTraj">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nId" type="num" xsi:type="array" size="1" />
+      <Local name="l_nBuffID" type="num" xsi:type="array" size="1" />
+      <Local name="l_nSize" type="num" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_trTrsf" type="trsf" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //计算回退点
+  l_nId=getMoveId()
+  
+  call Algorith:GetWeldReturn(TxtFile:pCut,TxtFile:pMoveC,TxtFile:bMoveC,l_nId,l_nBuffID,TxtFile:trIODelay.z,x_bRes)
+  if !x_bRes or l_nBuffID<1  or l_nBuffID>(l_nId+0.0001)
+   // popUpMsg(toString(".3",l_nBuffID))
+    x_bRes=false
+    return
+  endIf
+  
+  if roundDown(l_nBuffID)==roundUp(l_nBuffID)
+    l_nBuffID=l_nBuffID+0.0001
+  endIf
+  
+  
+  //圆弧
+  
+  if TxtFile:bMoveC[roundDown(l_nBuffID)]
+    
+    l_trTrsf=interpolateC(TxtFile:pCut[roundDown((l_nBuffID)-1)].trsf,TxtFile:pMoveC[roundDown(l_nBuffID)].trsf,TxtFile:pCut[roundDown(l_nBuffID)].trsf,l_nBuffID-roundDown(l_nBuffID))
+  else
+    
+    l_trTrsf=interpolateL(TxtFile:pCut[roundDown((l_nBuffID)-1)].trsf,TxtFile:pCut[roundDown(l_nBuffID)].trsf,l_nBuffID-roundDown(l_nBuffID))
+  endIf
+  
+  
+  
+  l_nSize=roundUp(l_nId)-roundDown(l_nBuffID)
+  
+
+  resize(TxtFile:jAppro,1,l_nSize)
+  resize(TxtFile:pAppro,1,l_nSize)
+  resize(TxtFile:trAppro,1,l_nSize)
+  resize(TxtFile:bAppro,1,l_nSize)
+  
+  for l_nNum=0 to size(TxtFile:pAppro)-2
+    TxtFile:bAppro[l_nNum]=true
+    TxtFile:pAppro[l_nNum].trsf=TxtFile:pCut[roundDown(l_nId)-1-l_nNum].trsf
+    TxtFile:trAppro[l_nNum]=TxtFile:trCut[roundDown(l_nId)-l_nNum-1]
+  endFor
+  
+  TxtFile:pAppro[size(TxtFile:pAppro)-1].trsf=l_trTrsf
+  TxtFile:bAppro[size(TxtFile:pAppro)-1]=true
+  TxtFile:trAppro[size(TxtFile:pAppro)-1]=TxtFile:trAppro[0]
+  
+  for l_nNum=0 to roundDown(l_nBuffID)-2
+    delete(TxtFile:pCut[0])
+    delete(TxtFile:pMoveC[0])
+    delete(TxtFile:trCut[0])
+    delete(TxtFile:bMoveC[0])
+  endFor
+  TxtFile:pCut[0].trsf=l_trTrsf
+  TxtFile:bMoveC[0]=false
+
+  TxtFile:trPointCount.x=size(TxtFile:jAppro)
+  TxtFile:trPointCount.y=size(TxtFile:pCut)
+  
+  x_bRes=true
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

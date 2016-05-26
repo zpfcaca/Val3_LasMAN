@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="IPMove" access="public">
+    <Code><![CDATA[begin
+  //
+//  $XgetDrvCmdPos(nDrvPos)
+//  for l_i=0 to nAxesSum-1
+//    aioSet(aoIPPos[l_i],(nDrvPos[l_i]*nResolution[l_i]/nScaleFact[l_i]))
+//  endFor
+end]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="TrajByPass" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nIndex" type="num" xsi:type="element" />
+      <Parameter name="x_nTotal" type="num" xsi:type="element" />
+    </Parameters>
+    <Code><![CDATA[begin
+  
+  
+ // 路径由外部信号过滤
+ // 实现方式
+ //通过一个数字量输入信号，一个模拟量输入信号，一个模拟量输出信号
+ //没有经过测试过
+ 
+ 
+ 
+  do
+    
+    call IO:TrajBypass(TxtFile:bBypass[x_nIndex-1],x_nIndex-1) 
+    x_nIndex=x_nIndex+1
+    delay(0)
+  until TxtFile:bBypass[x_nIndex-1]==false or x_nIndex>=x_nTotal
+  
+  
+ 
+end]]></Code>
+  </Program>
+</Programs>

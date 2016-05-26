@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="ChangeCpoint" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_trSource" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_nDia" type="num" xsi:type="element" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_trTrsf" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_nDia" type="num" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //根据直径来修改点的数值
+  //外接圆
+  
+  //先根据三点来获得圆心点，然后根据三个点来求的圆心与三个点的长度。
+  
+  
+  
+  x_bRes=false
+  
+  if size(x_trSource)!=3
+    return
+  endIf
+  
+  
+  call Circumcircle(x_trSource,l_trTrsf,l_nDia,x_bRes)
+  if !x_bRes
+    return
+  endIf
+  
+  for l_nNum=0 to 2
+    call ChangeCirPoint(l_trTrsf,x_nDia,x_trSource[l_nNum],x_trSource[sel(l_nNum==2,0,l_nNum+1)],x_bRes)
+    if !x_bRes
+      return
+    endIf
+  endFor
+
+end]]></Code>
+  </Program>
+</Programs>

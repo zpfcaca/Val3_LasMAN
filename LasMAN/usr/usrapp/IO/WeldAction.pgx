@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="WeldAction" access="public" >
+    <Code><![CDATA[begin
+
+  //焊接收弧点
+  dDio["UsO_bNull5"]=true
+  // delay(0.005)
+  call Digtal2AnalogS(0)
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

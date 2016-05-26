@@ -1,0 +1,159 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Database xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Data/2">
+  <Datas>
+    <Data name="aiPosFbk" access="public" xsi:type="array" type="aio" size="1">
+      <Value key="0" link="CanIO\Axis7\drvPosFbk_0" />
+    </Data>
+    <Data name="aoIPPos" access="public" xsi:type="array" type="aio" size="1">
+      <Value key="0" link="CanIO\Axis7\drvIPCmdPos_0" />
+    </Data>
+    <Data name="aoIPSpd" access="public" xsi:type="array" type="aio" size="1">
+      <Value key="0" link="CanIO\Axis7\ipVel_0" />
+    </Data>
+    <Data name="aoPosCmd" access="public" xsi:type="array" type="aio" size="1">
+      <Value key="0" link="CanIO\Axis7\drvCmdPos_0" />
+    </Data>
+    <Data name="aoWorkMode" access="public" xsi:type="array" type="aio" size="1">
+      <Value key="0" link="CanIO\Axis7\drvworkmode" />
+    </Data>
+    <Data name="bDriveQuickStop" access="public" xsi:type="array" type="bool" size="1" />
+    <Data name="bDrivesOpEnable" access="public" xsi:type="array" type="bool" size="1" />
+    <Data name="bDrivesSwOnDis" access="private" xsi:type="array" type="bool" size="1" />
+    <Data name="bDrvFault" access="public" xsi:type="array" type="bool" size="2" />
+    <Data name="bEnableRequest" access="private" xsi:type="array" type="bool" size="1" />
+    <Data name="bIsS7_6" access="private" xsi:type="array" type="bool" size="1">
+      <Value key="0" value="true" />
+    </Data>
+    <Data name="bMemPower" access="private" xsi:type="array" type="bool" size="1" />
+    <Data name="bNoDrivesFault" access="public" xsi:type="array" type="bool" size="1">
+      <Value key="0" value="true" />
+    </Data>
+    <Data name="bOpeEnabled" access="public" xsi:type="array" type="bool" size="2" />
+    <Data name="bOverrun" access="private" xsi:type="array" type="bool" size="1" />
+    <Data name="bQuickStop" access="public" xsi:type="array" type="bool" size="2" />
+    <Data name="bSWOnDis" access="public" xsi:type="array" type="bool" size="1" />
+    <Data name="bSysShut" access="public" xsi:type="array" type="bool" size="1" />
+    <Data name="blifebit" access="public" xsi:type="array" type="bool" size="2">
+      <Value key="0" value="true" />
+      <Value key="1" value="true" />
+    </Data>
+    <Data name="blifebit_all_ok" access="private" xsi:type="array" type="bool" size="1">
+      <Value key="0" value="true" />
+    </Data>
+    <Data name="diFault" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\fault_0" />
+    </Data>
+    <Data name="diHomingError" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\homingError_0" />
+    </Data>
+    <Data name="diHomingReached" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\homingReached_0" />
+    </Data>
+    <Data name="diIntLmtAct" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\intLmtAct_0" />
+    </Data>
+    <Data name="diOpeEnabled" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\opeEnabled_0" />
+    </Data>
+    <Data name="diPosReached" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\targetReached_0" />
+    </Data>
+    <Data name="diQuickStop" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\quickStopped_0" />
+    </Data>
+    <Data name="diReady2SwOn" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\ready2SwOn_0" />
+    </Data>
+    <Data name="diSwOnDis" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\swOnDis_0" />
+    </Data>
+    <Data name="diSwitchedOn" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\switchedOn_0" />
+    </Data>
+    <Data name="diTargetReach" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\targetReached_0" />
+    </Data>
+    <Data name="diVoltEnabled" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\voltEnabled_0" />
+    </Data>
+    <Data name="diWarning" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\warning_0" />
+    </Data>
+    <Data name="doEnableOp" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\enableOp_0" />
+    </Data>
+    <Data name="doEnableVoltage" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\enableVolt_0" />
+    </Data>
+    <Data name="doFaultReset" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\faultReset_0" />
+    </Data>
+    <Data name="doManual" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\Manual" />
+    </Data>
+    <Data name="doQuickStop" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\quickStop_0" />
+    </Data>
+    <Data name="doStartHoming" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\startHoming_0" />
+    </Data>
+    <Data name="doSwitchOn" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\switchOn_0" />
+    </Data>
+    <Data name="jDummy" access="private" xsi:type="array" type="jointRx" size="1">
+      <Value key="0" j1="1.48" j2="0.75" j3="2.04" j4="1.56" j5="2.81" j6="1.79" />
+    </Data>
+    <Data name="jPosErrMax" access="private" xsi:type="array" type="jointRx" size="1">
+      <Value key="0" j1="100" j2="100" j3="100" j4="100" j5="100" j6="100" />
+    </Data>
+    <Data name="jZero" access="private" xsi:type="array" type="jointRx" size="1">
+      <Value key="0" j1="0.01" j2="0.01" j3="0.01" j4="0.01" j5="0.01" j6="0.01" />
+    </Data>
+    <Data name="nAxesPosFbk" access="public" xsi:type="array" type="num" size="2" />
+    <Data name="nAxesSum" access="public" xsi:type="array" type="num" size="1">
+      <Value key="0" value="2" />
+    </Data>
+    <Data name="nCntDrvDisable" access="private" xsi:type="array" type="num" size="1" />
+    <Data name="nCntDrvEnable" access="private" xsi:type="array" type="num" size="2" />
+    <Data name="nDrvFbkPos" access="public" xsi:type="array" type="num" size="2" />
+    <Data name="nDrvPos" access="private" xsi:type="array" type="num" size="2" />
+    <Data name="nDrvState" access="private" xsi:type="array" type="num" size="2">
+      <Value key="0" value="1" />
+      <Value key="1" value="1" />
+    </Data>
+    <Data name="nExtAxseAccDft" access="public" xsi:type="array" type="num" size="1">
+      <Value key="0" value="10" />
+    </Data>
+    <Data name="nExtAxseSpdDft" access="public" xsi:type="array" type="num" size="1">
+      <Value key="0" value="10" />
+    </Data>
+    <Data name="nGearratio" access="private" xsi:type="array" type="num" size="2">
+      <Value key="0" value="10" />
+      <Value key="1" value="1" />
+    </Data>
+    <Data name="nResolution" access="public" xsi:type="array" type="num" size="2">
+      <Value key="0" value="1280000" />
+      <Value key="1" value="180000" />
+    </Data>
+    <Data name="nScaleFact" access="public" xsi:type="array" type="num" size="2">
+      <Value key="0" value="10" />
+      <Value key="1" value="360" />
+    </Data>
+    <Data name="sMsg" access="public" xsi:type="array" type="string" size="1" />
+    <Data name="sVersion" access="private" xsi:type="array" type="string" size="1">
+      <Value key="0" value="s7.6 - May 29 2013 - 16:53:12" />
+    </Data>
+    <Data name="diRemote" access="public" xsi:type="array" type="dio" size="1">
+      <Value key="0" link="CanIO\Axis7\remote_0" />
+    </Data>
+    <Data name="nManul" access="private" xsi:type="array" type="num" size="1">
+      <Value key="0" value="10" />
+    </Data>
+    <Data name="nBuffSize" access="private" xsi:type="array" type="num" size="1" />
+    <Data name="nAxesData" access="private" xsi:type="array" type="num" size="1" />
+    <Data name="bMoveType" access="public" xsi:type="array" type="bool" size="1" />
+    <Data name="fFrame" access="private" xsi:type="array" type="frame" size="1">
+      <Value key="0" fatherId="world[0]" />
+    </Data>
+  </Datas>
+</Database>

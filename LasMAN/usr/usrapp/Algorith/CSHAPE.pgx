@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="Cshape" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_Source" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_trCut" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_nAngle" type="num" xsi:type="element" />
+      <Parameter name="x_nPointCout" type="num" xsi:type="element" use="reference" />
+      <Parameter name="x_trCen" type="trsf" xsi:type="element" />
+      <Parameter name="x_nDia" type="num" xsi:type="element" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_trTrsf" type="trsf" xsi:type="array" size="3" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_nBuff" type="num" xsi:type="array" size="1" />
+      <Local name="l_trBuff" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_fFrame" type="frame" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  //C型图形
+  x_bRes=false
+  if x_nAngle<=0 or x_nAngle>3600
+    
+    return
+  endIf
+  
+  //由于TRSF.RZ的范围是 +-360
+  
+  
+  l_trTrsf[0]=x_trCen
+  l_trTrsf[1]=x_Source[0]
+  l_trTrsf[2]=x_Source[1]
+  
+  // x_trCut[0]=x_Source[0]
+  call SetFrame(l_trTrsf,l_fFrame,x_bRes)
+  if !x_bRes
+    return
+  endIf
+  
+  
+  x_nPointCout=roundUp(x_nAngle/180)+1
+  x_nDia=x_nDia/2
+  l_nBuff=x_nAngle/(x_nPointCout-1)/2
+//  nNum=l_nBuff
+  x_trCut[0]=l_fFrame.trsf*{x_nDia,0,0,0,0,0}
+  for l_nNum=0 to x_nPointCout-2
+    x_trCut[l_nNum*2+1]=l_fFrame.trsf*{cos((l_nNum*2+1)*l_nBuff)*x_nDia,sin((l_nNum*2+1)*l_nBuff)*x_nDia,0,0,0,0}
+    x_trCut[l_nNum*2+2]=l_fFrame.trsf*{cos((l_nNum*2+2)*l_nBuff)*x_nDia,sin((l_nNum*2+2)*l_nBuff)*x_nDia,0,0,0,0}
+    
+  endFor
+
+  
+  x_bRes=true
+  
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

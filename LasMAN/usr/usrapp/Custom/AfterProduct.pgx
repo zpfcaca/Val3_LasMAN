@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="AfterProduct" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nWorkplaceIn" type="num" xsi:type="element" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //产品生产之后需要进行的工作
+  //路径完成，但是没有回零
+  //外部轴也没有进行归位
+  //与AfterWorkPlace区别是AfterWorkPlace机械手臂回到零位
+  //如果要加信号，请在前面加上waitendmove()
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+//  //路径过滤的话
+//  //启动时把下面的话语注释掉
+//  
+//  if TxtFile:bTrajFilter
+//    for l_nNum=0 to TxtFile:nTotalTraj-1
+//      
+//      TxtFile:bBypass[l_nNum]=false
+//      
+//    endFor
+//    
+//    call TrajByPass(1,TxtFile:nTotalTraj)
+//    
+//  endIf
+
+
+
+
+//添加
+
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

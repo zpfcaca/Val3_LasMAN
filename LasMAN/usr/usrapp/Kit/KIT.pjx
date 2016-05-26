@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://www.staubli.com/robotics/VAL3/Project/3">
+  <Parameters version="s7.7" stackSize="5000" millimeterUnit="true" />
+  <Programs>
+    <Program file="Align.pgx" />
+    <Program file="ExtraSysAxisIni.pgx" />
+    <Program file="GoHome.pgx" />
+    <Program file="Poll.pgx" />
+    <Program file="RecordAlarm.pgx" />
+    <Program file="start.pgx" />
+    <Program file="stop.pgx" />
+    <Program file="TrajByPass.pgx" />
+    <Program file="UpLoad.pgx" />
+  </Programs>
+  <Database>
+    <Data file="Kit.dtx" />
+  </Database>
+  <Libraries>
+    <Library alias="UI" path="Disk://StaubliUI/StaubliUI.pjx" />
+    <Library alias="TxtFile" path="Disk://TxtFile/TxtFile.pjx" />
+    <Library alias="DataBase" path="Disk://DataBase/DataBase.pjx" />
+    <Library alias="IO" path="Disk://IO/IO.pjx" />
+    <Library alias="ExtAxis" path="Disk://extAxisCan/extAxisCan.pjx" autoload="false" />
+    <Library alias="Custom" path="Disk://Custom/Custom.pjx" />
+  </Libraries>
+</Project>

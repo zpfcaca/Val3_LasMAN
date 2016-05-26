@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="CutOut" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_trCenter" type="trsf" xsi:type="element" />
+      <Parameter name="x_trLine" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_trDest" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_trCut" type="trsf" xsi:type="element" use="reference" />
+      <Parameter name="x_nType" type="num" xsi:type="element" />
+      <Parameter name="x_nPercent" type="num" xsi:type="element" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_trTrsf" type="trsf" xsi:type="array" size="2" />
+    </Locals>
+    <Code><![CDATA[begin
+  //切入引线
+    if x_nType==0
+    x_bRes=true
+    return
+    endIf
+  call CutIn(x_trCenter,x_trLine,l_trTrsf,x_trCut,x_nType,x_nPercent,x_bRes)
+  if !x_bRes
+    return
+  endIf
+  
+  x_trLine[1]=x_trLine[0]
+  x_trLine[0]=x_trCenter 
+
+  
+  call LineSymArray(l_trTrsf,x_trLine,x_trDest,x_bRes)
+
+
+end]]></Code>
+  </Program>
+</Programs>

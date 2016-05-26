@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="RecordAlarm">
+    <Locals>
+      <Local name="l_sString" type="string" xsi:type="array" size="1" />
+      <Local name="l_jJoint" type="joint" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  if !$fileExists("Log://alarm.txt")
+    nFileID=$fileOpen("Log://alarm.txt","w")
+  else
+    nFileID=$fileOpen("Log://alarm.txt","a")
+  endIf
+  
+  
+  
+  if nFileID<0 or nFileID>9
+    return
+  endIf
+  
+  l_sString=getDate("%Y_%m_%d %H:%M:%S")
+  l_sString=l_sString+"急停触发:产品:"+DataBase:sProductName[DataBase:nWorkPlaceIndex]+"路径:"+toString("",DataBase:nTrajIndex)
+  l_sString=l_sString+"MoveID:"+toString(".3",getMoveId())
+  
+  $fileSet(nFileID,l_sString,1)
+  l_jJoint=herej()
+  
+  l_sString="关节位置:"+toString(".3",l_jJoint.j1)+","+toString(".3",l_jJoint.j2)+","+toString(".3",l_jJoint.j3)+","
+  l_sString= l_sString+toString(".3",l_jJoint.j4)+","+toString(".3",l_jJoint.j5)+","+toString(".3",l_jJoint.j6)
+  
+   $fileSet(nFileID,l_sString,1)
+   
+   $fileClose(nFileID)
+  
+  
+  
+  
+  
+  
+  
+  
+  
+end]]></Code>
+  </Program>
+</Programs>

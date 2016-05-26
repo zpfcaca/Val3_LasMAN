@@ -1,0 +1,161 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="GetWeldId" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_pCut" type="point" xsi:type="array" use="reference" />
+      <Parameter name="x_pMC" type="point" xsi:type="array" use="reference" />
+      <Parameter name="x_bMC" type="bool" xsi:type="array" use="reference" />
+      <Parameter name="x_nLength" type="num" xsi:type="element" />
+      <Parameter name="x_nMoveId" type="num" xsi:type="element" use="reference" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+      <Parameter name="x_nWeldEndOffse" type="num" xsi:type="element" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_nBuffLength" type="num" xsi:type="array" size="1" />
+      <Local name="l_trBuff" type="trsf" xsi:type="array" size="3" />
+      <Local name="l_nArc" type="num" xsi:type="array" size="1" />
+      <Local name="l_nBuff" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //焊接的收弧点的moveid
+  
+  //x_nLength   收弧长度
+  //关键函数
+  
+  
+  
+  x_nMoveId=0
+  x_bRes=false
+  
+  if size(x_pCut)<2 or size(x_bMC)!=size(x_pCut) or size(x_bMC)!=size(x_pCut)
+    return
+  endIf
+  
+  
+  if x_nLength<=0
+    //    x_nMoveId=0
+    ////    x_bRes=true
+    //    return
+    x_nLength=5
+  endIf
+  
+  
+  
+  
+  
+  //实际走的长度
+  //2014.04.10
+  // 可以对长度经修正
+  
+  
+  
+  
+  //x_nWeldEndOffse=min(max(0.1,x_nWeldEndOffse),40)
+  ////2015.09.08
+  ////强制设置为o
+  //x_nWeldEndOffse=0
+  
+  
+  //if size(x_bMC)>1
+  //  if distance(x_pCut[size(x_pCut)-1].trsf,x_pCut[size(x_pCut)-2].trsf)<30
+  //    x_nWeldEndOffse=0
+  //  endIf
+  //else
+  //  x_nMoveId=1
+  //  x_bRes=true
+  //  return
+  //endIf
+  
+  //  x_nLength=max(0.1,l_nNum-x_nLength-x_nWeldEndOffse)
+  
+  //************************
+  
+  
+  //反算，从结尾开始算
+  l_nBuffLength=0
+  for l_nNum=size(x_bMC)-1 to 1 step -1
+    if !x_bMC[l_nNum]
+      l_nArc=distance(x_pCut[l_nNum-1].trsf,x_pCut[l_nNum].trsf)
+      l_nBuffLength=l_nArc+l_nBuffLength
+    else
+      l_trBuff[0]=x_pCut[l_nNum-1].trsf
+      l_trBuff[1]=x_pMC[l_nNum].trsf
+      l_trBuff[2]=x_pCut[l_nNum].trsf
+      call GetArcLength(l_trBuff,l_nArc,x_bRes)
+      if !x_bRes
+        return
+      endIf
+      l_nBuffLength=l_nBuffLength+l_nArc
+    endIf
+    
+    if l_nBuffLength>=x_nLength
+      
+      //这句是重点
+      //容易计算错误
+      x_nMoveId=l_nNum+(l_nBuffLength-x_nLength)/l_nArc
+      x_bRes=true
+      return
+    endIf
+  endFor
+  
+  //跳出整个程序
+  return
+  
+  
+  
+  
+  
+  
+  
+  //顺算，从头开始算
+  //获取整个长度
+  call GetCutLength(x_pCut,x_pMC,x_bMC,l_nNum,x_bRes)
+  if !x_bRes or l_nNum<=0 or x_nLength>=l_nNum
+    return
+  endIf
+  
+  x_nLength=l_nNum-x_nLength
+  l_nBuffLength=0
+  for l_nNum=1 to size(x_bMC)-1
+    if !x_bMC[l_nNum]
+      l_nArc=distance(x_pCut[l_nNum-1].trsf,x_pCut[l_nNum].trsf)
+      l_nBuffLength=l_nArc+l_nBuffLength
+    else
+      l_trBuff[0]=x_pCut[l_nNum-1].trsf
+      l_trBuff[1]=x_pMC[l_nNum].trsf
+      l_trBuff[2]=x_pCut[l_nNum].trsf
+      call GetArcLength(l_trBuff,l_nArc,x_bRes)
+      if !x_bRes
+        return
+      endIf
+      l_nBuffLength=l_nBuffLength+l_nArc
+    endIf
+    
+    
+    if l_nBuffLength>x_nLength
+      x_nMoveId=l_nNum-((l_nBuffLength-x_nLength)/l_nArc)+1
+      // x_nMoveId=l_nNum+()
+      x_bRes=true
+      return
+    endIf
+    
+    l_nBuff=l_nBuffLength
+    
+  endFor
+  
+  
+  
+  
+  
+  
+  
+  
+  x_bRes=false
+  
+end
+
+  
+      ]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="CreatDir" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_sDirName" type="string" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_bRes" type="bool" use="reference" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nFileID" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //说明：x_sDirName一般为 /usr/usrapp
+  //
+  //
+
+
+
+  x_bRes=false
+  //目录名为空则返回
+  if x_sDirName==""
+    return
+  endIf
+
+  //打开文件，如果文件不存在则新建文件
+  l_nFileID=$fileOpen(x_sDirName+"\text","w")
+  if l_nFileID<0 or l_nFileID>9
+    return
+  endIf
+  //关闭文件
+  call CloseFile(l_nFileID)
+  //删除文件  保留目录
+  $delete(x_sDirName+"\text")
+  x_bRes=true
+
+
+end]]></Code>
+  </Program>
+</Programs>

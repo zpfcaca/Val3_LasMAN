@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="setCmdPos" access="private" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nAxisNum" type="num" use="value" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nCurrentPos" type="num" xsi:type="array" size="1" />
+      <Local name="l_nCmdPos" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //把当前位置赋给驱动器
+  l_nCurrentPos=aioGet(aiPosFbk[x_nAxisNum])
+  aioSet(aoPosCmd[x_nAxisNum],l_nCurrentPos)
+end]]></Code>
+  </Program>
+</Programs>

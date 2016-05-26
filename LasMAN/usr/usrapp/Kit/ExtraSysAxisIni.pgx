@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="ExtraSysAxisIni" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Code><![CDATA[begin
+  
+  //2014.07.28
+  //同步七八轴
+  
+  x_bRes=false
+  TxtFile:bSync7Axis=TxtFile:bSync8Axis=false
+  if $fileExists("Usr://configs/externaxes.cfx") and getVersion("externalAxis")!="false"
+    
+    if !ExtAxis:libExist("Disk://extAxisCan/extAxisCan.pjx") 
+      
+      //2014.08.06
+      //适配7.5版本和S7.6版本
+      if find(getVersion("System"),"s7.5")>=0
+        if !$copy("Disk://extAxisCan/TASK4MS7.5.pgx","Disk://extAxisCan/TASK4MS.pgx")
+          popUpMsg("外部轴TASK4MS程序不正确")
+          return
+        endIf
+        
+      else  
+        if !$copy("Disk://extAxisCan/TASK4MS7.6.pgx","Disk://extAxisCan/TASK4MS.pgx")
+          popUpMsg("外部轴TASK4MS程序不正确")
+          return
+        endIf
+      endIf
+      
+      //
+      
+      
+      if ExtAxis:libLoad("Disk://extAxisCan/extAxisCan.pjx")!=0
+        popUpMsg("加载同步轴库不正确")
+        return
+      endIf
+    endIf
+    call ExtAxis:CheckAxis(TxtFile:bSync7Axis,TxtFile:bSync8Axis)
+    call ExtAxis:init()
+    // call ExtAxis:Reset()
+    DataBase:nAsysAxisPer=max(0.004,DataBase:nAsysAxisPer)
+    taskCreateSync "SyncAxis",DataBase:nAsysAxisPer,bSync,ExtAxis:Task4ms()
+    
+  endIf
+  
+  x_bRes=true
+  
+  
+  
+  
+  
+end
+]]></Code>
+  </Program>
+</Programs>

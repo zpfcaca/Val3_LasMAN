@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="SaveAction" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_bRes" type="bool" use="reference" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_nX" type="num" xsi:type="array" size="1" />
+      <Local name="l_sFileName" type="string" xsi:type="array" size="1" />
+      <Local name="l_sSBuff" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+
+  //参数初始化
+  x_bRes=false
+  l_sFileName="Disk://Txt/Action.txt"
+
+
+  //关闭所有文件
+  call FileDir:CloseAllFile()
+
+
+  //文件是否可以打开
+  nFileID=$fileOpen(l_sFileName,"w")
+  if nFileID<0 or nFileID>9
+    return
+  endIf
+
+
+  for l_nNum=1 to 50
+    l_sSBuff=toString("",l_nNum)+"="
+    for l_nX=0 to 11
+      l_sSBuff=l_sSBuff+toString("",nAction[l_nNum,l_nX,0])+","+toString(".2",nAction[l_nNum,l_nX,1])+";"
+    endFor
+    if $fileSet(nFileID,l_sSBuff,1)!=1
+      return
+    endIf
+  endFor
+
+  call FileDir:CloseAllFile()
+
+  x_bRes=true
+
+end]]></Code>
+  </Program>
+</Programs>

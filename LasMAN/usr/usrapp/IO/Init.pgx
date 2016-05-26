@@ -1,0 +1,199 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="Init" access="public" >
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //LasMAN modbus表格的初始化
+
+
+
+
+  //dDio["In1_bPowerOn"]=false
+  //dDio["In1_bStartCycl"]=false
+  //dDio["In1_bStopCycl"]=false
+  //dDio["In1_bHome"]=false
+  //dDio["In1_bEndCycl"]=false
+  //dDio["In1_bPrdSta1"]=false
+  //dDio["In1_bPrdSta2"]=false
+  //dDio["In1_bPausCycl"]=false
+  //dDio["In1_bOutAlarm"]=false
+  //dDio["In1_bReset"]=false
+  //dDio["In1_bPeripheralReady"]=false
+  //dDio["In1_bNull1"]=false
+  //dDio["In1_bNull2"]=false
+  //dDio["In1_bNull3"]=false
+  //dDio["UsIn_bNull1"]=false
+  //dDio["UsIn_bNull2"]=false
+  //dDio["UsIn_bNull3"]=false
+  //dDio["UsIn_bNull4"]=false
+  //dDio["UsIn_bNull5"]=false
+  //dDio["UsIn_bNull6"]=false
+  //dDio["UsIn_bNull7"]=false
+  //dDio["UsIn_bNull8"]=false
+  //dDio["In2_bPrdSta3"]=false
+  //dDio["In2_bPrdSta4"]=false
+  //dDio["In2_bAirAlarm"]=false
+  //dDio["In2_bCollisonAlarm"]=false
+  //dDio["In2_bLaserAlarm"]=false
+  //dDio["In2_bContactAlarm"]=false
+  //dDio["In2_bRasterOn"]=false
+  //dDio["In2_bNull1"]=false
+  //dDio["In2_bNull2"]=false
+  //dDio["In2_bNull3"]=false
+  //dDio["In2_bNull4"]=false
+  //dDio["In2_bNull5"]=false
+  //dDio["In2_bNull6"]=false
+  //dDio["In2_bNull7"]=false
+  //dDio["In2_bNull8"]=false
+  //dDio["In2_bNull9"]=false
+  //dDio["In7_bUpLimit_7"]=false
+  //dDio["In7_bDownLimit_7"]=false
+  //dDio["In7_bHomeLimit_7"]=false
+  //dDio["In7_bNull1"]=false
+  //dDio["In8_bUpLimit_8"]=false
+  //dDio["In8_bDownLimit_8"]=false
+  //dDio["In8_bHomeLimit_8"]=false
+  //dDio["In8_bNull1"]=false
+  //dDio["In4_b7Reached"]=false
+  //dDio["In4_b7BackHome"]=false
+  //dDio["In4_b7HomeDone"]=false
+  //dDio["In4_b7MotorPower"]=false
+  //dDio["In4_b7IsHome"]=false
+  //dDio["In4_b7MotorError"]=false
+  //dDio["In4_b8Reached"]=false
+  //dDio["In4_b8BackHome"]=false
+  //dDio["In4_b8HomeDone"]=false
+  //dDio["In4_b8MotorPower"]=false
+  //dDio["In4_b8IsHome"]=false
+  //dDio["In4_b8MotorError"]=false
+  //dDio["In4_bNull1"]=false
+  //dDio["In4_bNull2"]=false
+  //dDio["In4_bNull3"]=false
+  //dDio["In4_bNull4"]=false
+  //dDio["In4_bNull5"]=false
+  //dDio["In4_bNull6"]=false
+  //dDio["In4_bNull7"]=false
+  //dDio["In4_bNull8"]=false
+
+  //所有数字量输出为false
+  dDio["O1_bLaserOn"]=false
+  dDio["O1_bFollowOn"]=false
+  dDio["O1_bFollowDone"]=false
+  dDio["O1_bAirOn"]=false
+  dDio["O1_bNull1"]=false
+  dDio["O1_bRedLamp"]=false
+  dDio["O1_bYellowLamp"]=false
+  dDio["O1_bGreenLamp"]=false
+  dDio["O1_bAlarm"]=false
+  dDio["UsO_bNull1"]=false
+  dDio["UsO_bNull2"]=false
+  dDio["UsO_bNull3"]=false
+  dDio["UsO_bNull4"]=false
+  dDio["UsO_bNull5"]=false
+  dDio["UsO_bNull6"]=false
+  dDio["UsO_bNull7"]=false
+  dDio["UsO_bNull8"]=false
+  dDio["O2_bSta1Stat"]=false
+  dDio["O2_bSta2Stat"]=false
+  dDio["O2_bSta3Stat"]=false
+  dDio["O2_bSta4Stat"]=false
+  dDio["O2_bProCode1"]=false
+  dDio["O2_bProCode2"]=false
+  dDio["O2_bProCode3"]=false
+  dDio["O2_bFollowHeigh1"]=false
+  dDio["O2_bFollowHeigh2"]=false
+  dDio["O2_bFollowHeigh3"]=false
+  dDio["O2_bAxisPos1"]=false
+  dDio["O2_bAxisPos2"]=false
+  dDio["O2_bAxisPos3"]=false
+  dDio["O2_bNull1"]=false
+  dDio["O2_bNull2"]=false
+  dDio["O2_bNull3"]=false
+  dDio["O7_bAxis7Pulse"]=false
+  dDio["O7_bAxis7Direction"]=false
+  dDio["O7_bNull1"]=false
+  dDio["O7_bNull2"]=false
+  dDio["O7_bNull3"]=false
+  dDio["O8_bAxis8Pulse"]=false
+  dDio["O8_bAxis8Direction"]=false
+  dDio["O8_bNull1"]=false
+  dDio["O8_bNull2"]=false
+  dDio["O8_bNull3"]=false
+  dDio["O4_b7RecordPos"]=false
+  dDio["O4_b7MoveToPos"]=false
+  dDio["O4_b7ResetError"]=false
+  dDio["O4_b7ChkHome"]=false
+  dDio["O4_b7AxisHome"]=false
+  dDio["O4_b7MoveDir"]=false
+  dDio["O4_b7MoveDirM"]=false
+  dDio["O4_b7StopMotor"]=false
+  dDio["O4_bHome"]=false
+  dDio["O4_b8RecordPos"]=false
+  dDio["O4_b8MoveToPos"]=false
+  dDio["O4_b8ResetError"]=false
+  dDio["O4_b8ChkHome"]=false
+  dDio["O4_b8AxisHome"]=false
+  dDio["O4_b8MoveDir"]=false
+  dDio["O4_b8MoveDirM"]=false
+  dDio["O4_b8StopMotor"]=false
+  dDio["O4_bNull1"]=false
+  dDio["O4_bNull2"]=false
+  dDio["O4_bNull3"]=false
+  dDio["O4_bNull4"]=false
+  dDio["O4_bNull5"]=false
+  dDio["O4_bNull6"]=false
+  dDio["O4_bNull7"]=false
+  dDio["O4_bNull8"]=false
+
+
+
+
+
+  //所有模拟量输出为0
+  aioSet(aAio["O1_aLasPwr"],0)
+  aioSet(aAio["O1_aAirPress"],0)
+  aioSet(aAio["O1_aFPWM"],0)
+  aioSet(aAio["O1_aPMW"],0)
+  aioSet(aAio["O2_aFollowSensitive"],0)
+  aioSet(aAio["O2_aNull"],0)
+  //aioSet(aAio["In4_a7CurPosL"] ,0)
+  //aioSet(aAio["In4_a7CurPosH"] ,0)
+  //aioSet(aAio["In4_a8CurPosL"] ,0)
+  //aioSet(aAio["In4_a8CurPosH"] ,0)
+  aioSet(aAio["O4_a7Velocity"],0)
+  aioSet(aAio["O4_a7JogVelo"],0)
+  aioSet(aAio["O4_a7MoveDis"],0)
+  aioSet(aAio["O4_a7AiHomeH"],0)
+  aioSet(aAio["O4_a7AiHomeL"],0)
+  aioSet(aAio["O4_a7MovePosL"],0)
+  aioSet(aAio["O4_a7MovePosH"],0)
+  aioSet(aAio["O4_a8Velocity"],0)
+  aioSet(aAio["O4_a8JogVelo"],0)
+  aioSet(aAio["O4_a8MoveDis"],0)
+  aioSet(aAio["O4_a8AiHomeH"],0)
+  aioSet(aAio["O4_a8AiHomeL"],0)
+  aioSet(aAio["O4_a8MovePosL"],0)
+  aioSet(aAio["O4_a8MovePosH"],0)
+  aioSet(aAio["Out_a66_81"],0)
+  aioSet(aAio["Out_a82_97"],0)
+  aioSet(aAio["Out_a98_113"],0)
+  aioSet(aAio["Out_a114_129"],0)
+  aioSet(aAio["Out_a130_133"],0)
+  //aioSet(aAio["In_aVersion"] ,0)
+
+  resize(sIOName,1,167)
+  for l_nNum=0 to 166
+    call IOName(l_nNum,sIOName[l_nNum])
+  endFor
+
+  resize(bDigtal,1,167)
+  for l_nNum=0 to 166
+    call IsDigtal(l_nNum,bDigtal[l_nNum])
+  endFor
+
+
+end]]></Code>
+  </Program>
+</Programs>

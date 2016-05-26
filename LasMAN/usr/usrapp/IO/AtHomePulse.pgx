@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="AtHomePulse" access="public" >
+    <Code><![CDATA[begin
+
+  //2014.12.09
+  //回零脉冲
+  waitEndMove()
+  dDio["UsO_bNull2"]=true
+  call Digtal2Analog()
+  delay(0.5)
+  dDio["UsO_bNull2"]=false
+  call Digtal2Analog()
+
+
+  //信号确认
+  delay(0.5)
+  dDio["UsO_bNull1"]=true
+  delay(0.5)
+  dDio["UsO_bNull1"]=false
+  delay(0.5)
+  dDio["UsO_bNull7"]=true
+  delay(0.5)
+  dDio["UsO_bNull7"]=false
+  delay(0.5)
+
+
+end]]></Code>
+  </Program>
+</Programs>

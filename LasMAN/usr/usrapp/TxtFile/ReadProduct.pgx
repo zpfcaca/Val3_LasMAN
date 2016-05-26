@@ -1,0 +1,216 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="ReadProduct" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_sFileName" type="string" xsi:type="element" />
+      <Parameter name="x_sProductName" type="string" xsi:type="element" />
+      <Parameter name="x_bReadTrajName" type="bool" xsi:type="element" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nBeginEnd" type="num" xsi:type="array" size="2" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="3" />
+      <Local name="l_sBuff" type="string" xsi:type="array" size="1" />
+      <Local name="l_sFileName" type="string" xsi:type="array" size="1" />
+      <Local name="l_trTrsf" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_nLineCount" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+
+  //读取生产文件
+
+  //参数初始化
+  x_bRes=false
+  l_sFileName=x_sFileName
+  nTotalTraj=0
+  //判断文件是否存在
+  if !$fileExists(l_sFileName) or x_sProductName==""
+    return
+  endIf
+
+  //关闭所有文件
+  call FileDir:CloseAllFile()
+
+  //文件是否可以打开
+  nFileID=$fileOpen(l_sFileName,"r")
+  if nFileID<0 or nFileID>9
+    return
+  endIf
+
+
+  //读取每行并解析
+  //  if $fileGet(nFileID,l_sBuff,1)!=1 or l_sBuff!=("PRODUCT="+x_sProductName)
+  //    return
+  //  endIf
+  if $fileGet(nFileID,l_sBuff,1)!=1 or find(l_sBuff,("PRODUCT="+x_sProductName))<0
+    logMsg(x_sProductName+"不正确")
+    return
+  endIf
+
+  //TOOL
+  if $fileGet(nFileID,l_sBuff,1)==1
+    call FileDir:SplitTrsf(l_sBuff,"TOOL=",tFileTool.trsf,x_bRes)
+    if !x_bRes
+      logMsg("工具值不正确")
+      return
+    endIf
+
+    //如果工具不正确，则报错！
+    if tFileTool.trsf!=tCfg.trsf
+      x_bRes=false
+      return
+    endIf
+
+
+  endIf
+
+
+  //Home
+  //  if $fileGet(nFileID,l_sBuff,1)==1
+  //    call FileDir:SplitJoint(l_sBuff,"HOME=",jFileHome,x_bRes)
+  //    if !x_bRes
+  //      return
+  //    endIf
+  //  endIf
+
+
+
+
+  //Totalelements
+  if $fileGet(nFileID,l_sBuff,1)==1
+    toNum(right(l_sBuff,len(l_sBuff)-len("TOTALELEMENTS=")),nTotalTraj,x_bRes)
+    //判断参数合法化
+    if !x_bRes or nTotalTraj<0 or (nTotalTraj!=roundDown(nTotalTraj))
+      x_bRes=false
+      return
+    else
+      if nTotalTraj==0
+        resize(sTrajName,1,1)
+        resize(nTrajType,1,1)
+        resize(sTrajNameType,1,1)
+        resize(bBypass,1,1)
+        sTrajName=""
+        sTrajNameType=""
+        nTrajType=10
+        bBypass=false
+      else
+        resize(sTrajName,1,nTotalTraj)
+        resize(nTrajType,1,nTotalTraj)
+        resize(sTrajNameType,1,nTotalTraj)
+        resize(bBypass,1,nTotalTraj)
+      endIf
+    endIf
+  endIf
+
+  //
+  //frame
+  if $fileGet(nFileID,l_sBuff,1)==1
+    call FileDir:SplitTrsf(l_sBuff,"FRAME=",fProduct.trsf,x_bRes)
+    if !x_bRes
+      logMsg("读取产品坐标系不正确")
+      return
+    endIf
+  endIf
+
+
+
+  //OFFSET
+  if $fileGet(nFileID,l_sBuff,1)==1
+    call FileDir:SplitTrsf(l_sBuff,"OFFSET=",fPofffset.trsf,x_bRes)
+    if !x_bRes
+      logMsg("读取产品偏移不正确")
+      return
+    endIf
+  endIf
+
+
+
+  //PRESET
+  if $fileGet(nFileID,l_sBuff,1)==1
+    bMatchPreset=!(l_sBuff=="PRESET=StaubliPreset")
+    sPresetName=right(l_sBuff,len(l_sBuff)-len("PRESET="))
+    //    if !x_bRes
+    //      return
+    //    endIf
+  endIf
+
+
+  if nTotalTraj==0
+    x_bRes=true
+    return
+
+
+  endIf
+
+  l_nBeginEnd[0]=l_nBeginEnd[1]=0
+  
+
+
+
+  
+
+
+
+
+  //读取路径名
+  //×××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××
+  l_nNum[0]=0
+  //强制检查路径是否完整
+  // if x_bReadTrajName
+  if true
+    while $fileGet(nFileID,l_sBuff,1)==1 and l_nNum[0]<nTotalTraj
+      if find(l_sBuff,"BEGIN=")>=0
+        sTrajName[l_nNum[0]]=right(l_sBuff,len(l_sBuff)-len("BEGIN="))
+        l_nBeginEnd[0]=l_nBeginEnd[0]+1
+      else
+        
+        //获取文件类型
+        if find(l_sBuff,"CUTTYPE=")>=0
+          toNum(right(l_sBuff,len(l_sBuff)-len("CUTTYPE=")),nTrajType[l_nNum[0]],x_bRes)
+          if !x_bRes
+            return
+          else
+            sTrajNameType[l_nNum[0]]=sTrajName[l_nNum[0]]+"("+sTrajType[nTrajType[l_nNum[0]]]+")"
+            
+          endIf
+        else
+          
+          //获取相应的过滤
+          if find(l_sBuff,"BYPASS=TRUE")>=0
+            bBypass[l_nBeginEnd[1]]=true
+          endIf
+          if find(l_sBuff,"BYPASS=FALSE")>=0
+            bBypass[l_nBeginEnd[1]]=false
+          endIf
+          
+          //得到路径最后标志符
+          if find(l_sBuff,"END=")>=0
+            l_nBeginEnd[1]=l_nBeginEnd[1]+1
+            l_nNum[0]=l_nNum[0]+1
+          endIf
+        endIf
+        
+      endIf
+      
+      //2016.04.22
+      //对于大文件则退出
+      //对于大量的打磨，3D打印进行定制
+      l_nLineCount=l_nLineCount+1
+      if l_nLineCount>3000 
+        logMsg("文件行数超过3000行")
+        call FileDir:CloseAllFile()
+        x_bRes=true
+        return
+      endIf
+      
+      
+    endWhile
+  endIf
+  //×××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××
+
+  //关闭所有文件
+  call FileDir:CloseAllFile()
+  x_bRes=(l_nBeginEnd[0]==l_nBeginEnd[1]) and (l_nBeginEnd[0]==nTotalTraj)
+end]]></Code>
+  </Program>
+</Programs>

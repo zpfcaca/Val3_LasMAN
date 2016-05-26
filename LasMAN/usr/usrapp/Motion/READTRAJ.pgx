@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="ReadTraj" access="public">
+    <Locals>
+      <Local name="l_bBool" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  TxtFile:bReadProduct=true
+  if DataBase:nInterfaceType==5
+    call TxtFile:ReadTraj("Disk://Txt/Recipe.txt",TxtFile:sProductName,nStartTraj,nEndTraj,l_bBool)
+  else
+    logMsg("读取"+"Disk://Txt/Product"+toString("",DataBase:nWorkPlaceIndex)+".txt")
+    call TxtFile:ReadTraj("Disk://Txt/Product"+toString("",DataBase:nWorkPlaceIndex)+".txt",DataBase:sProductName[DataBase:nWorkPlaceIndex],1,TxtFile:nTotalTraj,l_bBool)
+  endIf
+  
+  
+  TxtFile:bReadProduct=false
+  if !l_bBool
+    disablePower()
+    popUpMsg("读取路径信息出现异常")
+    
+    if DataBase:nInterfaceType==5
+      logMsg(TxtFile:sProductName+"读取示教路径信息出现异常")
+    else
+      logMsg(DataBase:sProductName[DataBase:nWorkPlaceIndex]+"读取路径信息出现异常")
+    endIf
+  else
+    //popUpMsg("读取路径OK")
+  endIf
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

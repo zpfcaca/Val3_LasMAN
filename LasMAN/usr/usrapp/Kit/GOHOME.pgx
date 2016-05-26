@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="GoHome" access="public">
+    <Locals>
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_trTrsf" type="trsf" xsi:type="array" size="1" />
+      <Local name="l_p" type="point" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //机械手臂回零程序
+  
+  
+  //2014.07.28
+  //同步七八轴
+//  if TxtFile:bSync7Axis or TxtFile:bSync8Axis
+//    if !ExtAxis:libExist("Disk://extAxisCan/extAxisCan.pjx")
+//      if ExtAxis:libLoad("Disk://extAxisCan/extAxisCan.pjx")!=0
+//        popUpMsg("加载外部轴出错")
+//        return
+//      endIf
+//    endIf
+//  endIf
+  
+  //回零程序
+  cls()
+  resetMotion()
+  call UI:Form_MainS(",,,,,,,终止")
+  call UI:Control_PanelMd("机器人正在回零")
+  DataBase:mJHome.tvel=min(500,max(50,TxtFile:nHomeSpeed*1000/60))
+  DataBase:mJHome.blend=off
+  
+  
+  //2014.07.29 同步七轴或者八轴
+  if TxtFile:bSync7Axis or TxtFile:bSync8Axis
+    l_trTrsf.x=TxtFile:trSync7Axis.y
+    l_trTrsf.y=TxtFile:trSync8Axis.y
+    call ExtAxis:SingleMove(1,TxtFile:jHome,l_p,l_p,TxtFile:tCfg,DataBase:mJHome,l_trTrsf) 
+  else
+    movej(TxtFile:jHome,TxtFile:tCfg,DataBase:mJHome)
+    
+  endIf
+  
+  wait(!isEmpty()and getKey()==-1)
+  while  !isEmpty()
+    l_nKey=getKey()
+    switch l_nKey
+      case 278
+        call UI:Control_YesNO("确定要终止回零吗?",l_bRes)
+        if l_bRes
+          resetMotion()
+          return
+        else
+          call UI:Form_MainS(",,,,,,,终止")
+          call UI:Control_PanelMd("机器人正在回零")
+        endIf
+      break
+    endSwitch
+    delay(0)
+  endWhile
+  wait(DataBase:bIsHome)
+  
+  
+  //2014.12.09
+  //外部PLC控制回零信号
+  if DataBase:bExtraContrAxis
+    
+    call IO:AtHomePulse()
+    
+  endIf
+  //************************
+  
+  
+  
+  cls()
+  call UI:Control_PanelMd("回零成功")
+  delay(2)
+  cls()
+end
+]]></Code>
+  </Program>
+</Programs>

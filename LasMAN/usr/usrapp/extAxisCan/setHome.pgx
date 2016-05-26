@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="setHome" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nAxisNum" type="num" xsi:type="element" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_bError" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nEtape" type="num" xsi:type="array" size="1" />
+      <Local name="l_sMsg" type="string" xsi:type="array" size="1" />
+      <Local name="l_nTps" type="num" xsi:type="array" size="1" />
+      <Local name="l_bVerrou" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bOK" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nDuration" type="num" xsi:type="array" size="1" />
+      <Local name="l_sYN" type="string" xsi:type="array" size="2" />
+      <Local name="l_nDrvPos" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //对绝对编码器电机设置当前值位为零点
+    if !isPowered()
+      popUpMsg("请先上电")
+      return 
+    endIf
+    x_bRes=false
+    doStartHoming[x_nAxisNum]=false
+    delay(0.1)
+    aioSet(aoWorkMode[x_nAxisNum],cst:nHOMINGMODE)
+    doStartHoming[x_nAxisNum]=true
+    wait(diHomingReached[x_nAxisNum]==false)
+    wait(diHomingReached[x_nAxisNum]==true)
+    if watch(diHomingReached[x_nAxisNum]==true,2)
+      x_bRes=true
+      popUpMsg("设置成功")
+    endIf
+    disablePower()
+    delay(0.008)
+    aioSet(aoWorkMode[x_nAxisNum],cst:nINTERPMODE)
+ end]]></Code>
+  </Program>
+</Programs>

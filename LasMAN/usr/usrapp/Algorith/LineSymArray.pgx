@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="LineSymArray" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_trSource" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_trLine" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_trDest" type="trsf" xsi:type="array" use="reference" />
+      <Parameter name="x_bRes" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  //点的数组有关直线对称
+  for l_nNum=0 to size(x_trSource)-1
+    call LineSym(x_trSource[l_nNum],x_trLine,x_trDest[l_nNum],x_bRes)
+    if !x_bRes
+      return
+    endIf
+  endFor
+end]]></Code>
+  </Program>
+</Programs>

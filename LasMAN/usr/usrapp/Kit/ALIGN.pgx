@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="Align" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_tTool" type="tool" xsi:type="element" />
+    </Parameters>
+    <Locals>
+      <Local name="l_pPoint" type="point" xsi:type="array" size="1" />
+      <Local name="l_nKey" type="num" xsi:type="array" size="1" />
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //-----------------------------------------------------------------------
+  //Header begin
+  //Description of program
+  //  工具对齐
+  //Input parameters
+  //  tool x_TxtFile:tCfg:工具值
+  //Output paramaters
+  //  bool x_bOK:是否对齐
+  //Example
+  //  call Align(tool,bOK)
+  //History
+  //  Creation : 2012-06-11 - PF.Zhong
+  //Header end
+  //不推荐客户自己改动此函数代码
+  //-----------------------------------------------------------------------
+  resetMotion()
+  cls()
+  link(l_pPoint,world)
+  l_pPoint=here(TxtFile:tCfg,world)
+  l_pPoint.trsf=align(l_pPoint.trsf,world.trsf)
+  mNomSpeed.blend=off
+  movej(l_pPoint,TxtFile:tCfg,mNomSpeed)
+  call UI:Control_PanelMd("正在对齐,请稍候")
+  call UI:Control_BottomS(",,,,,,,终止")
+  while !isEmpty()
+    l_nKey=getKey()
+    switch l_nKey
+      case 278
+        call UI:Control_YesNO("确定需要终止吗?",l_bRes)
+        cls()
+        if l_bRes
+          resetMotion()
+          return
+        else
+          call UI:Control_PanelMd("正在对齐,请稍候")
+          call UI:Control_BottomS(",,,,,,,终止")
+        endIf
+        
+      break  
+      
+    endSwitch
+    delay(0)
+  endWhile
+  cls()
+  call UI:Control_PanelMd("对齐成功!")
+  delay(2)
+  cls()
+  delay(0)
+end]]></Code>
+  </Program>
+</Programs>

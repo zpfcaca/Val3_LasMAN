@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="BeforeOpenLaser" access="public">
+    <Code><![CDATA[begin
+  //在motion.pjx中的move.pgx中
+  //请使用ctr+F进行全局查找
+  //用在切割点开光之前
+  //
+  
+  
+//  if bDebug
+//    popUpMsg("beforelaser")
+//    logMsg("beforelaser")
+//    
+//    
+//  endIf
+  
+  
+  
+  
+  
+  
+  
+end
+  ]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="OnEvent16" access="private" >
+    <Code><![CDATA[begin
+  //-----------------------------------------------------------------------
+  //Header begin
+  //LasMAN3.6
+  //Description of program
+  // 
+  //Input parameters
+  //
+  //Output paramaters
+  //Example
+  //  call OnEvent1()
+  //History
+  //  Creation : 2013-06-23  y.ye@staubli.com
+  //Header end
+  //-----------------------------------------------------------------------
+  resetMotion()
+  if TxtFile:b8Axis
+    // call Teach:Teach8Axis(TxtFile:trAxisData.rx,TxtFile:trAxisData.ry,0)
+    call Teach:TeachAxis(TxtFile:trAxis8Data.x,TxtFile:trAxis8Data.y,TxtFile:trAxis8Data.z,TxtFile:trAxis8Data.rx,true)
+  else
+    popUpMsg("请到选项界面中激活八轴")
+  endIf
+  DataBase:nInterfaceType=9
+end]]></Code>
+  </Program>
+</Programs>

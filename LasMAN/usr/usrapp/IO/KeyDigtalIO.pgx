@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="KeyDigtalIO" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_bGas" type="bool" xsi:type="element" />
+      <Parameter name="x_bFollow" type="bool" xsi:type="element" />
+      <Parameter name="x_bLaser" type="bool" xsi:type="element" />
+      <Parameter name="x_nGasDelay" type="num" xsi:type="element" />
+      <Parameter name="x_nFollowDelay" type="num" xsi:type="element" />
+    </Parameters>
+    <Code><![CDATA[begin
+  //激光，随动，气体的能使信号
+  //在激光切割中进行了定制
+
+  //×××××××××××××××××××××××××××××
+  //客户可以定制开气开随动开激光
+
+  //气体
+  if dDio["O1_bAirOn"]!=x_bGas
+    dDio["O1_bAirOn"]=x_bGas
+    call Digtal2AnalogS(0)
+    if x_bGas
+      delay(min(max(x_nGasDelay,0),20))
+      logMsg("O1_bAirOn触发,气体开")
+    else
+      logMsg("O1_bAirOn触发,气体关")
+    endIf
+  endIf
+
+
+
+  //随动
+  if dDio["O1_bFollowOn"]!=x_bFollow
+    //*****************************
+    //抬枪信号
+    //2014.06.06
+    if bGunUp
+      dDio["UsO_bNull1"]=x_bFollow
+      if x_bFollow
+        delay(0.1)
+      endIf
+    endIf
+    //*****************************
+    dDio["O1_bFollowOn"]=x_bFollow
+    call Digtal2AnalogS(0)
+    if x_bFollow
+      if bWaitFollowDown
+          logMsg("等待In1_bPeripheralReady为true")
+        wait(dDio["In1_bPeripheralReady"]==true)
+      endIf
+      delay(min(max(x_nFollowDelay,0),20))
+      //等待随动到位信号
+      logMsg("O1_bFollowOn触发,随动开")
+    else
+      logMsg("O1_bFollowOn触发,随动关")
+    endIf
+  endIf
+
+
+
+
+
+  //切割激光开与关
+  if dDio["O1_bLaserOn"]!=x_bLaser
+    dDio["O1_bLaserOn"]=x_bLaser
+    call Digtal2AnalogS(0)
+    if x_bLaser
+      logMsg("O1_bLaserOn触发,激光开")
+    else
+      logMsg("O1_bLaserOn触发,激光关")
+    endIf
+  endIf
+
+
+  //焊接激光开与关
+  if bWeldEnable
+    if dDio["UsO_bNull4"]!=x_bLaser
+      dDio["UsO_bNull4"]=x_bLaser
+      call Digtal2AnalogS(0)
+      if x_bLaser
+        logMsg("UsO_bNull4触发,激光开")
+      else
+        logMsg("UsO_bNull4触发,激光关")
+      endIf
+    endIf
+
+  endIf
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

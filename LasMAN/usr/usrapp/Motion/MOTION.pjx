@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://www.staubli.com/robotics/VAL3/Project/3">
+  <Parameters version="s7.9" stackSize="5000" millimeterUnit="true" />
+  <Programs>
+    <Program file="CoreSpeed.pgx" />
+    <Program file="GetActionData.pgx" />
+    <Program file="Joint2Joint.pgx" />
+    <Program file="Joint2Point.pgx" />
+    <Program file="KillTask.pgx" />
+    <Program file="Move.pgx" />
+    <Program file="PartMove.pgx" />
+    <Program file="Point2Joint.pgx" />
+    <Program file="Preset.pgx" />
+    <Program file="Preset_old.pgx" />
+    <Program file="ReadTraj.pgx" />
+    <Program file="RecordJoint.pgx" />
+    <Program file="SpeedFilter.pgx" />
+    <Program file="start.pgx" />
+    <Program file="stop.pgx" />
+    <Program file="TeachSimu.pgx" />
+    <Program file="ThickPlateCut.pgx" />
+    <Program file="TrajSimu.pgx" />
+    <Program file="WeldEnd.pgx" />
+  </Programs>
+  <Database>
+    <Data file="Motion.dtx" />
+  </Database>
+  <Libraries>
+    <Library alias="TxtFile" path="Disk://TxtFile/TxtFile.pjx" />
+    <Library alias="Algorith" path="Disk://Algorith/Algorith.pjx" />
+    <Library alias="DataBase" path="Disk://DataBase/DataBase.pjx" />
+    <Library alias="IO" path="Disk://IO/IO.pjx" />
+    <Library alias="Kit" path="Disk://Kit/Kit.pjx" />
+    <Library alias="ExtAxis" path="Disk://extAxisCan/extAxisCan.pjx" autoload="false" />
+    <Library alias="Custom" path="Disk://Custom/Custom.pjx" />
+  </Libraries>
+</Project>

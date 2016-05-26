@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
+  <Program name="GetAsyncAxis" access="public" >
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1" >
+      <Parameter name="x_nType" type="num" use="value" xsi:type="element" dimensions="1" />
+      <Parameter name="x_sText" type="string" use="reference" xsi:type="element" dimensions="1" />
+      <Parameter name="x_trAxis" type="trsf" use="reference" xsi:type="element" dimensions="1" />
+    </Parameters>
+    <Locals>
+      <Local name="l_bBool" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nBuff" type="num" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+      <Local name="l_sSBuff" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  if x_nType!=20 and x_nType!=9
+    return
+  endIf
+
+  //把第七，第八轴给提取出来
+  while find(l_sSBuff,"/")<0 and l_nNum<len(x_sText)
+    l_nNum=l_nNum+1
+    l_sSBuff=right(x_sText,l_nNum)
+  endWhile
+
+  l_sSBuff=right(x_sText,l_nNum-1)+",0,0,0,0"
+  x_sText=left(x_sText,len(x_sText)-l_nNum)
+
+  call FileDir:SplitTrsf(l_sSBuff,"",x_trAxis,l_bBool)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+end]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://www.staubli.com/robotics/VAL3/Project/3">
+  <Parameters version="s7.6.3" stackSize="5000" millimeterUnit="true" />
+  <Programs>
+    <Program file="CheckAxis.pgx" />
+    <Program file="chkDrivesFault.pgx" />
+    <Program file="chkDrivesOpEnab.pgx" />
+    <Program file="chkDrivesSwOff.pgx" />
+    <Program file="chkDrvState.pgx" />
+    <Program file="chkLife.pgx" />
+    <Program file="chkPosStatus.pgx" />
+    <Program file="chkQuickStop.pgx" />
+    <Program file="chkStatusWord.pgx" />
+    <Program file="cmdAbortHoming.pgx" />
+    <Program file="cmdDisableOp.pgx" />
+    <Program file="cmdDisableVolt.pgx" />
+    <Program file="cmdEnableHold.pgx" />
+    <Program file="cmdEnableOp.pgx" />
+    <Program file="cmdFaultReset.pgx" />
+    <Program file="cmdQuickStop.pgx" />
+    <Program file="cmdResetAll.pgx" />
+    <Program file="cmdShutdown.pgx" />
+    <Program file="cmdSwitchOn.pgx" />
+    <Program file="getFbkPos.pgx" />
+    <Program file="GoToPos.pgx" />
+    <Program file="homing.pgx" />
+    <Program file="init.pgx" />
+    <Program file="IPMove.pgx" />
+    <Program file="JogNegative.pgx" />
+    <Program file="JogPositve.pgx" />
+    <Program file="ReadMe.pgx" />
+    <Program file="RecordExtAxis.pgx" />
+    <Program file="RecordJoint.pgx" />
+    <Program file="Reset.pgx" />
+    <Program file="setCmdPos.pgx" />
+    <Program file="setErrorCode.pgx" />
+    <Program file="setHome.pgx" />
+    <Program file="setOpMode.pgx" />
+    <Program file="setPos.pgx" />
+    <Program file="SingleMove.pgx" />
+    <Program file="start.pgx" />
+    <Program file="StepMove.pgx" />
+    <Program file="stop.pgx" />
+    <Program file="StopAll.pgx" />
+    <Program file="stopExtAxis.pgx" />
+    <Program file="Task4ms.pgx" />
+  </Programs>
+  <Database>
+    <Data file="extAxisCan.dtx" />
+  </Database>
+  <Libraries>
+    <Library alias="cst" path="Disk://constantes/constantes.pjx" />
+  </Libraries>
+</Project>

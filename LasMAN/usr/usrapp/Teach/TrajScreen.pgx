@@ -1,0 +1,217 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="TrajScreen" access="public">
+    <Locals>
+      <Local name="l_bRes" type="bool" xsi:type="array" size="1" />
+      <Local name="l_nNum" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  //************************************************************
+  cls()
+  nApproIndex=0
+  nCutIndex=0
+  nLeaveIndex=0
+  
+  for l_nNum=0 to size(TxtFile:nPartTrajCount)-1
+    TxtFile:nPartTrajCount[l_nNum]=0
+  endFor
+  
+  
+  //示教异步七轴
+  if TxtFile:b7Axis 
+    //call Teach7Axis(TxtFile:trWorkplace.x,TxtFile:trWorkplace.y,1)
+    if  (DataBase:nWorkPlaceIndex==1 and DataBase:bMutexAxis) or !DataBase:bMutexAxis
+      //示教的时候把当前位置赋值给外部轴
+      //2014.8.13
+      if bFirstTeach==false
+        call IO:GetAxis7Pos(TxtFile:trWorkplace.x,TxtFile:trAxisData.z)
+        TxtFile:trWorkplace.y=nAxisSpeed
+      endIf
+      //×××××××××××××××
+      call TeachAxis(TxtFile:trWorkplace.x,TxtFile:trWorkplace.y,TxtFile:trAxisData.z,TxtFile:trAxisData.rx,false)
+    endIf
+  endIf
+  
+  
+  //示教异步八轴
+  if TxtFile:b8Axis 
+    //  call Teach8Axis(TxtFile:trWorkplace.z,TxtFile:trWorkplace.rx,1)
+    if (DataBase:bMutexAxis and DataBase:nWorkPlaceIndex==2) or !DataBase:bMutexAxis
+      //示教的时候把当前位置赋值给外部轴
+      //2014.8.13
+      if bFirstTeach==false
+        call IO:GetAxis8Pos(TxtFile:trWorkplace.z,TxtFile:trAxis8Data.z)
+        TxtFile:trWorkplace.rx=nAxisSpeed
+      endIf
+      //××××××××××××××××××××××××
+      call TeachAxis(TxtFile:trWorkplace.z,TxtFile:trWorkplace.rx,TxtFile:trAxis8Data.z,TxtFile:trAxis8Data.rx,true)
+    endIf
+  endIf
+  
+  
+  
+  //示教frame
+  call UI:Control_YesNO("是否需要示教Frame",l_bRes)
+  if l_bRes
+    call TeachFrame(TxtFile:fTraj)
+  endIf  
+  
+  
+  
+  //示教的话则初始化点位
+  if bFirstTeach==false
+    resize(TxtFile:nTrajDelay,1,2)
+    resize(TxtFile:pAppro,1,1)
+    resize(TxtFile:bAppro,1,1)
+    resize(TxtFile:jAppro,1,1)
+    resize(TxtFile:trAppro,1,1)
+    resize(TxtFile:trApproAxis,1,1)
+    
+    resize(TxtFile:pCut,1,sel(TxtFile:nSingleType==2 or TxtFile:nSingleType==23 or TxtFile:nSingleType==10  or TxtFile:nSingleType==20,1,3))
+    resize(TxtFile:bMoveC,1,size(TxtFile:pCut,1))
+    resize(TxtFile:pMoveC,1,size(TxtFile:pCut,1))
+    resize(TxtFile:trCut,1,size(TxtFile:pCut,1))
+    resize(TxtFile:trCutAxis,1,size(TxtFile:pCut,1))
+    
+    resize(TxtFile:pLeave,1,1)
+    resize(TxtFile:bLeave,1,1)
+    resize(TxtFile:jLeave,1,1)
+    resize(TxtFile:trLeave,1,1)
+    resize(TxtFile:trLeaveAxis,1,1)
+    TxtFile:bLeave=TxtFile:bAppro=false
+    
+    TxtFile:trAppro={0,0,100,10,1,0}
+    if TxtFile:nSingleType==10 or TxtFile:nSingleType==20
+      TxtFile:trCut={1,0,100,5,1,0} 
+    else
+      TxtFile:trCut={1,0,100,5,1,0} 
+    endIf
+    TxtFile:trLeave={0,0,100,10,1,0} 
+    TxtFile:pAppro=TxtFile:pLeave=here(TxtFile:tCfg,TxtFile:fArray)
+    TxtFile:jLeave=TxtFile:jAppro=herej()
+    
+    if TxtFile:nSingleType==2
+      TxtFile:trDownLead={1,100,0,0,10,0}
+    else
+      TxtFile:trDownLead={1,100,0,0,0,0}
+    endIf
+    
+    
+    //××××××××××××××××××××××××××××××
+    //2014.10.23
+    //厚板切割
+    //强制使用厚板切割程序
+    if DataBase:bThickPlate
+      TxtFile:trDownLead.y=101
+      
+    endIf
+    //×××××××××××××××××××××××××××××××
+    
+    
+    
+    
+    
+    
+    //激光延时默认
+    //      TxtFile:trIODelay.x=0.3
+    //      TxtFile:trIODelay.y=0
+    
+    TxtFile:nTrajDelay[0]=sel( TxtFile:bWeldEnable,0,0.3)
+    TxtFile:nTrajDelay[1]=0
+    for l_nNum=0 to size(TxtFile:pCut)-1
+      
+      TxtFile:pCut[l_nNum]=TxtFile:pMoveC[l_nNum]=here(TxtFile:tCfg,TxtFile:fArray)
+      TxtFile:trCut[l_nNum]=TxtFile:trCut[0]
+    endFor
+    TxtFile:trWorkplace.rz=1
+    //所有类型圆弧度
+    TxtFile:trDownLead.rz=36
+    //焊接
+    TxtFile:trWorkplace.ry=5
+    
+    
+    //为外部轴而设
+    //205.03.23
+    //外部轴程序修改
+    if TxtFile:nSingleType==20 or TxtFile:nSingleType==9
+      call ExtAxis:RecordExtAxis(TxtFile:trCutAxis[0],TxtFile:pCut[0].trsf,TxtFile:tCfg)
+      TxtFile:pMoveC[0].trsf=TxtFile:pAppro[0].trsf=TxtFile:pLeave[0].trsf=TxtFile:pCut[0].trsf
+      TxtFile:trApproAxis[0]=TxtFile:trLeaveAxis[0]=TxtFile:trCutAxis[0]
+    endIf
+    
+    //2014.12.08
+    //示教趋近与离开默认值
+    
+    TxtFile:trAppro=TxtFile:trLeave=DataBase:trTeachTemp
+    
+  endIf
+  
+  
+  
+  
+  //把所有的点都给链接到相应的数值上
+  for l_nNum=0 to size(TxtFile:pAppro)-1
+    link(TxtFile:pAppro[l_nNum],TxtFile:fArray)
+  endFor
+  
+  for l_nNum=0 to size(TxtFile:pLeave)-1
+    link(TxtFile:pLeave[l_nNum],TxtFile:fArray)
+  endFor
+  
+  for l_nNum=0 to size(TxtFile:pCut)-1
+    link(TxtFile:pCut[l_nNum],TxtFile:fArray)
+    link(TxtFile:pMoveC[l_nNum],TxtFile:fArray)
+  endFor
+  
+  
+  
+  
+  
+  
+  if TxtFile:nSingleType!=9
+    
+    nPointType=1
+    while nPointType>=0 and nPointType<4
+      
+      switch nPointType
+        //frame
+        case 0
+          call TeachFrame(TxtFile:fTraj)
+        break
+        
+        //趋近点
+        case 1
+          call Approach()  
+        break
+        
+        //切割点
+        case 2
+          call Cut()
+        break
+        
+        //离开点
+        case 3
+          call Leave()
+        break
+        
+      endSwitch
+      
+    endWhile
+    
+  else
+    
+    call IdlePoint()
+    
+  endIf
+  
+  
+  //****************************************************************************************** 
+  
+  
+  
+end
+  
+]]></Code>
+  </Program>
+</Programs>
