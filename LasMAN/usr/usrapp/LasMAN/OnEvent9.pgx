@@ -1,6 +1,6 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2" >
-  <Program name="OnEvent9" access="private" >
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="OnEvent9">
     <Locals>
       <Local name="l_bBool" type="bool" xsi:type="array" size="1" />
       <Local name="l_nKey" type="num" xsi:type="array" size="1" />
@@ -8,7 +8,7 @@
     <Code><![CDATA[begin
   //-----------------------------------------------------------------------
   //Header begin
-  //LasMAN3.6
+  //LasMAN3.7
   //Description of program
   // 
   //Input parameters
@@ -85,7 +85,7 @@
   call IO:Light(1)
 
   //界面
-  title("LasMAN3.6->主界面")
+  title("LasMAN3.7->主界面")
   if TxtFile:b7Axis
     call UI:Form_MainS("回零,七轴,工艺,动作,产品,远程,配置,退出")
   else

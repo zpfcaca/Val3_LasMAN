@@ -193,7 +193,7 @@
       //IO配置
       call IO:Preset(TxtFile:nPreset,l_nPointIndex+1,TxtFile:trPresetData.z,TxtFile:trPresetData.x,TxtFile:trPresetData.y)
       call IO:GetPreset(DataBase:nPresetData,TxtFile:trPresetData.z,TxtFile:trPresetData.x,TxtFile:trPresetData.y)
-      call UI:Form_Simulation("LasMAN3.6->示教工艺","工艺表",sSItem,l_nPointIndex,DataBase:nPresetData,l_bKeyIO)
+      call UI:Form_Simulation("LasMAN3.7->示教工艺","工艺表",sSItem,l_nPointIndex,DataBase:nPresetData,l_bKeyIO)
       
       
       gotoxy(0,0)

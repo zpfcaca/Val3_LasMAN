@@ -17,7 +17,7 @@
       <Local name="l_nBuff" type="num" xsi:type="array" size="1" />
     </Locals>
     <Code><![CDATA[begin
-  //为LasMAN3.6 Action配置
+  //为LasMAN3.7 Action配置
   
   
   for l_nNum=0 to 11

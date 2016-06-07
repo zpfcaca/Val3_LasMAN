@@ -15,7 +15,7 @@
       <Local name="l_nSelectIndex" type="num" xsi:type="array" size="1" />
     </Locals>
     <Code><![CDATA[begin
-  //为LasMAN3.6进行配置
+  //为LasMAN3.7进行配置
   //修改点位的参数
   
   

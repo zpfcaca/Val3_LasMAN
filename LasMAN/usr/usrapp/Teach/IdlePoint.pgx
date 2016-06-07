@@ -449,7 +449,7 @@
       sSItem[0]="1.MOVEJ"
       sSItem[1]="2.MOVEL"
       sSItem[2]="3.MOVEJ"
-      call UI:Form_PanelList("LasMAN3.6->示教路径","空走路径点",sSItem,l_nIndex,",记录,参数,,模拟,退出,,保存")
+      call UI:Form_PanelList("LasMAN3.7->示教路径","空走路径点",sSItem,l_nIndex,",记录,参数,,模拟,退出,,保存")
       call UI:Control_Mess("类型:"+TxtFile:sTrajType[TxtFile:nSingleType],"")
       
       

@@ -14,7 +14,7 @@
     </Locals>
     <Code><![CDATA[begin
   
-  //为LasMAN3.6配置
+  //为LasMAN3.7配置
   //局部偏差
 l_nData[0]=x_nFrom
 l_nData[1]=x_nTo

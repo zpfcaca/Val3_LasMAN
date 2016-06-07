@@ -361,7 +361,7 @@
       call SingleMove(3)
       l_bFirst=true
       call GetListItems()
-      call UI:Form_PanelList("LasMAN3.6->示教路径","离开点",sSItem,nLeaveIndex,"插入,记录,参数,删除,模拟,退出,返回,保存")
+      call UI:Form_PanelList("LasMAN3.7->示教路径","离开点",sSItem,nLeaveIndex,"插入,记录,参数,删除,模拟,退出,返回,保存")
       call UI:Control_Mess("类型:"+TxtFile:sTrajType[TxtFile:nSingleType],"离开点个数:"+toString("",size(TxtFile:pLeave)))
       
       

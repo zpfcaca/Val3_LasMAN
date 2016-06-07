@@ -38,7 +38,7 @@
   
   cls()
   userPage()
-  call UI:Form_PanelList("LasMAN3.6->示教安全点","安全点",sSItem,l_nIndex,"记录,,,,,上传,保存,退出")
+  call UI:Form_PanelList("LasMAN3.7->示教安全点","安全点",sSItem,l_nIndex,"记录,,,,,上传,保存,退出")
   
   while DataBase:nInterfaceType==15
     l_nKey=getKey()
@@ -126,7 +126,7 @@
       
     endSwitch
     if l_nKey!=-1 and l_nKey>260
-      call UI:Form_PanelList("LasMAN3.6->示教安全点","安全点",sSItem,l_nIndex,"记录,,,,,上传,保存,退出")
+      call UI:Form_PanelList("LasMAN3.7->示教安全点","安全点",sSItem,l_nIndex,"记录,,,,,上传,保存,退出")
       
     endIf
     

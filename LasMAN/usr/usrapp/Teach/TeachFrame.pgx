@@ -59,10 +59,10 @@
   cls()
   userPage()
   if DataBase:nInterfaceType==5
-    call UI:Form_LabelList("LasMAN3.6->坐标系示教","用户坐标系",sSItem,"参考点",l_sData,l_nIndex,"记录,对齐,测试,默认,,计算,保存,退出")
+    call UI:Form_LabelList("LasMAN3.7->坐标系示教","用户坐标系",sSItem,"参考点",l_sData,l_nIndex,"记录,对齐,测试,默认,,计算,保存,退出")
   else
     
-    call UI:Form_LabelList("LasMAN3.6->坐标系示教","用户坐标系",sSItem,"参考点",l_sData,l_nIndex,"记录,对齐,测试,默认,上传,计算,保存,退出")
+    call UI:Form_LabelList("LasMAN3.7->坐标系示教","用户坐标系",sSItem,"参考点",l_sData,l_nIndex,"记录,对齐,测试,默认,上传,计算,保存,退出")
     
   endIf
   movej(l_p[0],TxtFile:tCfg,mNomSpeed)
@@ -210,10 +210,10 @@
     
     if l_nKey!=-1
       if DataBase:nInterfaceType==5
-        call UI:Form_LabelList("LasMAN3.6->坐标系示教","用户坐标系",sSItem,"参考点",l_sData,l_nIndex,"记录,对齐,测试,默认,,计算,保存,退出")
+        call UI:Form_LabelList("LasMAN3.7->坐标系示教","用户坐标系",sSItem,"参考点",l_sData,l_nIndex,"记录,对齐,测试,默认,,计算,保存,退出")
       else
         
-        call UI:Form_LabelList("LasMAN3.6->坐标系示教","用户坐标系",sSItem,"参考点",l_sData,l_nIndex,"记录,对齐,测试,默认,上传,计算,保存,退出")
+        call UI:Form_LabelList("LasMAN3.7->坐标系示教","用户坐标系",sSItem,"参考点",l_sData,l_nIndex,"记录,对齐,测试,默认,上传,计算,保存,退出")
         
       endIf
     endIf

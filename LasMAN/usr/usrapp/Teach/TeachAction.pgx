@@ -40,7 +40,7 @@
     
   endFor
   cls()
-  call UI:Form_Action("LasMAN3.6->示教动作","动作表",sSItem,l_nPointIndex,l_bKeyIO,l_nPointIndex+1,l_sBuff)
+  call UI:Form_Action("LasMAN3.7->示教动作","动作表",sSItem,l_nPointIndex,l_bKeyIO,l_nPointIndex+1,l_sBuff)
   
   
   
@@ -167,7 +167,7 @@
         
         
       endFor
-      call UI:Form_Action("LasMAN3.6->示教动作","动作表",sSItem,l_nPointIndex,l_bKeyIO,l_nPointIndex+1,l_sBuff)
+      call UI:Form_Action("LasMAN3.7->示教动作","动作表",sSItem,l_nPointIndex,l_bKeyIO,l_nPointIndex+1,l_sBuff)
       
       
     endIf

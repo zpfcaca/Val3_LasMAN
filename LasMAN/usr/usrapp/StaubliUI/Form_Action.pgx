@@ -14,7 +14,7 @@
       <Local name="l_nNum" type="num" xsi:type="array" size="1" />
     </Locals>
     <Code><![CDATA[begin
-  //为LasMAN3.6进行配置界面
+  //为LasMAN3.7进行配置界面
  // cls() 
   x_nSelectIndex=round(x_nSelectIndex)%500
   x_nPresetIndex=x_nPresetIndex%50

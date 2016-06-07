@@ -17,7 +17,7 @@
   
   
   
-  title("LasMAN3.6->配置")
+  title("LasMAN3.7->配置")
   call TxtFile:ReadCfg(l_bRes)
    IO:bWeldEnable=TxtFile:bWeldEnable
    IO:bExt7AxisEnable=TxtFile:b7Axis

@@ -10,7 +10,7 @@
       <Local name="l_sVersion" type="string" xsi:type="array" size="1" />
     </Locals>
     <Code><![CDATA[begin
-  //为LasMAN3.6配置
+  //为LasMAN3.7配置
   //主要是配置界面
   
   

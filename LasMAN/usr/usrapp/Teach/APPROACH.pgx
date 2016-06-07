@@ -240,7 +240,7 @@
     if (l_nKey<279  and l_nKey>=260)or l_nKey==112 or !l_bFirst or l_nKey==118
       l_bFirst=true
       call GetListItems()
-      call UI:Form_PanelList("LasMAN3.6->示教路径","趋近点",sSItem,nApproIndex,"插入,记录,参数,删除,全局,,退出,继续")
+      call UI:Form_PanelList("LasMAN3.7->示教路径","趋近点",sSItem,nApproIndex,"插入,记录,参数,删除,全局,,退出,继续")
       call UI:Control_Mess("类型:"+TxtFile:sTrajType[TxtFile:nSingleType],"趋近点个数:"+toString("",size(TxtFile:pAppro)))  
       call SingleMove(1)
       

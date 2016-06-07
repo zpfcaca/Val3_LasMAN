@@ -37,7 +37,7 @@
   
   
   cls()
-  call UI:Form_LabelList("LasMAN3.6->示教工具","工具值",sSItem,"示教点",l_sData,l_nIndex,"记录,对齐,,,上传,计算,保存,退出")
+  call UI:Form_LabelList("LasMAN3.7->示教工具","工具值",sSItem,"示教点",l_sData,l_nIndex,"记录,对齐,,,上传,计算,保存,退出")
   
   while  true
     l_nKey=getKey()
@@ -172,7 +172,7 @@
     endSwitch
     
     if l_nKey!=-1
-      call UI:Form_LabelList("LasMAN3.6->示教工具","工具值",sSItem,"参考点",l_sData,l_nIndex,"记录,对齐,,,上传,计算,保存,退出")
+      call UI:Form_LabelList("LasMAN3.7->示教工具","工具值",sSItem,"参考点",l_sData,l_nIndex,"记录,对齐,,,上传,计算,保存,退出")
       
     endIf
     

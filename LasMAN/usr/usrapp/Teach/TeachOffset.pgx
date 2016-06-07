@@ -120,11 +120,11 @@
   //  endIf
   //  
   //  if DataBase:nInterfaceType==5
-  //    call UI:Form_LabelList("LasMAN3.6->示教偏差","偏差值",l_sData,l_sOorT,sSItem,l_nIndex,"记录,计算,一点,三点,对齐,保存,数值,退出")
+  //    call UI:Form_LabelList("LasMAN3.7->示教偏差","偏差值",l_sData,l_sOorT,sSItem,l_nIndex,"记录,计算,一点,三点,对齐,保存,数值,退出")
   //    
   //  else
   //    
-  //    call UI:Form_LabelList("LasMAN3.6->示教偏差","偏差值",l_sData,l_sOorT,sSItem,l_nIndex,"记录,计算,一点,三点,对齐,保存,上传,退出")
+  //    call UI:Form_LabelList("LasMAN3.7->示教偏差","偏差值",l_sData,l_sOorT,sSItem,l_nIndex,"记录,计算,一点,三点,对齐,保存,上传,退出")
   //    
   //  endIf
   
@@ -321,11 +321,11 @@
         sSItem[5]="修正点3"
       endIf
       if DataBase:nInterfaceType==5
-        call UI:Form_LabelList("LasMAN3.6->示教偏差","偏差值",l_sData,l_sOorT,sSItem,l_nIndex,"记录,计算,一点,三点,对齐,保存,数值,退出")
+        call UI:Form_LabelList("LasMAN3.7->示教偏差","偏差值",l_sData,l_sOorT,sSItem,l_nIndex,"记录,计算,一点,三点,对齐,保存,数值,退出")
         
       else
         
-        call UI:Form_LabelList("LasMAN3.6->示教偏差","偏差值",l_sData,l_sOorT,sSItem,l_nIndex,"记录,计算,一点,三点,对齐,保存,上传,退出")
+        call UI:Form_LabelList("LasMAN3.7->示教偏差","偏差值",l_sData,l_sOorT,sSItem,l_nIndex,"记录,计算,一点,三点,对齐,保存,上传,退出")
         
       endIf
       

@@ -13,7 +13,7 @@
       <Local name="l_nSelectIndex" type="num" xsi:type="array" size="1" />
     </Locals>
     <Code><![CDATA[begin
-  //为LasMAN3.6进行配置
+  //为LasMAN3.7进行配置
   //中途进行模拟点
   
   l_nData[0]=x_nStart

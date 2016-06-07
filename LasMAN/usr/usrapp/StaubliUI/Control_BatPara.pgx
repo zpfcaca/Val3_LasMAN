@@ -19,7 +19,7 @@
     </Locals>
     <Code><![CDATA[begin
   
-  //为LasMAN3.6进行配置
+  //为LasMAN3.7进行配置
   //批处理切割或者焊接点的参数
   //包括速度，加速度，blend, 工艺，动作
   

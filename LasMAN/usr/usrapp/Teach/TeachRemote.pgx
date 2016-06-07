@@ -238,10 +238,10 @@
     if (l_nKey>0 and l_nKey<279) or !l_bFirst
       l_bFirst=true
       if l_bUFile
-        call UI:Form_LabelList("LasMAN3.6->远程生产","工位信息",sMess,"U盘文件",sSItem,l_nIndex,"添加,删除,U盘,CS8C,配置,,生产,退出")
+        call UI:Form_LabelList("LasMAN3.7->远程生产","工位信息",sMess,"U盘文件",sSItem,l_nIndex,"添加,删除,U盘,CS8C,配置,,生产,退出")
         
       else
-        call UI:Form_LabelList("LasMAN3.6->远程生产","工位信息",sMess,"控制器文件",sSItem,l_nIndex,"添加,删除,U盘,CS8C,配置,,生产,退出")
+        call UI:Form_LabelList("LasMAN3.7->远程生产","工位信息",sMess,"控制器文件",sSItem,l_nIndex,"添加,删除,U盘,CS8C,配置,,生产,退出")
         
       endIf
       

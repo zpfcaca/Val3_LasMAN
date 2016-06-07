@@ -239,14 +239,14 @@
       //模拟时候添加
      // if !TxtFile:bWeldEnable
         if false
-        call UI:Form_Simulation("LasMAN3.6->模拟路径"+toString("",DataBase:nTrajIndex),l_sItemTitle,sSItem,l_nPointIndex,DataBase:nPresetData,l_bKeyIO)
+        call UI:Form_Simulation("LasMAN3.7->模拟路径"+toString("",DataBase:nTrajIndex),l_sItemTitle,sSItem,l_nPointIndex,DataBase:nPresetData,l_bKeyIO)
       else
         l_trArray=TxtFile:trArray
         l_trArray.y=DataBase:nArrayX
         l_trArray.rx=DataBase:nArrayY
         l_trArray.rz=DataBase:nArrayZ
         
-        call UI:Form_SimArray("LasMAN3.6->模拟路径"+toString("",DataBase:nTrajIndex),l_sItemTitle,sSItem,l_nPointIndex,DataBase:nPresetData,l_bKeyIO,l_trArray)
+        call UI:Form_SimArray("LasMAN3.7->模拟路径"+toString("",DataBase:nTrajIndex),l_sItemTitle,sSItem,l_nPointIndex,DataBase:nPresetData,l_bKeyIO,l_trArray)
       endIf
       
       

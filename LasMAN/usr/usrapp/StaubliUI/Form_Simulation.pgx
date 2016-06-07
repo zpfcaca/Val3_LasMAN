@@ -10,7 +10,7 @@
       <Parameter name="x_bIO" type="bool" xsi:type="array" use="reference" />
     </Parameters>
     <Code><![CDATA[begin
-  //为LasMAN3.6
+  //为LasMAN3.7
   //工艺参数模拟选项
   
   

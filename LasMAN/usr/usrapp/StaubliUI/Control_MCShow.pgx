@@ -10,7 +10,7 @@
     </Locals>
     <Code><![CDATA[begin
   
-  //LasMAN3.6
+  //LasMAN3.7
   //为圆弧进行配置
   
   if x_nMoveType>2 or x_nMoveType<1

@@ -39,7 +39,7 @@
   l_nPrecent=x_nPrecent
   l_nJogSpeed=x_nJogSpeed
   cls()
-  //  call UI:Form_PanelList("LasMAN3.6->示教异步七轴","第七轴",sSItem,l_nIndex,"+,-,记录,回零,运动,停止,保存,退出")
+  //  call UI:Form_PanelList("LasMAN3.7->示教异步七轴","第七轴",sSItem,l_nIndex,"+,-,记录,回零,运动,停止,保存,退出")
   //  call UI:Control_Mess("马达正常,未上电","")
   
   if DataBase:nInterfaceType==12 or DataBase:nInterfaceType==16
@@ -399,10 +399,10 @@
       endIf
       if !x_b8Axis
         
-        call UI:Form_PanelList("LasMAN3.6->示教异步七轴","第七轴",sSItem,l_nIndex,l_sBottom)
+        call UI:Form_PanelList("LasMAN3.7->示教异步七轴","第七轴",sSItem,l_nIndex,l_sBottom)
         
       else
-        call UI:Form_PanelList("LasMAN3.6->示教异步八轴","第八轴",sSItem,l_nIndex,l_sBottom)
+        call UI:Form_PanelList("LasMAN3.7->示教异步八轴","第八轴",sSItem,l_nIndex,l_sBottom)
         
       endIf
       

@@ -216,7 +216,7 @@
           bPowerFlag=true
         else  
           call UI:Control_YesNO("确定要上电吗?",l_bRes)
-          call UI:Form_Product("LasMAN3.6->生产界面",sMess,sSItem,l_sBottom)
+          call UI:Form_Product("LasMAN3.7->生产界面",sMess,sSItem,l_sBottom)
           if l_bRes
             if DataBase:nToolMode!=4
               popUpMsg("机器手臂请切换到远程模式")
@@ -297,7 +297,7 @@
     else
       l_sBottom="继续,上电,"+l_sA+",,,,,退出"
     endIf
-    call UI:Form_Product("LasMAN3.6->生产界面",sMess,sSItem,l_sBottom)
+    call UI:Form_Product("LasMAN3.7->生产界面",sMess,sSItem,l_sBottom)
     gotoxy(32,0)
     
     

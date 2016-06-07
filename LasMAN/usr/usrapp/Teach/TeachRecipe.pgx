@@ -290,8 +290,8 @@
       //2015.5.21
       TxtFile:trPointCount={0,0,0,0,0,0}
       resetMotion()
-      //  call UI:Form_PanelList("LasMAN3.6->编辑产品","路径列表",TxtFile:sTrajName,nTrajIndex,"回零,新建,模拟,调图,删除,对齐,上传,退出")
-      call UI:Form_PanelList("LasMAN3.6->编辑产品","路径列表",TxtFile:sTrajNameType,nTrajIndex,"回零,新建,模拟,调图,删除,对齐,上传,退出")
+      //  call UI:Form_PanelList("LasMAN3.7->编辑产品","路径列表",TxtFile:sTrajName,nTrajIndex,"回零,新建,模拟,调图,删除,对齐,上传,退出")
+      call UI:Form_PanelList("LasMAN3.7->编辑产品","路径列表",TxtFile:sTrajNameType,nTrajIndex,"回零,新建,模拟,调图,删除,对齐,上传,退出")
       call UI:Control_LeftCut(0)
       
       

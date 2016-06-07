@@ -573,7 +573,7 @@
       //界面
       l_bFirst=true
       call GetListItems()
-      call UI:Form_PanelList("LasMAN3.6->示教路径",l_sTtile,sSItem,nCutIndex,l_sBottom)
+      call UI:Form_PanelList("LasMAN3.7->示教路径",l_sTtile,sSItem,nCutIndex,l_sBottom)
       call UI:Control_LeftCut(2)
       call UI:Control_Mess("类型:"+TxtFile:sTrajType[TxtFile:nSingleType],l_sTtile+"个数:"+toString("",size(TxtFile:pCut)))
       if TxtFile:bMoveC[nCutIndex]
