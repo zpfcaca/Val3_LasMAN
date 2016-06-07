@@ -7,6 +7,8 @@
     <Application>Disk://DataBase/DataBase.pjx</Application>
     <Application>Disk://TxtFile/TxtFile.pjx</Application>
     <Application>Disk://FileDir/FileDir.pjx</Application>
+    <Application>Disk://extAxisCan/extAxisCan.pjx</Application>
+    <Application>Disk://Custom/Custom.pjx</Application>
   </Controller>
   <Option Name="DataTreeView">
     <Nodes>
@@ -25,11 +27,25 @@
     <Nodes>
       <Node Path="Val_LasMAN" IsExpanded="true" />
       <Node Path="Val_LasMAN\LasMAN" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\Custom" IsExpanded="true" />
     </Nodes>
   </Option>
   <Option Name="GeometryView">
     <Nodes>
       <Node Path="Val_LasMAN" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\TxtFile" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\TxtFile\world[0]" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\TxtFile\world[0]\fProduct" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\TxtFile\world[0]\fProduct\fProduct[0]" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\TxtFile\world[0]\fProduct\fProduct[0]\fPofffset" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\TxtFile\world[0]\fProduct\fProduct[0]\fPofffset\fPofffset[0]" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\TxtFile\world[0]\fProduct\fProduct[0]\fPofffset\fPofffset[0]\fTraj" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\TxtFile\world[0]\fProduct\fProduct[0]\fPofffset\fPofffset[0]\fTraj\fTraj[0]" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\TxtFile\world[0]\fProduct\fProduct[0]\fPofffset\fPofffset[0]\fTraj\fTraj[0]\fToffset" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\TxtFile\world[0]\fProduct\fProduct[0]\fPofffset\fPofffset[0]\fTraj\fTraj[0]\fToffset\fToffset[0]" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\TxtFile\world[0]\fProduct\fProduct[0]\fPofffset\fPofffset[0]\fTraj\fTraj[0]\fToffset\fToffset[0]\fArray" IsExpanded="true" />
+      <Node Path="Val_LasMAN\LasMAN\TxtFile\world[0]\fProduct\fProduct[0]\fPofffset\fPofffset[0]\fTraj\fTraj[0]\fToffset\fToffset[0]\fArray\fArray[0]" IsExpanded="true" />
     </Nodes>
   </Option>
   <Option Name="SynchronizerMode">

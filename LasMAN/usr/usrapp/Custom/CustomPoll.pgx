@@ -5,17 +5,19 @@
       <Local name="l_nNum" type="num" xsi:type="array" size="1" />
     </Locals>
     <Code><![CDATA[begin
-  //用户在轮询函数中添加自己需要检查的内容
-  //  可以添加报警信号
+  
+  //引用位置:Kit:Poll.pgx
+  //功能：用户在轮询函数中添加自己需要检查的内容
+  // 可以添加报警信号
   //如果报警，则下电 dispower()
-  //logmess
+  //不需要加死循环，循环已经在poll.pgx中已经有了
   
   
-//  if dAlarm==true
-//    disablePower()
-//    logMsg("aAlarm 报警触发")
-//    
-//  endIf
+  //  if dAlarm==true
+  //    disablePower()
+  //    logMsg("aAlarm 报警触发")
+  //    
+  //  endIf
   
   
   

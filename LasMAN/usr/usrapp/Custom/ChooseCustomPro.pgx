@@ -2,42 +2,48 @@
 <Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
   <Program name="ChooseCustomPro" access="public">
     <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
-      <Parameter name="x_nWorkplace" type="num" xsi:type="element" use="reference" />
+      <Parameter name="x_nWorkplaceIn" type="num" xsi:type="element" use="reference" />
       <Parameter name="x_nProductIndex" type="num" xsi:type="element" use="reference" />
     </Parameters>
     <Code><![CDATA[begin
+  //参数：x_nWorkplaceIn 工位序号，传入的参数是 DataBase:nWorkPlaceIndex
+  //参数：x_nProductIndex 同工位多产品特制
+  //引用位置:Teach:WorkPlaceChose 
+  //功能：对应客户自定义方式来选择相对应的产品
+  //备注：
+  
   //对应客户自定义方式来选择相对应的产品
   //在触发方式中 有客户自定义触发
   //2014.06.03
   
-//  x_nWorkplace=0
-//  while x_nWorkplace==0
-//    
-//    if bDebug
-//      if dSafety1==true and dSation1==true
-//        x_nWorkplace=1
-//      endIf
-//      
-//      
-//      if dSafety2==true and dSation2==true
-//        x_nWorkplace=2
-//      endIf
-//      
-//      if dSaftey3==true and dSation3==true
-//        x_nWorkplace=3
-//      endIf
-//      
-//      if dSaftey4==true and dSation4==true
-//        x_nWorkplace=4
-//      endIf
-//      
-//      
-//    endIf
-//    
-//    
-//    
-//    delay(0)
-//  endWhile
+  //  x_nWorkplace=0
+  //  while x_nWorkplace==0
+  //    
+  //    if bDebug
+  //      if dSafety1==true and dSation1==true
+  //        x_nWorkplace=1
+  //      endIf
+  //      
+  //      
+  //      if dSafety2==true and dSation2==true
+  //        x_nWorkplace=2
+  //      endIf
+  //      
+  //      if dSaftey3==true and dSation3==true
+  //        x_nWorkplace=3
+  //      endIf
+  //      
+  //      if dSaftey4==true and dSation4==true
+  //        x_nWorkplace=4
+  //      endIf
+  //      
+  //      
+  //    endIf
+  //    
+  //    
+  //    
+  //    delay(0)
+  //  endWhile
   
   
   

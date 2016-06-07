@@ -8,54 +8,56 @@
       <Local name="l_nNum" type="num" xsi:type="array" size="1" />
     </Locals>
     <Code><![CDATA[begin
-  //产品生产之后需要进行的工作
-  //路径完成，但是没有回零
-  //外部轴也没有进行归位
-  //与AfterWorkPlace区别是AfterWorkPlace机械手臂回到零位
+  //参数：x_nWorkplaceIn 工位序号，传入的参数是 DataBase:nWorkPlaceIndex
+  //引用位置:Motion:Move.pgx
+  //功能：所有路径都走完以后
+  //备注：机械手臂没有回零，与AfterWorkPlace区别是AfterWorkPlace机械手臂回到零位
   //如果要加信号，请在前面加上waitendmove()
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-//  //路径过滤的话
-//  //启动时把下面的话语注释掉
-//  
-//  if TxtFile:bTrajFilter
-//    for l_nNum=0 to TxtFile:nTotalTraj-1
-//      
-//      TxtFile:bBypass[l_nNum]=false
-//      
-//    endFor
-//    
-//    call TrajByPass(1,TxtFile:nTotalTraj)
-//    
-//  endIf
 
-
-
-
-//添加
-
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  //  //路径过滤的话
+  //  //启动时把下面的话语注释掉
+  //  
+  //  if TxtFile:bTrajFilter
+  //    for l_nNum=0 to TxtFile:nTotalTraj-1
+  //      
+  //      TxtFile:bBypass[l_nNum]=false
+  //      
+  //    endFor
+  //    
+  //    call TrajByPass(1,TxtFile:nTotalTraj)
+  //    
+  //  endIf
+  
+  
+  
+  
+  //添加
+  
   
   
 end]]></Code>

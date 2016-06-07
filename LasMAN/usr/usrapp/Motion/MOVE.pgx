@@ -186,7 +186,7 @@
     
     
     //2.3客户自定义函数
-    call Custom:BeforeTraj(TxtFile:nReadTrajIndex)
+    call Custom:BeforeTraj(DataBase:nWorkPlaceIndex,TxtFile:nReadTrajIndex)
     
     
     
@@ -259,7 +259,7 @@
     
     
     //2.5客户自定义函数
-    call Custom:BeforeAppro()
+    call Custom:BeforeAppro(DataBase:nWorkPlaceIndex,TxtFile:nReadTrajIndex)
     
     //2.6趋近点
     DataBase:nPointType=1
@@ -458,7 +458,7 @@
       endIf
     endIf
     
-    call Custom:BeforeArrayCut(TxtFile:nTrajIndex)
+    call Custom:BeforeArrayCut(DataBase:nWorkPlaceIndex,TxtFile:nReadTrajIndex)
     
     
     
@@ -505,7 +505,7 @@
           //×××××××××××××××××××××××××××××××××××××××
           
           //在穿孔点之前
-          call Custom:BeforeCut()
+          call Custom:BeforeCut(DataBase:nWorkPlaceIndex,TxtFile:nReadTrajIndex)
           
           
           //激光如果是厚板,两级穿孔
@@ -551,7 +551,7 @@
           
           
           //客户自定义函数
-          call Custom:BeforeOpenLaser()
+          call Custom:BeforeOpenLaser(DataBase:nWorkPlaceIndex,TxtFile:nReadTrajIndex)
           
           
           
@@ -597,7 +597,7 @@
           
           
           //激光切割开光之后的处理
-          call Custom:AfterOpenLaser()
+          call Custom:AfterOpenLaser(DataBase:nWorkPlaceIndex,TxtFile:nReadTrajIndex)
           
           //激光切割穿孔延时
           if !TxtFile:bWeldEnable
@@ -850,7 +850,7 @@
           
           //激光关延时
           delay(max(TxtFile:nTrajDelay[1],0))
-          call Custom:AfterCloseLaser()
+          call Custom:AfterCloseLaser(DataBase:nWorkPlaceIndex,TxtFile:nReadTrajIndex)
         endFor
       endFor
     endFor
@@ -874,7 +874,7 @@
     
     
     //阵列后的用户自定义函数
-    call Custom:AfterArrayCut(TxtFile:nTrajIndex)
+    call Custom:AfterArrayCut(DataBase:nWorkPlaceIndex,TxtFile:nReadTrajIndex)
     
     
     //再次确认激光关闭
@@ -931,7 +931,7 @@
     
     
     //5.用户自定义函数
-    call Custom:AfterTraj(TxtFile:nReadTrajIndex)
+    call Custom:AfterTraj(DataBase:nWorkPlaceIndex,TxtFile:nReadTrajIndex)
     
     
     //2.11文件读取结束

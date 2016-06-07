@@ -61,7 +61,7 @@
   
   
   //客户自定义函数
-  call Custom:BeforeAppro()
+  call Custom:BeforeAppro(DataBase:nWorkPlaceIndex,TxtFile:nReadTrajIndex)
   //走趋近点
   DataBase:nPointType=1
   setMoveId(0)
@@ -81,7 +81,7 @@
   l_nBuffCutCount=0
   
   //客户自定义函数
- call Custom:BeforeOpenLaser()
+ call Custom:BeforeOpenLaser(DataBase:nWorkPlaceIndex,TxtFile:nReadTrajIndex)
   
   
   
@@ -160,7 +160,7 @@
   call IO:SafteyIO()
   delay(max(TxtFile:nTrajDelay[1],0))
   
-  call Custom:AfterCloseLaser()
+  call Custom:AfterCloseLaser(DataBase:nWorkPlaceIndex,TxtFile:nReadTrajIndex)
   
   
   //离开点  

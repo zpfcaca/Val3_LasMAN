@@ -8,39 +8,25 @@
       <Local name="l_nNum" type="num" xsi:type="array" size="1" />
     </Locals>
     <Code><![CDATA[begin
-  //产品开始生产前所需要做的工作
-  //安全信号的确认之类
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+  //参数：x_nWorkplaceIn 工位序号，传入的参数是 DataBase:nWorkPlaceIndex 
+  //引用位置:Teach:Product.pgx
+  //功能：产品开始生产前所需要做的工作
+  //备注：安全信号的确认之类
   
   
   //路径过滤的话
   //启动时把下面的话语注释掉
   
-//  if TxtFile:bTrajFilter
-//    for l_nNum=0 to TxtFile:nTotalTraj-1
-//      
-//      TxtFile:bBypass[l_nNum]=false
-//      
-//    endFor
-//    
-//    call TrajByPass(1,TxtFile:nTotalTraj)
-//    
-//  endIf
+  //  if TxtFile:bTrajFilter
+  //    for l_nNum=0 to TxtFile:nTotalTraj-1
+  //      
+  //      TxtFile:bBypass[l_nNum]=false
+  //      
+  //    endFor
+  //    
+  //    call TrajByPass(1,TxtFile:nTotalTraj)
+  //    
+  //  endIf
   
   
 end]]></Code>
